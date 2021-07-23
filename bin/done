@@ -1,0 +1,26 @@
+#!/usr/bin/fish
+
+function modules
+  git status --porcelain | while read -d ' ' space change file
+    set parts (string split / $file)
+    if test "$parts[1]" = "addons" && set -q parts[2]
+      set -a modules $parts[2]
+    end
+  end
+
+  string join ', ' $modules
+end
+
+function parse_ticket_id
+  string match -rq 'opw-(?P<id>\d+)' $argv[1] && echo $id || echo TODO
+end
+
+function opw
+  parse_ticket_id (git rev-parse --abbrev-ref HEAD)
+end
+
+function msg
+  string join \n\n '[FIX] '(modules)':' 'Step to follow' 'Cause of the issue' 'Solution' 'opw-'(opw)
+end
+
+git commit -eF (msg | psub)

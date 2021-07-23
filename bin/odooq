@@ -1,0 +1,33 @@
+#!/usr/bin/fish
+
+function query
+  psql --csv -d $argv[1] -c $argv[2] | tail -n+2
+end
+
+function err
+  set_color red
+  echo -- $argv
+  set_color reset
+  exit 1
+end
+
+argparse 'd/database=' -- $argv
+
+if not set -q _flag_database
+  set parts (string split '/' $PWD)
+
+  if not set -q parts[5]
+    err 'not inside ~/src/VERSION'
+  end
+
+  set _flag_database $parts[5]
+end
+
+# queries
+set installed "select name from ir_module_module where state = 'installed' order by name"
+
+if not set -q $argv[1]
+  exit 1
+end
+
+query $_flag_database $$argv[1]

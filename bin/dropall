@@ -1,0 +1,7 @@
+#!/usr/bin/fish
+
+psql -Atqwl | while read -d'|' -l db user others
+    if test "$user" = odoo
+        dropdb $db
+    end
+end

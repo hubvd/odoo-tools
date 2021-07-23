@@ -1,0 +1,94 @@
+#!/usr/bin/fish
+
+# Directory structure
+# /home/odoo/src
+# ├── 12.0
+# │  ├── enterprise
+# │  ├── odoo
+# │  └── venv
+# ├── 13.0
+# │  ├── enterprise
+# │  ├── odoo
+# │  └── venv
+# ├── 14.0
+# │  ├── enterprise
+# │  ├── odoo
+# │  └── venv
+# └── master
+#    ├── enterprise
+#    ├── odoo
+#    └── venv
+
+function err
+  set_color red
+  echo -- $argv
+  set_color reset
+  exit 1
+end
+
+set parts (string split '/' $PWD)
+
+if not set -q parts[5]
+  err 'not inside ~/src/VERSION'
+end
+
+set db $parts[5]
+
+set root (string join '/' $parts[1..5])
+
+set odoo_args
+
+set provided_args $argv
+
+# argv[1]: arg to add
+# argv[2]: pattern to check
+function add_if_absent
+  if test (count $argv) -eq 2
+    set arg $argv[1]
+    set re $argv[2]
+  else
+    set arg $argv[1]
+    set re $argv[2]
+  end
+
+  if not string match -q -r -- $re $provided_args
+    set -a odoo_args $arg
+  end
+end
+
+add_if_absent --database=$db ' -d|--database' 
+add_if_absent --addons-path=odoo/addons,enterprise '--addons-path'
+add_if_absent --limit-time-cpu=9999 '--limit-time-cpu'
+add_if_absent --limit-time-real=9999 '--limit-time-real'
+
+function add_test_args
+  add_if_absent --stop-after-init
+  add_if_absent --log-level=test --log-level
+  add_if_absent --max-cron-threads=0
+end
+
+if contains -- '--test-enable' $provided_args
+  add_test_args
+end
+
+if string match -q -r -- '--test-tags' $provided_args
+  add_if_absent --test-enable
+  add_test_args
+end
+
+function run
+  cd $root
+  set_color -o 
+  echo root = $PWD
+  echo provided args = $provided_args
+  echo added args = $odoo_args
+  echo cli = venv/bin/python odoo/odoo-bin
+  set_color normal
+  venv/bin/python odoo/odoo-bin $odoo_args $provided_args 2>&1
+end
+
+if not contains -- '--help' $argv
+  run | colout '^(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{3} \d{2,5}) ([A-Z]+) (\S+) (.*?):' blue,red,green,yellow
+else
+  run
+end
