@@ -1,0 +1,29 @@
+#!/usr/bin/fish
+
+function pull
+  set parts (string split '/' $argv[1])
+  set expected_branch $parts[5]
+  set branch (git -C $argv[1] rev-parse --abbrev-ref HEAD)
+  if test "$branch" = "$expected_branch"
+    git -C $argv[1] pull
+  else
+    set -ga skipped $argv[1]
+  end
+end
+
+function repos
+  for i in (fd -td -d1 . ~/src)
+    if test -d $i/enterprise -a -d $i/odoo
+      echo $i/enterprise
+      echo $i/odoo
+    end
+  end
+end
+
+for r in (repos)
+  pull $r
+end
+
+for r in 
+  skipped $skipped
+end
