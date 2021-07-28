@@ -26,15 +26,8 @@ function err
   exit 1
 end
 
-set parts (string split '/' $PWD)
-
-if not set -q parts[5]
-  err 'not inside ~/src/VERSION'
-end
-
-set db $parts[5]
-
-set root (string join '/' $parts[1..5])
+set root (workspace -p) || exit 1
+set db (workspace -v) || exit 1
 
 set odoo_args
 

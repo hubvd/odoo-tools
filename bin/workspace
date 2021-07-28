@@ -1,0 +1,43 @@
+#!/usr/bin/fish
+
+argparse 'v/version' 'p/path' 'l/list' -- $argv
+
+set root ~/src
+
+if not string match -rq '/$'
+  set root $root/
+end
+
+if set -q _flag_l
+  for i in (fd -td -d1 . $root)
+    if test -d $i/enterprise -a -d $i/odoo
+      echo $i
+    end
+  end
+  exit 0
+end
+
+if test (count $argv) -eq 1
+  set wd $argv[1]
+else
+  set wd $PWD
+end
+
+# If not inside a directory inside root -> fail
+if not string match -rq "^$root.*" $wd
+  exit 1
+end
+
+set path_from_root (string replace $root '' $wd)
+
+set parts (string split '/' $path_from_root)
+
+set ws_version $parts[1]
+
+if set -q _flag_v
+  # ie: 14.0
+  echo $ws_version
+else if set -q _flag_p
+  # ie: /home/odoo/src/14.0
+  echo $root$ws_version
+end
