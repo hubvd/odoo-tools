@@ -92,7 +92,7 @@ end
 
 if not contains -- '--help' $argv
   info
-  run | colout '^(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{3} \d{2,5}) ([A-Z]+) (\S+) (.*?):' blue,red,green,yellow
+  run | odoopretty
   if test "$mode" = "test"
     notify-send -h string:frcolor:#00FF00 'Tests done'
   end
