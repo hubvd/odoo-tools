@@ -56,7 +56,6 @@ function add_if_absent
   end
 end
 
-add_if_absent --database=$db ' -d|--database' 
 add_if_absent --addons-path=odoo/addons,enterprise '--addons-path'
 add_if_absent --limit-time-cpu=9999 '--limit-time-cpu'
 add_if_absent --limit-time-real=9999 '--limit-time-real'
@@ -69,14 +68,21 @@ end
 
 if contains -- '--test-enable' $provided_args
   add_test_args
+  set mode test
 end
 
 if string match -q -r -- '--test-tags' $provided_args
   add_if_absent --test-enable
   add_test_args
+  set mode test
 end
 
-function run
+if test "$mode" = "test"
+  set db $db-test  
+end
+add_if_absent --database=$db ' -d|--database' 
+
+function info
   cd $root
   set_color -o 
   echo root = $PWD
@@ -84,11 +90,19 @@ function run
   echo added args = $odoo_args
   echo cli = venv/bin/python odoo/odoo-bin
   set_color normal
+end
+
+function run
+  cd $root
   venv/bin/python odoo/odoo-bin $odoo_args $provided_args 2>&1
 end
 
 if not contains -- '--help' $argv
+  info
   run | colout '^(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{3} \d{2,5}) ([A-Z]+) (\S+) (.*?):' blue,red,green,yellow
+  if test "$mode" = "test"
+    notify-send -h string:frcolor:#00FF00 'Tests done'
+  end
 else
   run
 end
