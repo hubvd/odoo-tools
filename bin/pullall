@@ -4,7 +4,8 @@ function pull
   set repo $argv[1]
   set repo_version (workspace -v $repo)
   set branch (git -C $repo rev-parse --abbrev-ref HEAD)
-  if test "$branch" = "$repo_version"
+  set git_status (git -C $repo status --porcelain)
+  if test "$branch" = "$repo_version" -a -z "$git_status"
     git -C $argv[1] pull
   else
     set -ga skipped $argv[1]
