@@ -24,6 +24,7 @@ for r in (repos)
   pull $r
 end
 
-for r in 
-  skipped $skipped
+if set -q skipped
+  echo
+  echo (set_color red)Skipped(set_color normal) (string join ',' $skipped)
 end
