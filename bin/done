@@ -3,8 +3,17 @@
 function modules
   git status --porcelain | while read -d ' ' space change file
     set parts (string split / $file)
-    if test "$parts[1]" = "addons" && set -q parts[2]
-      set -a modules $parts[2]
+    switch (workspace -r)
+      case 'odoo'
+        if test "$parts[1]" = "addons" && set -q parts[2]
+          set -a modules $parts[2]
+        end
+      case 'enterprise'
+        if set -q parts[1]
+          set -a modules $parts[1]
+        end
+      case '*'
+        exit 1
     end
   end
 
