@@ -1,0 +1,17 @@
+#!/usr/bin/fish
+
+set destination_branch (workspace -v) || exit 1
+set destination_repo (workspace -r) || exit 1
+set repo_path (workspace -p)"/$destination_repo"
+set local_branch (git -C $repo_path rev-parse --abbrev-ref HEAD)
+
+switch $destination_repo
+  case 'odoo'
+    set remote 'https://github.com/odoo/odoo'
+  case 'enterprise'
+    set remote 'https://github.com/odoo/enterprise'
+  case '*'
+    exit 1
+end
+
+open "$remote/compare/$destination_branch...odoo-dev:$local_branch?expand=1"

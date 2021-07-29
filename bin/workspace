@@ -1,6 +1,6 @@
 #!/usr/bin/fish
 
-argparse 'v/version' 'p/path' 'l/list' -- $argv
+argparse 'v/version' 'p/path' 'l/list' 'r/repo' -- $argv
 
 set root ~/src
 
@@ -40,4 +40,11 @@ if set -q _flag_v
 else if set -q _flag_p
   # ie: /home/odoo/src/14.0
   echo $root$ws_version
+else if set -q _flag_r
+  set repo $parts[2]
+  if test "$repo" = odoo -o "$repo" = enterprise
+    echo $repo
+  else
+    exit 1
+  end
 end
