@@ -18,7 +18,7 @@ if set -q _flag_l
 end
 
 if test (count $argv) -eq 1
-  set wd $argv[1]
+  set wd (readlink --canonicalize $argv[1])
 else
   set wd $PWD
 end

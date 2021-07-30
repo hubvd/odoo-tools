@@ -1,0 +1,105 @@
+#!/usr/bin/fish
+
+set base_url 'https://www.odoo.com'
+set user_id '2036938'
+set database 'openerp'
+set username 'Hubert Van de Walle (huvw)'
+set project_id '49'
+set password "$ODOO_PASS"
+
+if test -z "$password"
+  echo ODOO_PASS not set
+  exit 1
+end
+
+function request_body
+  # TODO pass limit
+  # TODO skip done stage
+  echo -n '<?xml version="1.0" encoding="UTF-8"?><methodCall><methodName>execute_kw</methodName><params>'
+  echo -n "<param><value>$database</value></param>"
+  echo -n "<param><value><double>$user_id</double></value></param>"
+  echo -n "<param><value>$password</value></param>"
+  echo -n '<param><value>project.task</value></param>'
+  echo -n '<param><value>search_read</value></param>'
+  echo -n '<param><value><array><data><value><array><data><value><array><data><value>user_id</value><value>=</value>'
+  echo -n "<value>$username</value>"
+  echo -n '</data></array></value>'
+  echo -n '<value><array><data><value>project_id.id</value><value>=</value>'
+  echo -n "<value>$project_id</value>"
+  echo -n '</data></array></value></data></array></value></data></array></value></param>'
+  echo -n '<param><value><struct><member><name>fields</name><value>'
+  echo -n '<array><data><value>id</value><value>name</value><value>stage_id</value><value>kanban_state</value></data></array></value></member></struct></value></param>'
+  echo -n '</params></methodCall>'
+end
+
+function search_read_tasks
+  request_body | curl -q --data-binary @- -X POST $base_url'/xmlrpc/2/object' --header 'Content-Type: text/xml' 2>/dev/null || exit 1
+end
+
+function extract
+  xmllint --xpath '//name[text()="'$argv[1]'"]/following-sibling::value//*/text()' $argv[2]
+end
+
+function extract_array
+  xmllint --xpath '//name[text()="'$argv[1]'"]/following-sibling::value//string/text()' $argv[2]
+end
+
+set response (search_read_tasks)
+set ids (extract id (echo $response | psub))
+set names (extract name (echo $response | psub))
+set states (extract kanban_state (echo $response | psub))
+set stages (extract_array stage_id (echo $response | psub))
+
+function ticket_url
+  set url "$base_url/web#id=$argv[1]&active_id=$project_id&model=project.task&view_type=form&cids=1"
+  # TODO check in the terminfo database if the terminal supports this
+  echo -e '\e]8;;'"$url"'\a'$argv[2]'\e]8;;\a'
+end
+
+for i in (seq (count $ids))
+  switch "$stages[$i]"
+    case 'Functional'
+      set -a functional $i
+    case 'Technical & Platform'
+      set -a technical $i
+    case 'Bug Fixes'
+      set -a bugs $i
+    case 'Cust. Feedback'
+      set -a feedback $i
+  end
+end
+
+function print_section
+  if not set -q $argv[2]
+    return
+  end
+
+  if set -q first
+    echo
+  end
+
+  set_color -o brcyan
+  echo $argv[1]
+  set_color normal
+  echo
+
+  set -g first 
+
+  for i in $$argv[2]
+    echo -n "  "
+    if test "$states[$i]" =  "done"
+      set_color -u green
+    else if test "$states[$i]" = "blocked"
+      set_color -u red
+    else
+      set_color -u
+    end
+    ticket_url $ids[$i] "$names[$i]"
+    set_color normal
+  end
+end
+
+print_section 'Functional' functional
+print_section 'Technical & Platform' technical
+print_section 'Bug Fixes' bugs
+print_section 'Cust. Feedback' feedback
