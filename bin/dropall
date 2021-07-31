@@ -1,7 +1,9 @@
 #!/usr/bin/fish
 
+set odoo_databases (workspace -l | xargs -l basename){,-test}
+
 psql -Atqwl | while read -d'|' -l db user others
-    if test "$user" = odoo
+    if test "$user" = $USER && contains $db $odoo_databases
         dropdb $db
     end
 end

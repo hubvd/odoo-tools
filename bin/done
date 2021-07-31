@@ -1,7 +1,13 @@
 #!/usr/bin/fish
 
-function modules
-  git status --porcelain | while read -d ' ' space change file
+argparse 'amend' -- $argv
+
+function modules --inherit _flag_amend
+  if set -q _flag_amend
+    set files (git diff-tree --no-commit-id --name-only -r @)
+  end
+  set -a files (git status --porcelain | rg '^[AMRDC]+\s+(?P<path>.*)' -or'$1')
+  for file in $files
     set parts (string split / $file)
     switch (workspace -r)
       case 'odoo'
@@ -17,7 +23,11 @@ function modules
     end
   end
 
-  string join ', ' $modules
+  if set -q modules
+    string join ', ' $modules
+  else
+    echo
+  end
 end
 
 function parse_ticket_id
@@ -32,4 +42,8 @@ function msg
   string join \n\n '[FIX] '(modules)':' 'Step to follow' 'Cause of the issue' 'Solution' 'opw-'(opw)
 end
 
-git commit -eF (msg | psub)
+if set -q _flag_amend
+  git commit --amend -eF (msg | psub)
+else
+  git commit -eF (msg | psub)
+end

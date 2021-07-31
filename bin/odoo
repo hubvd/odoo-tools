@@ -29,6 +29,11 @@ end
 set root (workspace -p) || exit 1
 set db (workspace -v) || exit 1
 
+if set -l index (contains -i -- shell $argv)
+  set -e argv[$index]
+  set shell shell
+end
+
 set odoo_args
 
 set provided_args $argv
@@ -87,12 +92,16 @@ end
 
 function run
   cd $root
-  venv/bin/python odoo/odoo-bin $odoo_args $provided_args 2>&1
+  venv/bin/python odoo/odoo-bin $shell $odoo_args $provided_args 2>&1
 end
 
 if not contains -- '--help' $argv
   info
-  run | odoopretty
+  if set -q shell
+    run
+  else
+    run | odoopretty
+  end
   if test "$mode" = "test"
     notify-send -h string:frcolor:#00FF00 'Tests done'
   end
