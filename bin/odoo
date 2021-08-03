@@ -19,11 +19,8 @@
 #    ├── odoo
 #    └── venv
 
-function err
-  set_color red
-  echo -- $argv
-  set_color reset
-  exit 1
+if contains -- --dry-run $argv
+    set -g _flag_dry_run '' 
 end
 
 set root (workspace -p) || exit 1
@@ -81,6 +78,10 @@ end
 add_if_absent --database=$db ' -d|--database' 
 
 function info
+  if set -q _flag_dry_run
+    return
+  end
+
   cd $root
   set_color -o 
   echo root = $PWD
@@ -92,12 +93,17 @@ end
 
 function run
   cd $root
-  venv/bin/python odoo/odoo-bin $shell $odoo_args $provided_args 2>&1
+  set args $shell $odoo_args $provided_args
+  if set -q _flag_dry_run
+    echo odoo/odoo-bin $args
+  else
+    venv/bin/python odoo/odoo-bin $shell $odoo_args $provided_args 2>&1
+  end
 end
 
 if not contains -- '--help' $argv
   info
-  if set -q shell
+  if set -q shell || set -q _flag_dry_run
     run
   else
     run | odoopretty

@@ -1,0 +1,40 @@
+#!/usr/bin/fish
+
+set recent_projects "$HOME/.config/JetBrains/PyCharmCE2021.2/options/recentProjects.xml"
+set pycharm_bin "$HOME/.local/share/JetBrains/Toolbox/apps/PyCharm-C/ch-0/212.4746.96/bin/pycharm.sh"
+
+for i in $recent_projects $pycharm_bin
+    if not test -f $i
+        notify-send (basename $i)" moved"
+        exit 1
+    end
+end
+
+function list_workspace
+    xmllint --xpath '//map//entry/@key' $recent_projects | string replace ' key="$USER_HOME$' $HOME | tr -d '"'
+end
+
+function open
+    setsid $pycharm_bin $argv &>/dev/null &
+end
+
+if not set -q argv[1]
+    set choice (workspace -p)
+    if test $status -ne 0
+        set workspaces (list_workspace | string collect)
+        set lines (count (echo $workspaces | string split \n))
+        if tty -s
+            set choice (echo $workspaces | fzf --height=(math $lines + 2))
+        else
+            set choice (echo $workspaces | rofi -lines $lines -dmenu -p pycharm)
+        end
+    end
+else
+    set choice $argv[1]
+end
+
+if test -d "$choice"
+    open $choice
+else
+    exit 1
+end

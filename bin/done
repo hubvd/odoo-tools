@@ -11,11 +11,11 @@ function modules --inherit _flag_amend
     set parts (string split / $file)
     switch (workspace -r)
       case 'odoo'
-        if test "$parts[1]" = "addons" && set -q parts[2]
+        if test "$parts[1]" = "addons" && set -q parts[2] && not contains $parts[2] $modules
           set -a modules $parts[2]
         end
       case 'enterprise'
-        if set -q parts[1]
+        if set -q parts[1] && not contains $parts[1] $modules
           set -a modules $parts[1]
         end
       case '*'
