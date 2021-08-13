@@ -1,4 +1,4 @@
-import nre, terminal, strformat
+import nre, terminal, strformat, strutils
 
 proc ctrlc() {.noconv.} =
   quit(0)
@@ -32,6 +32,9 @@ while true:
         version = m.captures["version"]
         logger = m.captures["logger"]
         remaining = m.captures["remaining"]
+
+      if remaining.contains("longpolling"):
+        continue
 
       if not loaded and level == "INFO":
         stdout.eraseLine()
