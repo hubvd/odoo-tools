@@ -18,6 +18,6 @@ end
 
 set local_branch (git rev-parse --abbrev-ref HEAD)
 
-if not string match -q '*-opw-*-huvw' $local_branch
+if not string match -q '*-opw-*-huvw*' $local_branch
   fail "Can't push on $local_branch"
 end
