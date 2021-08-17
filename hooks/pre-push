@@ -1,0 +1,23 @@
+#!/usr/bin/fish
+
+set remote $argv[1]
+set url $argv[2]
+
+function fail
+  echo $argv 2>&1
+  exit 1
+end
+
+if test $remote = "origin"
+  fail "Can't push on origin"
+end
+
+if string match -q '*github.com/odoo/*' $url
+  fail "Can't push on github.com/odoo/"
+end
+
+set local_branch (git rev-parse --abbrev-ref HEAD)
+
+if not string match -q '*-opw-*-huvw' $local_branch
+  fail "Can't push on $local_branch"
+end
