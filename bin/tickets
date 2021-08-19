@@ -3,7 +3,6 @@
 set base_url 'https://www.odoo.com'
 set user_id '2036938'
 set database 'openerp'
-set username 'Hubert Van de Walle (huvw)'
 set project_id '49'
 set password "$ODOO_PASS"
 
@@ -32,7 +31,7 @@ function search_read
 end
 
 function request_body
-  set domain (jo -a project_id = $project_id) (jo -a user_id = $username) (jo -a stage_id in '[194, 227]')
+  set domain (jo -a project_id = $project_id) (jo -a user_id = $user_id) (jo -a stage_id in '[194, 227]')
   search_read --limit 25 --model project.task --fields id,name,stage_id,kanban_state $domain
 end
 
