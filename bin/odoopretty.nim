@@ -11,7 +11,7 @@ var
   loaded = false
 
 let
-  pattern = re"^(?P<date>\d{4}-\d{2}-\d{2}) (?P<time>\d{2}:\d{2}:\d{2},\d{3}) \d{2,5} (?P<level>[A-Z]+) (?P<version>\S+) (?P<logger>.*?): (?P<remaining>.*)"
+  pattern = re"^(?P<date>\d{4}-\d{2}-\d{2}) (?P<time>\d{2}:\d{2}:\d{2},\d{3}) \d{2,6} (?P<level>[A-Z]+) (?P<version>\S+) (?P<logger>.*?): (?P<remaining>.*)"
   yellow = fgYellow.ansiForegroundColorCode(true)
   boldRed = fgRed.ansiForegroundColorCode(true)
   red = fgRed.ansiForegroundColorCode()
