@@ -1,0 +1,25 @@
+#!/usr/bin/fish
+
+set -q argv[1] || exit 1
+set branch $argv[1]
+set root $HOME/src
+set repos odoo enterprise
+
+# check if branch exist on origin
+for i in $root/master/$repos
+  git -C $i rev-parse --quiet --verify origin/$branch >/dev/null || exit 1
+end
+
+for d in $root/$branch/$repos
+  test -d $d && exit 2
+  mkdir -p $d
+end
+
+for i in $repos
+  git -C $root/master/$i worktree add $root/$branch/$i $branch
+end
+
+virtualenv $root/$branch/venv --python=$HOME/.localpython/bin/python3.8
+source $root/$branch/venv/bin/activate.fish
+pip install --upgrade pip
+pip install -r $root/$branch/odoo/requirements.txt
