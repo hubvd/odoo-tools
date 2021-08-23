@@ -1,0 +1,4 @@
+--glob=!*test*
+--glob=!*.po
+--glob=!*.md
+--glob=!*venv*
