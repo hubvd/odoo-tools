@@ -1,4 +1,5 @@
 --glob=!*test*
 --glob=!*.po
+--glob=!*.pot
 --glob=!*.md
 --glob=!*venv*
