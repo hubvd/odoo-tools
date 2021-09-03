@@ -13,6 +13,8 @@ function modules --inherit _flag_amend
       case 'odoo'
         if test "$parts[1]" = "addons" && set -q parts[2] && not contains $parts[2] $modules
           set -a modules $parts[2]
+        else if test "$parts[1]" = "odoo" && test "$parts[2]" = "addons" && set -q parts[3] && not contains $parts[3] $modules
+          set -a modules $parts[3]
         end
       case 'enterprise'
         if set -q parts[1] && not contains $parts[1] $modules
