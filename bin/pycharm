@@ -1,7 +1,7 @@
 #!/usr/bin/fish
 
-set recent_projects "$HOME/.config/JetBrains/PyCharmCE2021.2/options/recentProjects.xml"
-set pycharm_bin "$HOME/.local/share/JetBrains/Toolbox/apps/PyCharm-C/ch-0/212.4746.96/bin/pycharm.sh"
+set recent_projects "$HOME/.config/JetBrains/PyCharm2021.2/options/recentProjects.xml"
+set pycharm_bin "$HOME/.local/share/JetBrains/Toolbox/apps/PyCharm-P/ch-0/212.5080.64/bin/pycharm.sh"
 
 for i in $recent_projects $pycharm_bin
     if not test -f $i
