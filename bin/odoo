@@ -51,7 +51,12 @@ function add_if_absent
   end
 end
 
-add_if_absent --addons-path=odoo/addons,enterprise '--addons-path'
+
+if test -d $root/design-themes
+  add_if_absent --addons-path=odoo/addons,enterprise,design-themes '--addons-path'
+else
+  add_if_absent --addons-path=odoo/addons,enterprise '--addons-path'
+end
 add_if_absent --limit-time-cpu=9999 '--limit-time-cpu'
 add_if_absent --limit-time-real=9999 '--limit-time-real'
 
