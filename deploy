@@ -1,0 +1,3 @@
+#!/usr/bin/fish
+
+stow bin --verbose -t ~/bin --ignore='.*\.nim'
