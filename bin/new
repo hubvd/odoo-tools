@@ -3,5 +3,5 @@
 set -q argv[1] || exit 1
 set ws (workspace -v) || exit 1
 set branch $ws-opw-$argv[1]-huvw
-git rev-parse --quiet --verify $branch > /dev/null || set flags -- -b
+git rev-parse --quiet --verify $branch > /dev/null || set flags -b
 git checkout $flags $branch
