@@ -1,7 +1,9 @@
 // ==UserScript==
 // @name        Login odoo admin/demo
 // @match       https://*.runbot*.odoo.com/web/login
+// @match       https://*.runbot*.odoo.com/*/web/login
 // @match       http://localhost:8069/web/login
+// @match       http://localhost:8069/*/web/login
 // @grant       none
 // @version     1.0
 // @author      hubvd
