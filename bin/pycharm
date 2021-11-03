@@ -1,7 +1,7 @@
 #!/usr/bin/fish
 
 set recent_projects "$HOME/.config/JetBrains/PyCharm2021.2/options/recentProjects.xml"
-set pycharm_bin "$HOME/.local/share/JetBrains/Toolbox/apps/PyCharm-P/ch-0/212.5080.64/bin/pycharm.sh"
+set pycharm_bin (fd pycharm.sh ~/.local/share/JetBrains/Toolbox/apps/PyCharm-P/ch-0/*/bin | sort -r | head -n1)
 
 for i in $recent_projects $pycharm_bin
     if not test -f $i
@@ -26,7 +26,7 @@ if not set -q argv[1]
         if tty -s
             set choice (echo $workspaces | fzf --height=(math $lines + 2))
         else
-            set choice (echo $workspaces | rofi -lines $lines -dmenu -p pycharm)
+            set choice (echo $workspaces | rofi -lines $lines -dmenu -p pycharm -no-default-config)
         end
     end
 else
