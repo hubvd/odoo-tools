@@ -16,7 +16,7 @@ for d in $root/$branch/$repos
 end
 
 for i in $repos
-  git -C $root/master/$i worktree add $root/$branch/$i $branch
+  git -C $root/master/$i worktree add $root/$branch/$i origin/$branch
 end
 
 virtualenv $root/$branch/venv --python=$HOME/.localpython/bin/python3.8
