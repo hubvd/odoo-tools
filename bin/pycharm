@@ -1,6 +1,6 @@
 #!/usr/bin/fish
 
-set recent_projects "$HOME/.config/JetBrains/PyCharm2021.2/options/recentProjects.xml"
+set recent_projects (fd 'PyCharm[0-9.]+' ~/.config/JetBrains --exact-depth 1 | sort -r | head -n1)/options/recentProjects.xml
 set pycharm_bin (fd pycharm.sh ~/.local/share/JetBrains/Toolbox/apps/PyCharm-P/ch-0/*/bin | sort -r | head -n1)
 
 for i in $recent_projects $pycharm_bin
@@ -11,7 +11,7 @@ for i in $recent_projects $pycharm_bin
 end
 
 function list_workspace
-    xmllint --xpath '//map//entry/@key' $recent_projects | string replace ' key="$USER_HOME$' $HOME | tr -d '"'
+    xmllint --xpath '//map//entry/@key' $recent_projects | string replace ' key="$USER_HOME$' $HOME | tr -d '"' | sort
 end
 
 function open
