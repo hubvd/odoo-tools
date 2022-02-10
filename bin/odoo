@@ -1,121 +1,108 @@
 #!/usr/bin/fish
 
-# Directory structure
-# /home/odoo/src
-# ├── 12.0
-# │  ├── enterprise
-# │  ├── odoo
-# │  └── venv
-# ├── 13.0
-# │  ├── enterprise
-# │  ├── odoo
-# │  └── venv
-# ├── 14.0
-# │  ├── enterprise
-# │  ├── odoo
-# │  └── venv
-# └── master
-#    ├── enterprise
-#    ├── odoo
-#    └── venv
-
-if contains -- --dry-run $argv
-    set -g _flag_dry_run '' 
-end
-
 set root (workspace -p) || exit 1
 set db (workspace -v) || exit 1
 
-if set -l index (contains -i -- shell $argv)
-  set -e argv[$index]
-  set shell shell
+set -a args 'dry-run'
+set -a args 'addons-path='
+set -a args 'test-enable'
+set -a args 'stop-after-init'
+set -a args 'log-level='
+set -a args 'max-cron-threads'
+set -a args 'limit-time-cpu='
+set -a args 'limit-time-real='
+set -a args 'test-tags='
+set -a args 'd/database='
+set -a args 'i/init='
+
+argparse --ignore-unknown $args -- $argv
+
+function default_addons_path
+  for d in odoo/addons enterprise design-themes
+    test -d $root/$d && set -a path $d
+  end
+  string join ',' $path
 end
 
-set odoo_args
-
-set provided_args $argv
-
-# argv[1]: arg to add
-# argv[2]: pattern to check
-function add_if_absent
-  if test (count $argv) -eq 2
-    set arg $argv[1]
-    set re $argv[2]
-  else
-    set arg $argv[1]
-    set re $argv[2]
+function default_init --inherit-variable _flag_test_tags
+  set -q _flag_test_tags || return
+  for tag in (string split ',' $_flag_test_tags)
+    set -e module class method pattern
+    string match -rq '(?:\\/(?P<module>\\w+))?(?::(?P<class>\\w+))?(?:\\.(?P<method>\\w+))?' $tag
+    if set -q module[1]
+      set -a modules $module
+    else if set -q class[1] || set -q method[1]
+      set files (rg -g '**/tests/**/*.py' --no-config -l $class $method $root)
+      for f in $files
+        string match -rq '/(?P<module>\w+)/tests/' $f
+        set -q module[1] && set -a modules $module
+      end
+    end
   end
-
-  if not string match -q -r -- $re $provided_args
-    set -a odoo_args $arg
-  end
+  string join ',' $modules
 end
 
+set default_limit_time_cpu 99999
+set default_limit_time_real 99999
 
-if test -d $root/design-themes
-  add_if_absent --addons-path=odoo/addons,enterprise,design-themes '--addons-path'
+if set -q _flag_test_tags
+  set default_test_enable
+  set default_log_level test
+  set default_max_cron_thread 0
+end
+
+if set -q _flag_test_enable || set -q default_test_enable
+  set default_database $db-test
 else
-  add_if_absent --addons-path=odoo/addons,enterprise '--addons-path'
-end
-add_if_absent --limit-time-cpu=9999 '--limit-time-cpu'
-add_if_absent --limit-time-real=9999 '--limit-time-real'
-
-function add_test_args
-  add_if_absent --stop-after-init
-  add_if_absent --log-level=test --log-level
-  add_if_absent --max-cron-threads=0
+  set default_database $db
 end
 
-if contains -- '--test-enable' $provided_args
-  add_test_args
-  set mode test
+function to_flag
+  echo --(string replace -a '_' '-' $argv)
 end
 
-if string match -q -r -- '--test-tags' $provided_args
-  add_if_absent --test-enable
-  add_test_args
-  set mode test
-end
-
-if test "$mode" = "test"
-  set db $db-test  
-end
-add_if_absent --database=$db ' -d|--database' 
-
-function info
-  if set -q _flag_dry_run
-    return
+# Use defaults if none are provided
+for d in (set -n | string match 'default_*')
+  set name (string replace 'default_' '' $d)
+  if not set -q "_flag_$name"
+    set flag (to_flag $name)
+    set -q $$d || set flag $flag=$$d
+    set -a odoo_args $flag
   end
-
-  cd $root
-  set_color -o 
-  echo root = $PWD
-  echo provided args = $provided_args
-  echo added args = $odoo_args
-  echo cli = venv/bin/python odoo/odoo-bin
-  set_color normal
+end
+for f in (functions -n | string match 'default_*')
+  set name (string replace 'default_' '' $f)
+  set -q "_flag_$name" || set -a odoo_args (to_flag $name)=($f)
 end
 
-function run
-  cd $root
-  set args $shell $odoo_args $provided_args
-  if set -q _flag_dry_run
-    echo odoo/odoo-bin $args
-  else
-    venv/bin/python odoo/odoo-bin $shell $odoo_args $provided_args 2>&1
+# Add every flag and it's value if it has one
+for f in (set -n | string match -r '_flag_\w\w+')
+  set name (string replace '_flag_' '' $f)
+  set flag_name (to_flag $name)
+  set -a odoo_args (test $flag_name = $$f && echo $flag_name || echo $flag_name=$$f)
+end
+
+# A command needs to be the first argument
+for c in cloc deploy populate scaffold shell start tsconfig
+  if set -l index (contains --i -- $c $argv)
+    set -e argv[$index]
+    set command $c
+    set -p odoo_args $command
+    break
   end
 end
 
-if not contains -- '--help' $argv
-  info
-  if set -q shell || set -q _flag_dry_run
-    run
-  else
-    run | odoopretty
-  end
-  if test "$mode" = "test"
-    notify-send -h string:frcolor:#00FF00 'Tests done'
-  end
+# Add unknown flags
+set -a odoo_args $argv
+
+cd $root
+echo -sn (set_color -o) odoo (set_color normal) ' '
+echo $odoo_args
+if set -q command
+  venv/bin/python odoo/odoo-bin $odoo_args
 else
-  run
+  venv/bin/python odoo/odoo-bin $odoo_args 2>&1 | odoopretty
 end
+# Send a notification once the tests are done
+contains -- --test-enable $odoo_args && notify-send -h string:frcolor:#00FF00 'Tests done'
+
