@@ -15,6 +15,8 @@ set -a args 'test-tags='
 set -a args 'd/database='
 set -a args 'i/init='
 set -a args 'h/help'
+set -a args 'p/http-port='
+set -a args 'longpolling-port='
 
 argparse --ignore-unknown $args -- $argv
 
@@ -51,6 +53,8 @@ if set -q _flag_test_tags
   set default_log_level test
   set default_max_cron_thread 0
   set default_stop_after_init
+  set default_http_port 9000
+  set default_longpolling_port 9001
 end
 
 if set -q _flag_test_enable || set -q default_test_enable
