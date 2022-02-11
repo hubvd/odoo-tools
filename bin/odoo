@@ -14,6 +14,7 @@ set -a args 'limit-time-real='
 set -a args 'test-tags='
 set -a args 'd/database='
 set -a args 'i/init='
+set -a args 'h/help'
 
 argparse --ignore-unknown $args -- $argv
 
@@ -28,7 +29,7 @@ function default_init --inherit-variable _flag_test_tags
   set -q _flag_test_tags || return
   for tag in (string split ',' $_flag_test_tags)
     set -e module class method pattern
-    string match -rq '(?:\\/(?P<module>\\w+))?(?::(?P<class>\\w+))?(?:\\.(?P<method>\\w+))?' $tag
+    string match -rq '(?:\\w+)?(?:\\/(?P<module>\\w+))?(?::(?P<class>\\w+))?(?:\\.(?P<method>\\w+))?' $tag
     if set -q module[1]
       set -a modules $module
     else if set -q class[1] || set -q method[1]
@@ -49,6 +50,7 @@ if set -q _flag_test_tags
   set default_test_enable
   set default_log_level test
   set default_max_cron_thread 0
+  set default_stop_after_init
 end
 
 if set -q _flag_test_enable || set -q default_test_enable
@@ -98,11 +100,20 @@ set -a odoo_args $argv
 cd $root
 echo -sn (set_color -o) odoo (set_color normal) ' '
 echo $odoo_args
-if set -q command
+if set -q command || set -q _flag_help
   venv/bin/python odoo/odoo-bin $odoo_args
+  set odoo_status $status
 else
   venv/bin/python odoo/odoo-bin $odoo_args 2>&1 | odoopretty
+  set odoo_status $pipestatus[1]
 end
 # Send a notification once the tests are done
-contains -- --test-enable $odoo_args && notify-send -h string:frcolor:#00FF00 'Tests done'
+if contains -- --test-enable $odoo_args
+  if test $odoo_status -eq 0
+    notify-send -h string:frcolor:#00FF00 'Tests passed'
+  else
+    notify-send -h string:frcolor:#FF0000 'Tests failed'
+  end
+end
+exit $odoo_status
 
