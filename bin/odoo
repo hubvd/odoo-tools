@@ -35,7 +35,12 @@ function default_init --inherit-variable _flag_test_tags
     if set -q module[1]
       set -a modules $module
     else if set -q class[1] || set -q method[1]
-      set files (rg -g '**/tests/**/*.py' --no-config -l $class $method $root)
+      if set -q class[1] && set -q method[1]
+        set rg_args --multiline --multiline-dotall "$class.*$method"
+      else
+        set rg_args $class $method
+      end
+      set files (rg -g '**/tests/**/*.py' --no-config -l $rg_args $root)
       for f in $files
         string match -rq '/(?P<module>\w+)/tests/' $f
         set -q module[1] && set -a modules $module
