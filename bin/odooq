@@ -12,6 +12,7 @@ end
 
 # queries
 set installed "select name from ir_module_module where state = 'installed' order by name"
+set reset_expiration "update ir_config_parameter set value='2999-05-07 13:16:50' where key='database.expiration_date'; delete from ir_config_parameter where key='database.expiration_reason'"
 
 if not set -q $argv[1]
   exit 1
