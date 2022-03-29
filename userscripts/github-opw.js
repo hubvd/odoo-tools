@@ -34,9 +34,19 @@ function createLink(match, qualifier, id) {
 }
 
 function replaceOpw() {
-    document
-        .querySelectorAll(".commit-desc pre, div.timeline-comment div.comment-body p")
-        .forEach(desc => desc.innerHTML = desc.innerHTML.replace(/\b(opw|task)\s*(?:-?id)?\s*(?:[:-](?:&gt;)?)?\s*#?(\d+)\b/gi, createLink))
+    Array.from(document.querySelectorAll(".commit-desc pre, div.timeline-comment div.comment-body"))
+        .flatMap(e => Array.from(e.childNodes))
+        .filter(e => !(e instanceof Text))
+        .filter(el => !el.hasAttribute('opw'))
+        .forEach(desc => {
+            desc.innerHTML = desc.innerHTML.replace(/\b(opw|task)\s*(?:-?id)?\s*(?:[:-](?:&gt;)?)?\s*#?(\d+)\b/gi, createLink)
+            desc.setAttribute('opw', true)
+        })
 }
 
 window.addEventListener("load", replaceOpw)
+window.addEventListener("message", replaceOpw)
+window.addEventListener('pjax:end', replaceOpw)
+window.addEventListener('urlchange', () => {
+    setTimeout(replaceOpw, 200)
+});
