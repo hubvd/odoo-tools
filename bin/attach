@@ -4,5 +4,9 @@ argparse 'p#port' 'd/detach' -- $argv
 
 set port (set -q _flag_port && echo $_flag_port || echo 8069)
 set method (set -q _flag_detach && echo detach || echo attach)
+set url "http://localhost:$port/debug/$method"
+set curl_status (curl -o /dev/null -s -w "%{http_code}\n" $url)
 
-curl "http://localhost:$port/debug/$method"
+if test (math "$curl_status / 100") -ne 2
+  echo 'An error occurred..'
+end
