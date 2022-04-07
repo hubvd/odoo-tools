@@ -1,0 +1,8 @@
+#!/bin/fish
+
+argparse 'p#port' 'd/detach' -- $argv
+
+set port (set -q _flag_port && echo $_flag_port || echo 8069)
+set method (set -q _flag_detach && echo detach || echo attach)
+
+curl "http://localhost:$port/debug/$method"
