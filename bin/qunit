@@ -1,0 +1,10 @@
+#!/bin/fish
+
+argparse 'p/port=' 'd/debug' -- $argv
+
+set filter (string join ' ' $argv | string escape --style=url)
+set debug (set -q _flag_debug && echo assets || echo 0)
+set port (set -q _flag_port && echo $_flag_port || echo 8069)
+
+test (uname -n) != huvw-laptop && set profile -P odoo
+firefox $profile "http://localhost:$port/web/tests?debug=$debug&filter=$filter" 2> /dev/null & disown
