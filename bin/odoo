@@ -24,6 +24,7 @@ function default_addons_path
   for d in odoo/addons enterprise design-themes
     test -d $root/$d && set -a path $d
   end
+  test -d ~/src/odoo-tools/debug-addon && set -a path ~/src/odoo-tools/debug-addon
   string join ',' $path
 end
 
