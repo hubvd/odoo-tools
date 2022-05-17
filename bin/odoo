@@ -18,6 +18,16 @@ set -a args 'h/help'
 set -a args 'p/http-port='
 set -a args 'longpolling-port='
 
+set -a args 'db_host='
+set -a args 'w/db_password='
+set -a args 'r/db_user='
+set -a args 'db_port='
+
+set -q PGPASSWORD && set default_db_password $PGPASSWORD
+set -q PGHOST && set default_db_host $PGHOST
+set -q PGUSER && set default_db_user $PGUSER
+set -q PGPORT && set default_db_port $PGPORT
+
 argparse --ignore-unknown $args -- $argv
 
 function default_addons_path
@@ -70,7 +80,12 @@ else
 end
 
 function to_flag
-  echo --(string replace -a '_' '-' $argv)
+  switch $argv
+    case db_port db_host db_user db_password # TODO
+      echo --$argv
+    case '*'
+      echo --(string replace -a '_' '-' $argv)
+  end
 end
 
 # Use defaults if none are provided
