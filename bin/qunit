@@ -2,7 +2,12 @@
 
 argparse 'p/port=' 'd/debug' -- $argv
 
-set filter (string join ' ' $argv | string escape --style=url)
+if set -q argv[1]
+  set filter (string join ' ' $argv | string escape --style=url)
+else
+  set filter (xsel | string trim | string escape --style=url)
+end
+
 set debug (set -q _flag_debug && echo assets || echo 0)
 set port (set -q _flag_port && echo $_flag_port || echo 8069)
 

@@ -1,36 +1,22 @@
 #!/usr/bin/fish
 
-set recent_projects (fd 'PyCharm[0-9.]+' ~/.config/JetBrains --exact-depth 1 | sort -r | head -n1)/options/recentProjects.xml
+set recent_projects (echo (seq 12 15).0 saas-15.{1,2,3} master | string split ' ')
+set workspaces ~/src/$recent_projects
 set pycharm_bin (fd pycharm.sh ~/.local/share/JetBrains/Toolbox/apps/PyCharm-P/ch-0/*/bin | sort -r | head -n1)
 
-for i in $recent_projects $pycharm_bin
-    if not test -f $i
-        notify-send (basename $i)" moved"
-        exit 1
-    end
-end
-
-function list_workspace
-    xmllint --xpath '//map//entry/@key' $recent_projects | string replace ' key="$USER_HOME$' $HOME | tr -d '"' | sort
+if not test -f $pycharm_bin
+    notify-send (basename $i)" moved"
+    exit 1
 end
 
 function open
     setsid $pycharm_bin $argv &>/dev/null &
 end
 
-if not set -q argv[1]
-    set choice (workspace -p)
-    if test $status -ne 0
-        set workspaces (list_workspace | string collect)
-        set lines (count (echo $workspaces | string split \n))
-        if tty -s
-            set choice (echo $workspaces | fzf --height=(math $lines + 2))
-        else
-            set choice (echo $workspaces | rofi -lines $lines -dmenu -p pycharm -no-default-config)
-        end
-    end
-else
-    set choice $argv[1]
+set choice (workspace -p)
+if test $status -ne 0
+    set lines (count $workspaces)
+    set choice (echo $workspaces | string split ' ' | rofi -lines $lines -dmenu -p pycharm -no-default-config)
 end
 
 if test -d "$choice"
