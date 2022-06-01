@@ -93,7 +93,7 @@ for d in (set -n | string match 'default_*')
   set name (string replace 'default_' '' $d)
   if not set -q "_flag_$name"
     set flag (to_flag $name)
-    set -q $$d || set flag $flag=$$d
+    test -n "$$d" && set flag $flag=$$d
     set -a odoo_args $flag
   end
 end
