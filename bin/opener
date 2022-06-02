@@ -1,0 +1,16 @@
+#!/bin/fish
+
+# control + shift + x
+#     opener
+
+set input (command xsel -p)
+
+if string match -rq 'odoo/(?P<repo>.*)#(?P<id>\d+)' $input
+  set url "https://github.com/odoo/$repo/pull/$id"
+else if string match -rq '(opw|task)\S(?P<id>\d+)' $input
+  set url "https://www.odoo.com/web#view_type=form&model=project.task&id=$id"
+end
+
+if test -n "$url"
+  open "$url"
+end
