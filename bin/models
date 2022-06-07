@@ -1,7 +1,8 @@
 #!/bin/fish
 
+argparse 'n/name' -- $argv
 set -q argv[1] || exit 1
 set model (string replace -a '.' '\.' $argv[1])
-
 set quotes "['\"]"
-rg --color never "^\s*_(inherit|name)\s*=\s*$quotes$model$quotes" -l -tpy
+set -q _flag_name && set type 'name' || set type '(inherit|name)'
+rg --color never "^\s*_$type\s*=\s*$quotes$model$quotes" -l -tpy

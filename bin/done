@@ -41,7 +41,7 @@ function opw
 end
 
 function msg
-  string join \n\n '[FIX] '(modules)':' 'Steps to follow' 'Cause of the issue' 'Solution' 'opw-'(opw)
+  string join \n\n '[FIX] '(modules)':' 'Steps to follow:' 'Cause of the issue:' 'Solution:' 'opw-'(opw)
 end
 
 if set -q _flag_amend

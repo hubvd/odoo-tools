@@ -3,7 +3,11 @@
 # control + shift + x
 #     opener
 
-set input (command xsel -p)
+if set -q argv[1]
+  set input (string join ' ' $argv)
+else
+  set input (command xsel -p)
+end
 
 if string match -rq 'odoo/(?P<repo>.*)#(?P<id>\d+)' $input
   set url "https://github.com/odoo/$repo/pull/$id"
