@@ -10,7 +10,7 @@ end
 
 if set -q _flag_l
   for i in (echo (seq 12 15).0 saas-15.{1,2,3} master | string split ' ')
-    echo $root$i
+    set -q _flag_version && echo $i || echo $root$i
   end
   exit 0
 end

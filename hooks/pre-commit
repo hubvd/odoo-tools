@@ -1,0 +1,8 @@
+#!/bin/fish
+
+set local_branch (git rev-parse --abbrev-ref HEAD)
+
+if contains "$local_branch" (workspace -lv)
+  echo "Can't commit to $local_branch" 2>&1
+  exit 1
+end

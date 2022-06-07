@@ -18,6 +18,6 @@ end
 
 set local_branch (git rev-parse --abbrev-ref HEAD)
 
-if not string match -q '*-opw-*-huvw*' $local_branch
+if contains "$local_branch" (workspace -lv)
   fail "Can't push to $local_branch"
 end
