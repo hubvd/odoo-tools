@@ -1,0 +1,14 @@
+#!/bin/fish
+
+argparse 'r/repo=' -- $argv
+set -q _flag_repo || set _flag_repo odoo
+contains $_flag_repo odoo enterprise || exit 1
+set commit_title (string join ' ' $argv)
+test -n "$commit_title" || exit 1
+
+for w in (workspace -l)
+    set w_version (workspace -v $w)
+    git -C $w/$_flag_repo log --oneline --grep $commit_title -F -n 1 --pretty='format:%H' | read hash
+    and echo (set_color green)$w_version(set_color normal): $hash
+    or echo (set_color red)$w_version(set_color normal)
+end
