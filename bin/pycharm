@@ -1,7 +1,6 @@
 #!/usr/bin/fish
 
-set recent_projects (workspace -l)
-set workspaces ~/src/$recent_projects
+set workspaces (workspace -l)
 set pycharm_bin (fd pycharm.sh ~/.local/share/JetBrains/Toolbox/apps/PyCharm-P/ch-0/*/bin | sort -r | head -n1)
 
 if not test -f $pycharm_bin
@@ -15,8 +14,13 @@ end
 
 set choice (workspace -p)
 if test $status -ne 0
+    set width 0
+    for i in $workspaces
+        set width (math "max($width, $(string length --visible $i))")
+    end
+    set width (math "$width + 2")
     set lines (count $workspaces)
-    set choice (echo $workspaces | string split ' ' | rofi -lines $lines -dmenu -p pycharm -no-default-config)
+    set choice (echo $workspaces | string split ' ' | rofi -l $lines -dmenu -p pycharm -no-default-config -theme-str "window {width: $width ch;}")
 end
 
 if test -d "$choice"
