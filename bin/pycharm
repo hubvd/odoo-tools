@@ -1,6 +1,6 @@
 #!/usr/bin/fish
 
-set recent_projects (echo (seq 12 15).0 saas-15.{1,2,3} master | string split ' ')
+set recent_projects (workspace -l)
 set workspaces ~/src/$recent_projects
 set pycharm_bin (fd pycharm.sh ~/.local/share/JetBrains/Toolbox/apps/PyCharm-P/ch-0/*/bin | sort -r | head -n1)
 

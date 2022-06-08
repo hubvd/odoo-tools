@@ -9,7 +9,7 @@ if not string match -rq '/$'
 end
 
 if set -q _flag_l
-  for i in (echo (seq 12 15).0 saas-15.{1,2,3} master | string split ' ')
+  for i in (echo (seq 12 15).0 saas-15.{1,2,3,4} master | string split ' ')
     set -q _flag_version && echo $i || echo $root$i
   end
   exit 0
