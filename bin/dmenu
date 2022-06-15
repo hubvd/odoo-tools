@@ -1,0 +1,13 @@
+#!/bin/fish
+
+argparse 'p=' -- $argv
+set lines (count $argv)
+set width 0
+for i in $argv
+    set width (math "max($width, $(string length --visible $i))")
+end
+set width (math "$width + 2")
+set args -l $lines -theme-str "window {width: $width ch;}" -no-default-config -dmenu
+set -q _flag_p && set -a args -p $_flag_p
+echo $argv | string split ' ' | rofi $args
+exit $status
