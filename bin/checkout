@@ -6,8 +6,8 @@ if set -q _flag_version
   set remote origin
   set branch (workspace -v) || exit 1
 else 
-  set -q argv[1] || exit 1
-  set values (string split : $argv[1])
+  set input (set -q argv[1] && echo $argv[1] || command xsel -b)
+  set values (string split : $input)
 
   switch (count $values)
     case 1
