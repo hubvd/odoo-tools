@@ -1,19 +1,7 @@
 #!/usr/bin/fish
 
-argparse 'dry-run' -- $argv
 set -q argv[1] || exit 1
 set ws (workspace -v) || exit 1
 set branch $ws-opw-$argv[1]-huvw
-set exists 0
-git rev-parse --quiet --verify $branch > /dev/null || set exists 1
-
-if not set -q exists
-  set flags -b
-end
-
-if set -q _flag_dry_run
-  set -q exists && echo "Branch $branch" exists || echo "Branch $branch does not exists"
-  exit $exists
-end
-
+git rev-parse --quiet --verify $branch > /dev/null || set flags -b
 git checkout $flags $branch
