@@ -4,43 +4,43 @@ argparse 'v/version' 'p/path' 'l/list' 'r/repo' -- $argv
 
 set root ~/src
 
-if not string match -rq '/$'
-  set root $root/
+function validate_workspace
+  test -f $argv[1]/odoo/odoo-bin
 end
 
 if set -q _flag_l
-  for i in (echo (seq 12 15).0 saas-15.{1,2,3,4} master | string split ' ')
-    set -q _flag_version && echo $i || echo $root$i
+  set workspaces (find $root -mindepth 1 -maxdepth 1 -type d | string replace -a $root/ '' | sort)
+  if contains master $workspaces
+    set -e workspaces[(contains -i master $workspaces)]
+    set -a workspaces master
+  end
+  for i in $workspaces
+    if validate_workspace $root/$i
+      set -q _flag_version && echo $i || echo $root/$i
+    end
   end
   exit 0
 end
 
-if test (count $argv) -eq 1
-  set wd (readlink --canonicalize $argv[1])
-else
-  set wd $PWD
-end
+test (count $argv) -eq 1 && set wd (realpath $argv[1]) || set wd $PWD
 
 # If not inside a directory inside root -> fail
-if not string match -rq "^$root.*" $wd
-  exit 1
-end
+string match -rq "^$root/.*" $wd || exit 1
 
-set path_from_root (string replace $root '' $wd)
-
+set path_from_root (string replace $root/ '' $wd)
 set parts (string split '/' $path_from_root)
-
 set ws_version $parts[1]
+validate_workspace $root/$ws_version || exit 1
 
 if set -q _flag_v
   # ie: 14.0
   echo $ws_version
 else if set -q _flag_p
   # ie: /home/odoo/src/14.0
-  echo $root$ws_version
+  echo $root/$ws_version
 else if set -q _flag_r
   set repo $parts[2]
-  if test "$repo" = odoo -o "$repo" = enterprise
+  if contains "$repo" odoo enterprise design-themes
     echo $repo
   else
     exit 1

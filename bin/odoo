@@ -123,15 +123,21 @@ end
 set -a odoo_args $argv
 
 cd $root
-echo -sn (set_color -o) odoo (set_color normal) ' '
-echo $odoo_args
-if set -q command || set -q _flag_help
-  venv/bin/python odoo/odoo-bin $odoo_args
-  set odoo_status $status
-else
-  venv/bin/python odoo/odoo-bin $odoo_args 2>&1 | odoopretty
-  set odoo_status $pipestatus[1]
+if isatty stdout
+  echo -sn (set_color -o) odoo (set_color normal) ' '
+  echo $odoo_args
 end
+
+set cmd venv/bin/python odoo/odoo-bin $odoo_args
+
+if isatty stdout && not set -q command && not set -q _flag_help && type -q odoopretty
+  set -a cmd "&|" odoopretty
+end
+
+set -a cmd '; set odoo_status $pipestatus[1]'
+
+eval $cmd
+
 # Send a notification once the tests are done
 if contains -- --test-enable $odoo_args
   if test $odoo_status -eq 0
