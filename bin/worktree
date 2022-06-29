@@ -1,7 +1,15 @@
 #!/usr/bin/fish
 
-set -q argv[1] || exit 1
-set branch $argv[1]
+argparse 'r/rebuild' -- $argv
+
+if set -q argv[1]
+  set branch $argv[1]
+else if set -q _flag_rebuild
+  set branch (workspace -v) || exit 1
+else
+  exit 1
+end
+
 set root $HOME/src
 set repos odoo enterprise
 
@@ -11,16 +19,47 @@ for i in $root/master/$repos
 end
 
 for d in $root/$branch/$repos
-  test -d $d && exit 2
-  mkdir -p $d
+  if set -q _flag_rebuild
+    test -d $d || exit 2
+  else
+    test -d $d && exit 2
+    mkdir -p $d
+  end
 end
 
-for i in $repos
-  git -C $root/master/$i worktree add $root/$branch/$i origin/$branch
+if not set -q _flag_rebuild
+  for i in $repos
+    git -C $root/master/$i worktree add $root/$branch/$i origin/$branch
+  end
 end
 
-virtualenv $root/$branch/venv --python=$HOME/.localpython/bin/python3.8
-source $root/$branch/venv/bin/activate.fish
+if not type -q asdf
+  echo asdf not installed
+  exit 1
+end
+
+asdf plugin list | string match -q python || asdf plugin add python
+
+cd $root/$branch
+set odoo_major_version (rg -o '^version_info = \((\d+),' -r '$1' odoo/odoo/release.py) || set odoo_major_version 15
+
+if test "$odoo_major_version" -le 13
+  set python_version '3.8.13'
+else
+  set python_version '3.9.13'
+end
+
+asdf list python | string match -q "*$python_version" || asdf install python $python_version
+
+asdf local python $python_version
+
+set venv_name venv
+set -q _flag_rebuild && test -d $venv_name && rm -r $venv_name
+virtualenv $venv_name --python=(asdf which python)
+source $venv_name/bin/activate.fish
 pip install --upgrade pip
-pip install -r $root/$branch/odoo/requirements.txt
-pip install websocket-client
+set blacklist vatnumber
+set dependencies (cat odoo/requirements.txt | string match -vr (string join '|' -- $blacklist))
+set -a dependencies pydevd-pycharm==(fd -td '^\d+\.\d+\.\d+$' ~/.local/share/JetBrains/Toolbox/apps/PyCharm-P/ch-0 -d1 -x echo '{/}' | sort -r | head -1)
+set -a dependencies websocket-client
+pip install -r (string join \n $dependencies | psub -s .txt)
