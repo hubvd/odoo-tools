@@ -42,7 +42,7 @@ function default_init --inherit-variable _flag_test_tags
   set -q _flag_test_tags || return
   for tag in (string split ',' $_flag_test_tags)
     set -e module class method pattern
-    string match -rq '(?:\\w+)?(?:\\/(?P<module>\\w+))?(?::(?P<class>\\w+))?(?:\\.(?P<method>\\w+))?' $tag
+    string match -rq '(?:\\w+)?(?:\\/(?P<module>\\w+))?(?::(?P<class>\\w+))?(?:\\.(?P<method>\\w+))?' -- $tag
     if set -q module[1]
       set -a modules $module
     else if set -q class[1] || set -q method[1]
