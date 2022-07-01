@@ -1,65 +1,95 @@
 #!/usr/bin/fish
 
-argparse 'r/rebuild' -- $argv
+set workspaces_root ~/src
+mkdir -p $workspaces_root
 
-if set -q argv[1]
-  set branch $argv[1]
-else if set -q _flag_rebuild
-  set branch (workspace -v) || exit 1
-else
+function _fail
+  _warn $argv
   exit 1
 end
 
-set root $HOME/src
-set repos odoo enterprise
-
-# check if branch exist on origin
-for i in $root/master/$repos
-  git -C $i rev-parse --quiet --verify origin/$branch >/dev/null || exit 1
+function _warn
+  set_color red
+  echo $argv 1>&2
+  set_color normal
 end
 
-for d in $root/$branch/$repos
-  if set -q _flag_rebuild
-    test -d $d || exit 2
+function init
+  test -d $workspaces_root/master && _fail 'master already exists'
+  mkdir $workspaces_root/master
+  cd $workspaces_root/master
+  _install_system_dependencies
+  for i in odoo enterprise design-themes
+    git clone git@github.com:odoo/$i.git
+    git -C $i checkout master
+  end
+  git clone git@github.com:odoo-ide/odoo-stubs.git
+  _create_venv --root=$workspaces_root/master
+end
+
+function add
+  set -q argv[1] || _fail 'missing version'
+  set workspace_root $workspaces_root/$argv[1]
+  test -d $workspace_root && _fail 'worktree already exists'
+  mkdir $workspace_root
+  cd $workspace_root
+  for i in odoo enterprise design-themes odoo-stubs
+    if test $i = odoo-stubs
+      set odoo_major_version (rg -o '^version_info = \((\d+),' -r '$1' odoo/odoo/release.py) || set odoo_major_version 15
+      set branch $odoo_major_version.0
+    else
+      set branch $argv[1]
+    end
+    set dest_repo $workspace_root/$i
+    git -C $workspaces_root/master/$i worktree add --checkout -f $dest_repo origin/$branch || _warn "Failed to add worktree for $i"
+  end
+  _create_venv --root=$workspace_root
+end
+
+function _install_system_dependencies
+  if not yay -Qq wkhtmltox &> /dev/null
+    wget -O /tmp/wkhtmltox.pkg.tar.gz https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6-3/wkhtmltox-0.12.6-3.archlinux-x86_64.pkg.tar.xz
+    yay -U /tmp/wkhtmltox.pkg.tar.gz
+    rm /tmp/wkhtmltox.pkg.tar.gz
+  end
+  for dep in libxcrypt-compat postgresql-libs libldap
+    yay -Qq $dep &> /dev/null || yay -S $dep
+  end
+  test -f /usr/lib64/libldap_r.so || echo 'INPUT ( libldap.so )' | sudo tee /usr/lib64/libldap_r.so > /dev/null
+end
+
+function _source_asdf
+  if not type -q asdf
+    if not test -f /opt/asdf-vm/asdf.fish
+      yay -S asdf-vm
+    end
+    test -f /opt/asdf-vm/asdf.fish && source /opt/asdf-vm/asdf.fish || _fail "Couldn't load asdf"
+  end
+end
+
+function _create_venv
+  _source_asdf
+  argparse 'root=' -- $argv
+  test -d $_flag_root || _fail "Root doesn't exist"
+  pushd $_flag_root
+  set odoo_major_version (rg -o '^version_info = \((\d+),' -r '$1' odoo/odoo/release.py) || set odoo_major_version 15
+  if test "$odoo_major_version" -le 13
+    set python_version '3.8.13'
   else
-    test -d $d && exit 2
-    mkdir -p $d
+    set python_version '3.9.13'
   end
+  asdf plugin list | string match -q python || asdf plugin add python || _fail 'Failed to install python plugin'
+  asdf list python | string match -q "*$python_version" || asdf install python $python_version || _fail "Failed to install python $python_version"
+  asdf local python $python_version
+  virtualenv venv --python=(asdf which python)
+  source venv/bin/activate.fish
+  pip install --upgrade pip
+  set blacklist vatnumber
+  set dependencies (cat odoo/requirements.txt | string match -vr (string join '|' -- $blacklist))
+  set -a dependencies pydevd-pycharm==(fd -td '^\d+\.\d+\.\d+$' ~/.local/share/JetBrains/Toolbox/apps/PyCharm-P/ch-0 -d1 -x echo '{/}' | sort -r | head -1)
+  set -a dependencies websocket-client ptpython
+  pip install -r (string join \n $dependencies | psub -s .txt)
+  popd
 end
 
-if not set -q _flag_rebuild
-  for i in $repos
-    git -C $root/master/$i worktree add $root/$branch/$i origin/$branch
-  end
-end
-
-if not type -q asdf
-  echo asdf not installed
-  exit 1
-end
-
-asdf plugin list | string match -q python || asdf plugin add python
-
-cd $root/$branch
-set odoo_major_version (rg -o '^version_info = \((\d+),' -r '$1' odoo/odoo/release.py) || set odoo_major_version 15
-
-if test "$odoo_major_version" -le 13
-  set python_version '3.8.13'
-else
-  set python_version '3.9.13'
-end
-
-asdf list python | string match -q "*$python_version" || asdf install python $python_version
-
-asdf local python $python_version
-
-set venv_name venv
-set -q _flag_rebuild && test -d $venv_name && rm -r $venv_name
-virtualenv $venv_name --python=(asdf which python)
-source $venv_name/bin/activate.fish
-pip install --upgrade pip
-set blacklist vatnumber
-set dependencies (cat odoo/requirements.txt | string match -vr (string join '|' -- $blacklist))
-set -a dependencies pydevd-pycharm==(fd -td '^\d+\.\d+\.\d+$' ~/.local/share/JetBrains/Toolbox/apps/PyCharm-P/ch-0 -d1 -x echo '{/}' | sort -r | head -1)
-set -a dependencies websocket-client
-pip install -r (string join \n $dependencies | psub -s .txt)
+string match -qv '_*' "$argv[1]" && functions -q "$argv[1]" && $argv
