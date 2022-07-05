@@ -46,6 +46,12 @@ function add
   _create_venv --root=$workspace_root
 end
 
+function rebuild
+  set ws (workspace -p) || _fail 'Not inside a workspace'
+  rm -r $ws/venv
+  _create_venv --root=$ws
+end
+
 function _install_system_dependencies
   if not yay -Qq wkhtmltox &> /dev/null
     wget -O /tmp/wkhtmltox.pkg.tar.gz https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6-3/wkhtmltox-0.12.6-3.archlinux-x86_64.pkg.tar.xz
@@ -87,7 +93,7 @@ function _create_venv
   set blacklist vatnumber
   set dependencies (cat odoo/requirements.txt | string match -vr (string join '|' -- $blacklist))
   set -a dependencies pydevd-pycharm==(fd -td '^\d+\.\d+\.\d+$' ~/.local/share/JetBrains/Toolbox/apps/PyCharm-P/ch-0 -d1 -x echo '{/}' | sort -r | head -1)
-  set -a dependencies websocket-client ptpython
+  set -a dependencies websocket-client ptpython mock pydevd-odoo
   pip install -r (string join \n $dependencies | psub -s .txt)
   popd
 end
