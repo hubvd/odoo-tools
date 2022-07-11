@@ -14,6 +14,10 @@ function _warn
   set_color normal
 end
 
+function _get_major_version
+  rg -o '^version_info = \((?:[\'"]saas~)?(\d+)[\'"]?,' -r '$1' $argv[1]
+end
+
 function init
   test -d $workspaces_root/master && _fail 'master already exists'
   mkdir $workspaces_root/master
@@ -35,7 +39,7 @@ function add
   cd $workspace_root
   for i in odoo enterprise design-themes odoo-stubs
     if test $i = odoo-stubs
-      set odoo_major_version (rg -o '^version_info = \((\d+),' -r '$1' odoo/odoo/release.py) || set odoo_major_version 15
+      set odoo_major_version (_get_major_version odoo/odoo/release.py)
       set branch $odoo_major_version.0
     else
       set branch $argv[1]
@@ -78,7 +82,7 @@ function _create_venv
   argparse 'root=' -- $argv
   test -d $_flag_root || _fail "Root doesn't exist"
   pushd $_flag_root
-  set odoo_major_version (rg -o '^version_info = \((\d+),' -r '$1' odoo/odoo/release.py) || set odoo_major_version 15
+  set odoo_major_version (_get_major_version odoo/odoo/release.py)
   if test "$odoo_major_version" -le 13
     set python_version '3.8.13'
   else
