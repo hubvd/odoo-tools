@@ -70,7 +70,11 @@ if set -q _flag_test_tags
   set default_max_cron_thread 0
   set default_stop_after_init
   set default_http_port 9000
-  set default_longpolling_port 9001
+end
+
+if set -q default_http_port || set -q _flag_http_port
+  set port $_flag_http_port $_default_http_port
+  set default_longpolling_port (math "$port + 1")
 end
 
 if set -q _flag_test_enable || set -q default_test_enable
