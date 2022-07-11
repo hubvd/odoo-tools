@@ -1,0 +1,19 @@
+#!/bin/fish
+
+set ws_root (workspace -p)
+set ws_version (workspace -v)
+set -q argv[1] || exit 1
+if not string match -rq '\d{4}-\d{2}-\d{2}' -- $argv[1]
+  echo argv[1] format should be yyyy-mm-dd
+  exit 1
+end
+
+set checkout_date "$argv[1] 00:00"
+
+function g --inherit-variable ws_root
+  git -C $ws_root/$argv[1] $argv[2..]
+end
+
+for i in odoo enterprise
+  g $i checkout (g $i rev-list -n 1 --first-parent --before=$checkout_date $ws_version)
+end
