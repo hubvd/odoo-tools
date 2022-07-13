@@ -8,13 +8,12 @@ function validate_workspace
   test -f $argv[1]/odoo/odoo-bin
 end
 
+function sort_workspaces
+  string join \n $argv | string replace -r '(saas-)?([\d.]+)' '$2:$1$2' | string replace master 999:master | sort | string replace -r '.*:(.*)' '$1'
+end
+
 if set -q _flag_l
-  set workspaces (find $root -mindepth 1 -maxdepth 1 -type d | string replace -a $root/ '' | sort)
-  if contains master $workspaces
-    set -e workspaces[(contains -i master $workspaces)]
-    set -a workspaces master
-  end
-  for i in $workspaces
+  for i in (sort_workspaces (find $root -mindepth 1 -maxdepth 1 -type d | string replace -a $root/ ''))
     if validate_workspace $root/$i
       set -q _flag_version && echo $i || echo $root/$i
     end
@@ -22,7 +21,7 @@ if set -q _flag_l
   exit 0
 end
 
-test (count $argv) -eq 1 && set wd (realpath $argv[1]) || set wd $PWD
+test (count $argv) -eq 1 && set wd (realpath $argv[1]) || set wd (realpath $PWD)
 
 # If not inside a directory inside root -> fail
 string match -rq "^$root/.*" $wd || exit 1
