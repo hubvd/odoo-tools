@@ -11,7 +11,7 @@
 
 window.addEventListener('load', () => {
   const login = document.querySelector('button[type="submit"]')
-  for (let text of ['admin', 'demo']) {
+  for (let text of ['admin', 'demo', 'portal']) {
     const el = document.createElement('button')
     el.innerText = text
     el.classList.add('btn', 'btn-info', 'btn-block')
