@@ -32,8 +32,13 @@ function init
 end
 
 function add
+  argparse 'n/name=' -- $argv
   set -q argv[1] || _fail 'missing version'
-  set workspace_root $workspaces_root/$argv[1]
+  if set -q _flag_name
+    set workspace_root $workspaces_root/$_flag_name
+  else
+    set workspace_root $workspaces_root/$argv[1] 
+  end
   test -d $workspace_root && _fail 'worktree already exists'
   mkdir $workspace_root
   cd $workspace_root
@@ -45,7 +50,7 @@ function add
       set branch $argv[1]
     end
     set dest_repo $workspace_root/$i
-    git -C $workspaces_root/master/$i worktree add --checkout -f $dest_repo origin/$branch || _warn "Failed to add worktree for $i"
+    git -C $workspaces_root/master/$i worktree add -f $dest_repo origin/$branch || _warn "Failed to add worktree for $i"
   end
   _create_venv --root=$workspace_root
 end
@@ -54,6 +59,12 @@ function rebuild
   set ws (workspace -p) || _fail 'Not inside a workspace'
   rm -r $ws/venv
   _create_venv --root=$ws
+end
+
+function prune
+  for i in odoo enterprise design-themes odoo-stubs
+    test -d $workspaces_root/master/$i && git -C $workspaces_root/master/$i worktree prune
+  end
 end
 
 function _install_system_dependencies
