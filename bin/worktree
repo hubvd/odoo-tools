@@ -46,6 +46,9 @@ function add
     if test $i = odoo-stubs
       set odoo_major_version (_get_major_version odoo/odoo/release.py)
       set branch $odoo_major_version.0
+      if test $branch = 16.0
+        set branch 15.0
+      end
     else
       set branch $argv[1]
     end
