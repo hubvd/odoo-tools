@@ -3,7 +3,7 @@
 set odoo_databases (workspace -l | xargs -l basename){,-test}
 
 psql -Atqwl | while read -d'|' -l db user others
-    if test "$user" = $USER && contains $db $odoo_databases
+    if test "$user" = $USER -o "$user" = odoo && contains $db $odoo_databases
         dropdb $db
     end
 end
