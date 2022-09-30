@@ -6,11 +6,7 @@
 if set -q argv[1]
   set input (string join ' ' $argv)
 else
-  if test "$XDG_SESSION_TYPE" = wayland
-    set input (wl-paste -p)
-  else
-    set input (command xsel -p)
-  end
+  set input (clip -s)
 end
 
 if string match -rq 'odoo/(?P<repo>.*)#(?P<id>\d+)' $input

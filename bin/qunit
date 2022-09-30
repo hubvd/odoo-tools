@@ -5,7 +5,7 @@ argparse 'p/port=' 'd/debug' -- $argv
 if set -q argv[1]
   set filter (string join ' ' $argv | string escape --style=url)
 else
-  set filter (xsel | string trim | string escape --style=url)
+  set filter (clip | string trim | string escape --style=url)
 end
 
 set debug (set -q _flag_debug && echo assets || echo 0)

@@ -1,0 +1,20 @@
+#!/bin/fish
+
+argparse 's/selection' -- $argv
+
+function is_wayland
+  test "$XDG_SESSION_TYPE" = wayland
+end
+
+if set -q _flag_selection
+  set wl_clipboard_flags -p
+  set xsel_flags -p
+else
+  set xsel_flags -b
+end
+
+if isatty stdin
+  is_wayland && command wl-paste -n $wl_clipboard_flags || command xsel $xsel_flags
+else
+  is_wayland && command wl-copy $wl_clipboard_flags || command xsel $xsel_flags
+end
