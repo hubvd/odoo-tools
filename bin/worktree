@@ -99,8 +99,10 @@ function _create_venv
   set odoo_major_version (_get_major_version odoo/odoo/release.py)
   if test "$odoo_major_version" -le 13
     set python_version '3.8.13'
-  else
+  else if test "$odoo_major_version" -lt 16
     set python_version '3.9.13'
+  else
+    set python_version '3.10.7'
   end
   asdf plugin list | string match -q python || asdf plugin add python || _fail 'Failed to install python plugin'
   asdf list python | string match -q "*$python_version" || asdf install python $python_version || _fail "Failed to install python $python_version"
