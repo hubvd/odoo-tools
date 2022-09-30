@@ -23,6 +23,9 @@ set -a args 'w/db_password='
 set -a args 'r/db_user='
 set -a args 'db_port='
 
+set custom_args community drop
+set -a args $custom_args
+
 set -q PGPASSWORD && set default_db_password $PGPASSWORD
 set -q PGHOST && set default_db_host $PGHOST
 set -q PGUSER && set default_db_user $PGUSER
@@ -30,11 +33,13 @@ set -q PGPORT && set default_db_port $PGPORT
 
 argparse --ignore-unknown $args -- $argv
 
-function default_addons_path
-  for d in odoo/addons enterprise design-themes
+function default_addons_path --inherit-variable _flag_community
+  set addons_paths odoo/addons design-themes
+  set -q _flag_community || set -a addons_paths enterprise
+  for d in $addons_paths
     test -d $root/$d && set -a path $d
   end
-  test -d ~/src/odoo-tools/addons && set -a path ~/src/odoo-tools/addons
+  test -d ~/odoo-tools/addons && set -a path ~/odoo-tools/addons
   string join ',' $path
 end
 
@@ -72,8 +77,18 @@ if set -q _flag_test_tags
   set default_http_port 9000
 end
 
+function get_actual_value --no-scope-shadowing
+  for i in _flag_$argv[1] default_$argv[1]
+    if set -q $i
+      echo $$i
+      return
+    end
+  end
+  return 1
+end
+
 if set -q default_http_port || set -q _flag_http_port
-  set port $_flag_http_port $_default_http_port
+  set port (get_actual_value http_port)
   set default_longpolling_port (math "$port + 1")
 end
 
@@ -81,6 +96,10 @@ if set -q _flag_test_enable || set -q default_test_enable
   set default_database $db-test
 else
   set default_database $db
+end
+
+if set -q _flag_drop
+  set db (get_actual_value database) && dropdb $db &> /dev/null
 end
 
 function to_flag
@@ -109,6 +128,7 @@ end
 # Add every flag and it's value if it has one
 for f in (set -n | string match -r '_flag_\w\w+')
   set name (string replace '_flag_' '' $f)
+  contains $name $custom_args && continue
   set flag_name (to_flag $name)
   set -a odoo_args (test $flag_name = $$f && echo $flag_name || echo $flag_name=$$f)
 end
@@ -127,19 +147,15 @@ end
 set -a odoo_args $argv
 
 cd $root
-if isatty stdout
-  echo -sn (set_color -o) odoo (set_color normal) ' '
-  echo $odoo_args
+if isatty stdout && not set -q _flag_help
+  set_color -uo cyan
+  # echo -sn (set_color -o) odoo (set_color normal) ' '
+  echo odoo $odoo_args
+  set_color normal
 end
 
 set cmd venv/bin/python odoo/odoo-bin $odoo_args
-
-if isatty stdout && not set -q command && not set -q _flag_help && type -q odoopretty
-  set -a cmd "&|" odoopretty
-end
-
 set -a cmd '; set odoo_status $pipestatus[1]'
-
 eval $cmd
 
 # Send a notification once the tests are done
