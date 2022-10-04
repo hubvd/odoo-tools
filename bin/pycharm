@@ -17,7 +17,7 @@ if set -q argv[1]
     exit $status
 end
 
-set choice (workspace -p) || set choice (dmenu -p pycharm $workspaces)
+set choice (workspace -p) || set choice (string join \n $workspaces | bemenu -p pycharm)
 
 if test -d "$choice"
     open $choice

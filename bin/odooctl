@@ -1,0 +1,23 @@
+#!/bin/fish
+
+function _pids
+  string join \n (pgrep -f 'python odoo/odoo-bin')
+end
+
+function _get_port_from_pid
+  ss -H -tlnp | string match -rg ':(\d+).*'$argv[1]
+end
+
+function _get_database
+  cat /proc/$argv[1]/cmdline | tr '\0' \n | string match -rg  -- '--database=(.*)'
+end
+
+function running
+  for pid in (_pids)
+    set port (_get_port_from_pid $pid)
+    set db (_get_database $pid)
+    string join : $pid $port $db
+  end
+end
+
+string match -qv '_*' "$argv[1]" && functions -q "$argv[1]" && $argv
