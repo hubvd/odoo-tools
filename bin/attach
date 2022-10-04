@@ -30,5 +30,5 @@ set curl_status (timeout 2s curl -o /dev/null -s -w "%{http_code}\n" $url)
 if not string match -q "2*" $curl_status
   error 'An error occurred..'
 else
-  success 'Attached succesfuly'
+  success 'Attached successfully'
 end
