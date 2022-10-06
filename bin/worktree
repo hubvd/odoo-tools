@@ -97,9 +97,18 @@ function _generate_requirements
   set pycharm_version (fd -td '^\d+\.\d+\.\d+$' ~/.local/share/JetBrains/Toolbox/apps/PyCharm-P/ch-0 -d1 -x echo '{/}' | sort -r | head -1)
   set -a dependencies pydevd-pycharm==$pycharm_version
   set -a dependencies websocket-client ptpython mock pydevd-odoo
-  if set -l index (contains -i -- pyopenssl==19.0.0 $dependencies)
-    set dependencies[$index] pyopenssl==22.0.0
+
+  for replacement in pyopenssl==22.0.0 cryptography==35.0.0
+    echo $replacement | read -d== name version
+    for dependency in $dependencies
+      if string match -q "$name*" $dependency
+        set index (contains -i -- $dependency $dependencies)
+        set -e dependencies[$index]
+      end
+    end
+    set -a dependencies $replacement
   end
+
   string join \n $dependencies
 end
 
