@@ -91,6 +91,18 @@ function _source_asdf
   end
 end
 
+function _generate_requirements
+  set blacklist vatnumber
+  set dependencies (cat odoo/requirements.txt | string match -vr (string join '|' -- $blacklist))
+  set pycharm_version (fd -td '^\d+\.\d+\.\d+$' ~/.local/share/JetBrains/Toolbox/apps/PyCharm-P/ch-0 -d1 -x echo '{/}' | sort -r | head -1)
+  set -a dependencies pydevd-pycharm==$pycharm_version
+  set -a dependencies websocket-client ptpython mock pydevd-odoo
+  if set -l index (contains -i -- pyopenssl==19.0.0 $dependencies)
+    set dependencies[$index] pyopenssl==22.0.0
+  end
+  string join \n $dependencies
+end
+
 function _create_venv
   _source_asdf
   argparse 'root=' -- $argv
@@ -110,11 +122,7 @@ function _create_venv
   virtualenv venv --python=(asdf which python)
   source venv/bin/activate.fish
   pip install --upgrade pip
-  set blacklist vatnumber
-  set dependencies (cat odoo/requirements.txt | string match -vr (string join '|' -- $blacklist))
-  set -a dependencies pydevd-pycharm==(fd -td '^\d+\.\d+\.\d+$' ~/.local/share/JetBrains/Toolbox/apps/PyCharm-P/ch-0 -d1 -x echo '{/}' | sort -r | head -1)
-  set -a dependencies websocket-client ptpython mock pydevd-odoo
-  pip install -r (string join \n $dependencies | psub -s .txt)
+  pip install -r (_generate_requirements | psub -s .txt)
   popd
 end
 
