@@ -12,6 +12,14 @@ function _get_database
   cat /proc/$argv[1]/cmdline | tr '\0' \n | string match -rg  -- '--database=(.*)'
 end
 
+function instances
+  running
+end
+
+function killall
+  kill (_pids)
+end
+
 function running
   for pid in (_pids)
     set port (_get_port_from_pid $pid)

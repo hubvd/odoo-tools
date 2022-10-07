@@ -23,7 +23,7 @@ set -a args 'w/db_password='
 set -a args 'r/db_user='
 set -a args 'db_port='
 
-set custom_args community drop
+set custom_args community drop test-qunit= failslow
 set -a args $custom_args
 
 set -q PGPASSWORD && set default_db_password $PGPASSWORD
@@ -32,6 +32,13 @@ set -q PGUSER && set default_db_user $PGUSER
 set -q PGPORT && set default_db_port $PGPORT
 
 argparse --ignore-unknown $args -- $argv
+
+if set -q _flag_test_qunit
+  if set -q _flag_test_tags
+    exit 1 # TODO
+  end
+  set default_test_tags /qunit.test_qunit
+end
 
 function default_addons_path --inherit-variable _flag_community
   set addons_paths odoo/addons design-themes
@@ -43,7 +50,13 @@ function default_addons_path --inherit-variable _flag_community
   string join ',' $path
 end
 
-function default_init --inherit-variable _flag_test_tags
+function default_init --inherit-variable _flag_test_tags --inherit-variable _flag_test_qunit
+  # TODO: scan all paths in addons_path
+  if set -q _flag_test_qunit
+    echo qunit
+    return
+  end
+
   set -q _flag_test_tags || return
   for tag in (string split ',' $_flag_test_tags)
     set -e module class method pattern
@@ -69,7 +82,7 @@ end
 set default_limit_time_cpu 99999
 set default_limit_time_real 99999
 
-if set -q _flag_test_tags
+if set -q _flag_test_tags || set -q _flag_test_qunit
   set default_test_enable
   set default_log_level test
   set default_max_cron_thread 0
@@ -126,9 +139,10 @@ for f in (functions -n | string match 'default_*')
 end
 
 # Add every flag and it's value if it has one
+set custom_args_names (string replace -r '=.*' '' $custom_args | string replace -a '-' _)
 for f in (set -n | string match -r '_flag_\w\w+')
   set name (string replace '_flag_' '' $f)
-  contains $name $custom_args && continue
+  contains $name $custom_args_names && continue
   set flag_name (to_flag $name)
   set -a odoo_args (test $flag_name = $$f && echo $flag_name || echo $flag_name=$$f)
 end
@@ -156,6 +170,15 @@ end
 
 set cmd venv/bin/python odoo/odoo-bin $odoo_args
 set -a cmd '; set odoo_status $pipestatus[1]'
+
+if set -q _flag_test_qunit
+  set -p cmd QUNIT_FILTER="'$_flag_test_qunit'"
+end
+
+if set -q _flag_failslow
+  set -p cmd QUNIT_FAILFAST=0
+end
+
 eval $cmd
 
 # Send a notification once the tests are done
