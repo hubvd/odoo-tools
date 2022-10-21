@@ -29,7 +29,11 @@ class WebSuite(odoo.tests.HttpCase):
         filter = os.environ.get("QUNIT_FILTER", "!punjabi (gurmukhi) has the correct numbering system")
         url += f"&filter={filter}"
 
-        if odoo.release.version_info[0] >= 16:
+        version = odoo.release.version_info[0]
+        if isinstance(version, str):
+            version = int(version.lstrip("saas~"))
+
+        if version >= 16:
             self.browser_js(url, "", "", login='admin', timeout=1800, error_checker=qunit_error_checker)
         else:
             self.browser_js(url, "", "", login='admin', timeout=1800)
