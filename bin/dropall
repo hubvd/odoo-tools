@@ -1,9 +1,7 @@
 #!/usr/bin/fish
 
-set odoo_databases (workspace -l | xargs -l basename){,-test}
+set dbs (workspace -l | xargs -l basename){,-test}
+set dbs (string replace -r '^' "'" $dbs | string replace -r '$' "'")
 
-psql -Atqwl | while read -d'|' -l db user others
-    if test "$user" = $USER -o "$user" = odoo && contains $db $odoo_databases
-        dropdb $db
-    end
-end
+psql -Atc "select datname from pg_database where datistemplate = false and datname in ($(string join , $dbs))" |
+    xargs -n 1 -r dropdb

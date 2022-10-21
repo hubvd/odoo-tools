@@ -1,6 +1,6 @@
 #!/bin/fish
 
-set instances (odooctl running)
+set instances (odooctl instances)
 
 function error
   notify-send -h string:frcolor:#FF0000 $argv

@@ -1,4 +1,4 @@
-#!/usr/bin/fish
+#!/usr/bin/fish -N
 
 argparse 'v/version' 'p/path' 'l/list' 'r/repo' -- $argv
 
@@ -21,7 +21,7 @@ if set -q _flag_l
   exit 0
 end
 
-test (count $argv) -eq 1 && set wd (realpath $argv[1]) || set wd (realpath $PWD)
+test (count $argv) -eq 1 && set wd (realpath $argv[1]) || set wd $PWD
 
 # If not inside a directory inside root -> fail
 string match -rq "^$root/.*" $wd || exit 1

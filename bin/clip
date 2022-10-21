@@ -14,7 +14,15 @@ else
 end
 
 if isatty stdin
-  is_wayland && command wl-paste -n $wl_clipboard_flags || command xsel $xsel_flags
+  if is_wayland
+    command wl-paste -n $wl_clipboard_flags
+  else
+    command xsel $xsel_flags
+  end
 else
-  is_wayland && command wl-copy $wl_clipboard_flags || command xsel $xsel_flags
+  if is_wayland
+    command wl-copy $wl_clipboard_flags
+  else
+    command xsel $xsel_flags
+  end
 end

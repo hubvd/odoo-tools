@@ -1,7 +1,7 @@
 #!/bin/fish
 
 function _pids
-  string join \n (pgrep -f 'python odoo/odoo-bin')
+  pgrep -f 'python odoo/odoo-bin'
 end
 
 function _get_port_from_pid
@@ -12,15 +12,11 @@ function _get_database
   cat /proc/$argv[1]/cmdline | tr '\0' \n | string match -rg  -- '--database=(.*)'
 end
 
-function instances
-  running
-end
-
 function killall
-  kill (_pids)
+  set pids (_pids) && kill $pids
 end
 
-function running
+function instances
   for pid in (_pids)
     set port (_get_port_from_pid $pid)
     set db (_get_database $pid)

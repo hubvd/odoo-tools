@@ -41,8 +41,8 @@ if set -q _flag_test_qunit
 end
 
 function default_addons_path --inherit-variable _flag_community
-  set addons_paths odoo/addons design-themes
-  set -q _flag_community || set -a addons_paths enterprise
+  set addons_paths odoo/addons
+  set -q _flag_community || set -a addons_paths enterprise design-themes
   for d in $addons_paths
     test -d $root/$d && set -a path $d
   end
@@ -117,6 +117,12 @@ end
 
 function to_flag
   switch $argv
+    case longpolling_port
+      if contains (workspace -v) 16.0 master
+        echo --gevent-port
+      else
+        echo --longpolling-port
+      end
     case db_port db_host db_user db_password # TODO
       echo --$argv
     case '*'
