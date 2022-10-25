@@ -41,7 +41,12 @@ function opw
 end
 
 function msg
-  string join \n\n '[FIX] '(modules)':' 'Steps to reproduce:' 'Cause of the issue:' 'Solution:' 'opw-'(opw)
+  set parts '[FIX] '(modules):
+  set -a parts "Steps to reproduce"\n"=================="
+  set -a parts "Cause of the issue"\n"=================="
+  set -a parts Solution\n========
+  set -a parts opw-(opw)
+  string join \n\n $parts
 end
 
 if set -q _flag_amend
