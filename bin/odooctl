@@ -1,7 +1,7 @@
 #!/bin/fish
 
 function _pids
-  pgrep -f 'python odoo/odoo-bin'
+  ps a -o pid,args | string match -rg '^\s+(?P<pid>\d+).*python odoo/odoo-bin (?!shell)'
 end
 
 function _get_port_from_pid
