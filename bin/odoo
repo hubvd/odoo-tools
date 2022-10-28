@@ -112,7 +112,18 @@ else
 end
 
 if set -q _flag_drop
-  set db (get_actual_value database) && dropdb $db &> /dev/null
+  set db (get_actual_value database)
+  if test $status -eq 0
+    set usages (psql -Atc "select pid,application_name from pg_stat_activity where backend_type = 'client backend' and application_name <> 'psql'" $db 2>/dev/null)
+    if test $status -ne 0 -o (count $usages) -eq 0
+      dropdb $db &> /dev/null
+      set d ~/.local/share/Odoo/filestore/$db
+      test -n "$d" -a -d $d && rm -r $d
+    else
+      echo "database $db is used by $(string join , $usages)"
+      exit 1
+    end
+  end
 end
 
 function to_flag
@@ -178,7 +189,7 @@ set cmd venv/bin/python odoo/odoo-bin $odoo_args
 set -a cmd '; set odoo_status $pipestatus[1]'
 
 if set -q _flag_test_qunit
-  set -p cmd QUNIT_FILTER="'$_flag_test_qunit'"
+  set -p cmd QUNIT_FILTER="'$(string escape --style=url -- $_flag_test_qunit)'"
 end
 
 if set -q _flag_failslow
