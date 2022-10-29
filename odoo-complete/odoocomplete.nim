@@ -13,6 +13,10 @@ type
   Addon = tuple
     name: string
     path: string
+  Ctag = tuple
+    name: string
+    scope: Option[string]
+    scopeKind: Option[string]
 
 proc newCompletion(names: seq[string], provider: string -> seq[
     string]): Completion =
@@ -72,6 +76,14 @@ proc parseTestTag(tag: string): TestTag =
     append()
   result = (parts[0].get(""), parts[1], parts[2], parts[3])
 
+iterator ctags(path: string, symbols: string): Ctag =
+  for line in execProcess(
+    "ctags",
+    args = ["--kinds-Python=" & symbols, "--recurse", "--output-format=json", path],
+    options = {poUsePath}
+  ).strip(leading = false).split("\n"):
+    yield parseJson(line).to(Ctag)
+
 proc completeTestTags(token: string): seq[string] =
   let tags = token.split(',')
   let lastTag = tags[^1]
@@ -79,7 +91,6 @@ proc completeTestTags(token: string): seq[string] =
   if tags.len > 1:
     previousTags = tags[0..tags.len - 2].join(",") & ','
 
-  # FIXME: clean this mess
   let (prefix, module, class, def) = parseTestTag(lastTag)
 
   var addonPath: string
@@ -94,36 +105,20 @@ proc completeTestTags(token: string): seq[string] =
       result.add(previousTags & prefix & '/' & i.name)
   elif module.isSome and def.isNone:
     if addonPath == "": return
-    for line in execProcess("ctags", args = ["--kinds-Python=c", "--recurse",
-        "--output-format=json", addonPath / "tests/"], options = {
-            poUsePath}).strip(
-        leading = false).split("\n"):
-      let json = parseJson(line)
-      result.add(previousTags & prefix & '/' & module.get & ':' & json["name"].getStr)
+    for ctag in ctags(addonPath / "tests", "c"):
+      result.add(previousTags & prefix & '/' & module.get & ':' & ctag.name)
   elif module.isSome:
     if addonPath == "": return
     if class.isNone:
-      for line in execProcess("ctags", args = ["--kinds-Python=f", "--recurse",
-          "--output-format=json", addonPath / "tests/"], options = {
-              poUsePath}).strip(
-          leading = false).split("\n"):
-        let json = parseJson(line)
-        let name = json["name"].getStr
-        if name.startsWith("test_"):
-          result.add(previousTags & prefix & '/' & module.get & '.' & name)
+      for ctag in ctags(addonPath / "tests", "f"):
+        if ctag.name.startsWith("test_"):
+          result.add(previousTags & prefix & '/' & module.get & '.' & ctag.name)
     else:
-      for line in execProcess("ctags", args = ["--kinds-Python=cmf",
-          "--recurse", "--output-format=json", addonPath / "tests/"],
-          options = {poUsePath}).strip(
-          leading = false).split("\n"):
-        let json = parseJson(line)
-        let name = json["name"].getStr
-        if name.startsWith("test_") and json.contains("scopeKind") and json[
-            "scopeKind"].getStr == "class" and json.contains("scope") and json[
-            "scope"].getStr == class.get:
+      for (name, scope, scopeKind) in ctags(addonPath / "tests", "cfm"):
+        if name.startsWith("test_") and scopeKind.get("") == "class" and
+            scope.get("") == class.get:
           result.add(previousTags & prefix & '/' & module.get & ':' &
               class.get & '.' & name)
-
 
 proc completeQUnitTests(): seq[string] =
   execProcess(
