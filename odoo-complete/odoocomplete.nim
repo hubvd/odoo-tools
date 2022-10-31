@@ -66,13 +66,13 @@ proc parseTestTag(tag: string): TestTag =
   var idx: int
   var current: string
   proc append() =
-    parts[idx + 1] = some(current)
+    parts[idx] = some(current)
     current = ""
 
   const seps = ['/', ':', '.']
   for (token, isSep) in tag.tokenize({'/', ':', '.'}):
     if not isSep: current = token
-    else: idx = seps.find(token[0])
+    else: idx = seps.find(token[0]) + 1
     append()
   result = (parts[0].get(""), parts[1], parts[2], parts[3])
 
