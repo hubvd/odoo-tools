@@ -1,6 +1,6 @@
 #!/usr/bin/fish
 
-set dbs (workspace -l | xargs -l basename){,-test}
+set dbs (worktree names){,-test}
 set dbs (string replace -r '^' "'" $dbs | string replace -r '$' "'")
 
 psql -Atc "select datname from pg_database where datistemplate = false and datname in ($(string join , $dbs))" |

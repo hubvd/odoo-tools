@@ -1,4 +1,5 @@
 #!/bin/fish
 
-set o_version (workspace -v || exit 1)
+worktree repository &> /dev/null || exit 1
+set o_version (worktree base || exit 1)
 git pull origin "$o_version" --rebase

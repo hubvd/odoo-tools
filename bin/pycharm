@@ -1,6 +1,5 @@
 #!/usr/bin/fish
 
-set workspaces (workspace -l)
 set pycharm_bin (fd pycharm.sh ~/.local/share/JetBrains/Toolbox/apps/PyCharm-P/ch-0/*/bin | sort -r | head -n1)
 
 if not test -f $pycharm_bin
@@ -13,11 +12,16 @@ function open
 end
 
 if set -q argv[1]
-    open $argv
+    set parts (string split '#' -- (string replace -r '\.pycharm$' '' -- $argv[1]))
+    if set -q parts[2]
+        open --line $parts[2] $parts[1]
+    else
+        open $parts[1]
+    end
     exit $status
 end
 
-set choice (workspace -p) || set choice (string join \n $workspaces | bemenu -p pycharm)
+set choice (worktree path) || set choice (worktree paths | bemenu -p pycharm)
 
 if test -d "$choice"
     open $choice

@@ -1,10 +1,12 @@
 #!/bin/fish
 
+worktree repository &>/dev/null || exit 1
+
 argparse 'v/version' -- $argv
 
 if set -q _flag_version
   set remote origin
-  set branch (workspace -v) || exit 1
+  set branch (worktree base) || exit 1
 else 
   set input (set -q argv[1] && echo $argv[1] || clip)
   set values (string split : $input)

@@ -7,7 +7,7 @@ end
 argparse 'd/database=' -- $argv
 
 if not set -q _flag_database
-  set _flag_database (workspace -v) || exit 1
+  set _flag_database (worktree name || worktree default name) || exit 1
 end
 
 # queries

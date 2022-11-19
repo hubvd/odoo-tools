@@ -19,14 +19,14 @@ def qunit_error_checker(message):
 
 @odoo.tests.tagged('post_install', '-at_install')
 class WebSuite(odoo.tests.HttpCase):
+    url = "/web/tests?mod=web"
 
     def test_qunit(self):
-        url = "/web/tests?mod=web"
-
+        url = self.url
         if os.environ.get("QUNIT_FAILFAST", "1") == "1":
             url += "&failfast"
 
-        filter = os.environ.get("QUNIT_FILTER", "!punjabi (gurmukhi) has the correct numbering system")
+        filter = os.environ.get("QUNIT_FILTER", "!Numbering system")
         url += f"&filter={filter}"
 
         version = odoo.release.version_info[0]
@@ -34,6 +34,13 @@ class WebSuite(odoo.tests.HttpCase):
             version = int(version.lstrip("saas~"))
 
         if version >= 16:
-            self.browser_js(url, "", "", login='admin', timeout=1800, error_checker=qunit_error_checker)
+            watch = os.environ.get("QUNIT_WATCH") == "1"
+            self.browser_js(url, "", "", login='admin', timeout=1800, error_checker=qunit_error_checker, watch=watch)
         else:
             self.browser_js(url, "", "", login='admin', timeout=1800)
+
+@odoo.tests.tagged('post_install', '-at_install')
+class WebSuiteMobile(WebSuite):
+    url = "/web/tests/mobile?mod=web"
+    browser_size = '375x667'
+    touch_enabled = True

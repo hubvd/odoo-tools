@@ -9,7 +9,7 @@ function modules --inherit _flag_amend
   set -a files (git status --porcelain | rg '^[AMRDC]+\s+(?P<path>.*)' -or'$1')
   for file in $files
     set parts (string split / $file)
-    switch (workspace -r)
+    switch (worktree repository)
       case 'odoo'
         if test "$parts[1]" = "addons" && set -q parts[2] && not contains $parts[2] $modules
           set -a modules $parts[2]

@@ -158,7 +158,12 @@ let completions = [
   newCompletion(@["--stop-after-init"]),
   newCompletion(@["-h", "--help"]),
   newCompletion(@["--community"]),
+  newCompletion(@["--mobile"]),
   newCompletion(@["--failslow"]),
+  newCompletion(@["--watch"]),
+  newCompletion(@["--dry-run"]),
+  newCompletion(@["--no-patch"]),
+  newCompletion(@["--addons-path"], true),
 ]
 
 var completed = false
