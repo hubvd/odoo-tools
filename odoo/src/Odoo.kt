@@ -4,7 +4,6 @@ import com.github.ajalt.mordant.rendering.AnsiLevel
 import com.github.ajalt.mordant.terminal.Terminal
 import com.github.hubvd.odootools.config.Config
 import com.github.hubvd.odootools.odoo.commands.LaunchCommand
-import com.github.hubvd.odootools.odoo.TestTag
 import com.github.hubvd.odootools.workspace.WorkspaceConfig
 import com.github.hubvd.odootools.workspace.Workspaces
 import com.github.pgreze.process.Redirect
@@ -51,15 +50,16 @@ fun LaunchCommand.computes() {
 
     depends("test-tags", "test-qunit") {
         flag("test-enable") { "test-tags" in options || "test-qunit" in options }
+    }
 
+    depends("test-qunit", "test-tags", "addons-path") {
         option("init") {
             if ("test-qunit" in options) return@option "qunit"
             val testTags = options["test-tags"] ?: return@option null
             testTags
                 .splitToSequence(',')
                 .filter { !it.startsWith('-') }
-                .map { TestTag(it) }
-                .flatMap { it.toAddons(workspace) }
+                .flatMap { TestTag(it).toAddons(workspace, options["addons-path"]) }
                 .joinToString(",")
         }
     }

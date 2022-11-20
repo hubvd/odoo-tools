@@ -5,6 +5,7 @@ import com.github.pgreze.process.Redirect
 import com.github.pgreze.process.process
 import kotlinx.coroutines.runBlocking
 import kotlin.io.path.Path
+import kotlin.io.path.div
 import kotlin.io.path.name
 
 data class TestTag(val module: String?, val clazz: String?, val method: String?) {
@@ -20,7 +21,7 @@ data class TestTag(val module: String?, val clazz: String?, val method: String?)
     }
 }
 
-fun TestTag.toAddons(workspace: Workspace): List<String> {
+fun TestTag.toAddons(workspace: Workspace, addonsPath: String?): List<String> {
     if (module != null) return listOf(module)
     val rgArg = mutableListOf("-g", "**/tests/**/test_*.py", "--no-config", "-l")
     when {
@@ -42,7 +43,22 @@ fun TestTag.toAddons(workspace: Workspace): List<String> {
             return emptyList()
         }
     }
-    rgArg += workspace.path.toString() // TODO: addons-path
+    if (addonsPath != null) {
+        addonsPath.splitToSequence(',')
+            .map { value ->
+                Path(
+                    when {
+                        value.startsWith("~/") -> value.replaceRange(0..1, System.getProperty("user.home") + "/")
+                        value == "~" -> System.getProperty("user.home")
+                        else -> value
+                    }
+                )
+            }
+            .map { path -> if (path.isAbsolute) path else workspace.path / path }
+            .forEach { rgArg += it.toString() }
+    } else {
+        rgArg += workspace.path.toString()
+    }
     val matches = runBlocking {
         process("rg", *rgArg.toTypedArray(), stdout = Redirect.CAPTURE, stderr = Redirect.SILENT).output
     }
