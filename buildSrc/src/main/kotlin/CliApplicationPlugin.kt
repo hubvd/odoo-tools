@@ -25,6 +25,10 @@ class CliApplicationPlugin : Plugin<Project> {
 
         val extension = project.extensions.create<CliApplicationPluginExtension>("cli")
 
+        project.tasks.getByName("build") {
+            dependsOn("nativeCompile")
+        }
+
         project.afterEvaluate {
             project.extensions.configure<GraalVMExtension>("graalvmNative") {
                 testSupport.set(false)

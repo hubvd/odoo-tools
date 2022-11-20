@@ -7,8 +7,10 @@ repositories {
 }
 
 java {
-    targetCompatibility = JavaVersion.toVersion(17)
-    sourceCompatibility = JavaVersion.toVersion(17)
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(19))
+        vendor.set(JvmVendorSpec.GRAAL_VM)
+    }
 }
 
 tasks.withType<JavaCompile> {

@@ -17,7 +17,7 @@ tasks.withType<Test> {
 
 tasks.withType<KotlinCompile> {
     kotlinOptions {
-        jvmTarget = "17"
+        jvmTarget = "19"
         javaParameters = true
         freeCompilerArgs = listOf("-Xcontext-receivers")
     }
