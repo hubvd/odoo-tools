@@ -1,0 +1,39 @@
+#!/bin/fish
+
+set root (path normalize (status dirname)/../lint)
+
+function _relativize
+  set rel (realpath --relative-to $root $PWD)
+  for path in $argv
+    switch $path
+      case '-*' '/*'
+        echo $path
+      case '*'
+        echo $rel/$path
+    end
+  end
+end
+
+function _run
+  set exe $root/node_modules/.bin/$argv[1]
+  test -f $exe || exit 1
+  env -C $root $exe (_relativize $argv[2..])
+end
+
+function lint
+  set js_files (string match '*.js' $argv)
+  and set -q js_files[1]
+  and _run eslint $js_files
+end
+
+function fix
+  set js_files (string match '*.js' $argv)
+  and set -q js_files[1]
+  and _run eslint --fix $js_files
+end
+
+if string match -qv '_*' "$argv[1]" && functions -q "$argv[1]"
+  $argv
+else
+  lint $argv
+end
