@@ -1,0 +1,10 @@
+#!/bin/fish
+
+function prs -a repo
+  gh pr list -R odoo/$repo --json title,url,headRefName --search 'involves:@me' --state open |
+  jq '.[] | select(.headRefName | contains("huvw")) | {title, url, branch: .headRefName}'
+end
+
+for repo in odoo enterprise
+  prs $repo
+end
