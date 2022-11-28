@@ -70,7 +70,12 @@ class Workspaces(private val config: WorkspaceConfig) {
         val worktrees = (mainRepository / ".git/worktrees").toFile().listFiles() ?: emptyArray()
         return buildList(capacity = worktrees.size + 1) {
             add(mainRepository)
-            worktrees.forEach { add(Path((it.toPath() / "gitdir").readText().trimEnd()).parent) }
+            worktrees.forEach {
+                Path((it.toPath() / "gitdir").readText().trimEnd())
+                    .takeIf { it.exists() }
+                    ?.parent
+                    ?.let { add(it) }
+            }
         }
     }
 

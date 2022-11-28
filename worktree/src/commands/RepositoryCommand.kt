@@ -21,7 +21,7 @@ class RepositoryCommand(private val workspaces: Workspaces) : CliktCommand() {
             ?.takeIf { (workspace.path / it / ".git").exists() }
             ?: exitProcess(1)
 
-        if (path) println(repoPath)
+        if (path) println(workspace.path / repoPath)
         else println(repoPath.name)
     }
 }
