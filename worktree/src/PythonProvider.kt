@@ -11,7 +11,6 @@ interface PythonProvider {
     context(ProcessSequenceDslContext)
     suspend fun installOrGetVersion(version: String): Path
 }
-
 fun pythonProvider(): PythonProvider {
     val systemPaths = System.getenv("PATH").split(':').map { Path(it) }
 
