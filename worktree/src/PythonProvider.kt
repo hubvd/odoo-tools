@@ -1,6 +1,5 @@
 package com.github.hubvd.odootools.worktree
 
-import com.github.ajalt.clikt.core.CliktError
 import java.nio.file.Path
 import kotlin.io.path.Path
 import kotlin.io.path.div
@@ -11,6 +10,7 @@ interface PythonProvider {
     context(ProcessSequenceDslContext)
     suspend fun installOrGetVersion(version: String): Path
 }
+
 fun pythonProvider(): PythonProvider {
     val systemPaths = System.getenv("PATH").split(':').map { Path(it) }
 
@@ -23,7 +23,12 @@ fun pythonProvider(): PythonProvider {
 
     return findExe(listOf(Path("/opt/asdf-vm/bin")) + systemPaths, "asdf")?.let { AsdfPythonProvider(it) }
         ?: findExe(systemPaths, "pyenv")?.let { PyenvPythonProvider(it) }
-        ?: throw CliktError("Could not find pyenv or asdf")
+        ?: SystemPythonProvider()
+}
+
+class SystemPythonProvider : PythonProvider {
+    context(ProcessSequenceDslContext) override suspend fun installOrGetVersion(version: String) =
+        Path(capture("which", "python3").first().trim())
 }
 
 class PyenvPythonProvider(private val path: Path) : PythonProvider {
