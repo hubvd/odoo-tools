@@ -55,18 +55,14 @@ private fun generateRequirements(requirements: Path): Path {
 context(ProcessSequenceDslContext)
 suspend fun createVirtualenv(
     workspace: Workspace,
-    asdf: Asdf
+    pythonProvider: PythonProvider
 ) {
     val pythonVersion = when {
         workspace.version < 16 -> "3.9.15"
         else -> "3.10.8"
     }
 
-    val pythonPath = asdf.run {
-        if ("python" !in listPlugins()) addPlugin("python")
-        if (pythonVersion !in listVersions("python")) addVersion("python", pythonVersion)
-        where("python", pythonVersion) / "bin/python"
-    }
+    val pythonPath = pythonProvider.installOrGetVersion(pythonVersion)
 
     run("virtualenv", "venv", "--python=$pythonPath")
     val pip = workspace.path / "venv/bin/pip"

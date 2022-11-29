@@ -10,7 +10,7 @@ import com.github.ajalt.mordant.terminal.Terminal
 import com.github.hubvd.odootools.workspace.Workspace
 import com.github.hubvd.odootools.workspace.WorkspaceConfig
 import com.github.hubvd.odootools.workspace.Workspaces
-import com.github.hubvd.odootools.worktree.Asdf
+import com.github.hubvd.odootools.worktree.PythonProvider
 import com.github.hubvd.odootools.worktree.createGitWorktrees
 import com.github.hubvd.odootools.worktree.createVirtualenv
 import com.github.hubvd.odootools.worktree.processSequence
@@ -21,7 +21,7 @@ import kotlin.io.path.exists
 
 class AddCommand(
     private val config: WorkspaceConfig,
-    private val asdf: Asdf,
+    private val pythonProvider: PythonProvider,
     private val terminal: Terminal,
     private val workspaces: Workspaces,
 ) : CliktCommand() {
@@ -40,7 +40,7 @@ class AddCommand(
                 path = path,
                 base = base
             )
-            createVirtualenv(Workspace(name, path), asdf)
+            createVirtualenv(Workspace(name, path), pythonProvider)
         }
         terminal.println((TextStyles.underline + TextStyles.bold + TextColors.green)("Worktree created"))
     }
