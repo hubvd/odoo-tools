@@ -1,6 +1,14 @@
 #!/usr/bin/fish
 
-set pycharm_bin (fd pycharm.sh ~/.local/share/JetBrains/Toolbox/apps/PyCharm-P/ch-0/*/bin | sort -r | head -n1)
+set pycharm_dir ~/.local/share/JetBrains/Toolbox/apps/PyCharm-P/ch-0
+set pycharm_latest_version (
+   path dirname $pycharm_dir/*/bin/pycharm.sh |
+   path dirname |
+   path basename |
+   sort -t . -k1,1n -k2,2n -k3,3n |
+   tail -1
+)
+set pycharm_bin $pycharm_dir/$pycharm_latest_version/bin/pycharm.sh
 
 if not test -f $pycharm_bin
     notify-send (basename $i)" moved"
