@@ -48,7 +48,7 @@ class CliApplicationPlugin : Plugin<Project> {
                         imageName.set(extension.name!!)
                         mainClass.set(extension.mainClass!!)
                         requiredVersion.set("22.3")
-                        buildArgs("--static", "--install-exit-handlers")
+                        buildArgs("--static", "--install-exit-handlers", "-H:+PrintClassInitialization")
                     }
                 }
             }

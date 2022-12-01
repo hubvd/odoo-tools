@@ -80,6 +80,7 @@ class Workspaces(private val config: WorkspaceConfig) {
     }
 
     fun list() = listWorktrees(config.root / config.default / "odoo")
+        .filter { it.name == "odoo" }
         .map { it.parent }
         .map { Workspace(it.name, it) }
         .sortedBy { it.name.removePrefix("saas-") }

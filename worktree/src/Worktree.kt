@@ -9,12 +9,9 @@ import com.github.hubvd.odootools.config.Config
 import com.github.hubvd.odootools.workspace.WorkspaceConfig
 import com.github.hubvd.odootools.workspace.workspaceModule
 import com.github.hubvd.odootools.worktree.commands.commandModule
-import org.kodein.di.DI
-import org.kodein.di.bind
-import org.kodein.di.instance
-import org.kodein.di.singleton
+import org.kodein.di.*
 import kotlin.io.path.Path
-
+import kotlin.io.path.div
 
 class WorktreeCommand : NoOpCliktCommand() {
     override fun aliases() = mapOf(
@@ -27,11 +24,20 @@ class WorktreeCommand : NoOpCliktCommand() {
     )
 }
 
+object DataDir {
+    private val base = Path(System.getenv("XDG_DATA_DIRS") ?: (System.getProperty("user.home") + "/.local/share")) / "odoo-tools"
+
+    operator fun get(name: String) = base / name
+}
+
 fun main(args: Array<String>) {
     val di = DI {
         bind { singleton { Config.get("workspace", WorkspaceConfig.serializer()) } }
         bind { singleton { pythonProvider() } }
         bind { singleton { Terminal(AnsiLevel.TRUECOLOR, interactive = true, hyperlinks = true) } }
+        bind { singleton { new(::OdooStubs) } }
+        bind { singleton { new(::Virtualenvs) } }
+        bind { singleton { DataDir } }
         import(commandModule)
         import(workspaceModule)
     }

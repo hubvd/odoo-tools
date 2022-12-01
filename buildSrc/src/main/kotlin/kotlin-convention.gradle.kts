@@ -19,7 +19,7 @@ tasks.withType<KotlinCompile> {
     kotlinOptions {
         jvmTarget = "19"
         javaParameters = true
-        freeCompilerArgs = listOf("-Xcontext-receivers")
+        freeCompilerArgs = listOf("-Xcontext-receivers", "-opt-in=kotlin.ExperimentalStdlibApi")
     }
 }
 

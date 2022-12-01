@@ -63,7 +63,7 @@ class SavePycharmConfiguration(
                 "SCRIPT_NAME" eq "\$PROJECT_DIR\$/odoo/odoo-bin"
                 "PARAMETERS" eq configuration.args.joinToString(" ").replace("~", "\$USER_HOME\$")
                 "SHOW_COMMAND_LINE" eq "false"
-                "EMULATE_TERMINAL" eq "true"
+                "EMULATE_TERMINAL" eq "false"
                 "MODULE_MODE" eq "false"
                 "INPUT_FILE" eq "false"
                 "method" { attribute("v", "2") }

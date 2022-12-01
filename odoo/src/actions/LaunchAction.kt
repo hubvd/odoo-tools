@@ -12,7 +12,7 @@ interface Action {
 
 class LaunchAction : Action {
     override fun run(configuration: RunConfiguration) {
-        val cmd = if ("no-patch" in configuration.context.flags)
+        val cmd = if ("no-patch" in configuration.context.flags || configuration.context.workspace.version < 14)
             listOf("venv/bin/python", "odoo/odoo-bin")
         else
             listOf("venv/bin/python", "/home/hubert/odoo-tools/patches/main.py") // FIXME: config ?

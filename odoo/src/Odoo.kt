@@ -14,6 +14,8 @@ import org.kodein.di.bind
 import org.kodein.di.instance
 import org.kodein.di.singleton
 import java.net.URLEncoder
+import kotlin.io.path.div
+import kotlin.io.path.isDirectory
 import kotlin.system.exitProcess
 
 fun LaunchCommand.computes() {
@@ -68,9 +70,8 @@ fun LaunchCommand.computes() {
         option("addons-path") {
             buildList {
                 add("odoo/addons")
-                if ("community" !in flags) {
+                if ("community" !in flags && (workspace.path / "enterprise").isDirectory()) {
                     add("enterprise")
-                    add("design-themes")
                 }
                 add("~/odoo-tools/addons")
             }.joinToString(",")
