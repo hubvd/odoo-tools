@@ -16,4 +16,5 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
     implementation("com.github.pgreze:kotlin-process:1.4")
     implementation("org.kodein.di:kodein-di:7.16.0")
+    implementation("org.redundent:kotlin-xml-builder:1.8.0")
 }

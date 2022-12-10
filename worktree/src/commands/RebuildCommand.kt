@@ -4,13 +4,12 @@ import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.CliktError
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
-import com.github.ajalt.mordant.rendering.TextColors
-import com.github.ajalt.mordant.rendering.TextStyles
 import com.github.ajalt.mordant.terminal.Terminal
 import com.github.hubvd.odootools.workspace.Workspaces
-import com.github.hubvd.odootools.worktree.OdooStubs
-import com.github.hubvd.odootools.worktree.Virtualenvs
-import com.github.hubvd.odootools.worktree.processSequence
+import com.github.hubvd.odootools.worktree.*
+import kotlin.io.path.div
+import kotlin.io.path.notExists
+
 
 class RebuildCommand(
     private val terminal: Terminal,
@@ -31,6 +30,9 @@ class RebuildCommand(
             for (workspace in selectedWorkspaces) {
                 venvs.create(workspace)
                 stubs.create(workspace)
+                val community = (workspace.path / "enterprise").notExists()
+                val repositories = Repository.values().filter { if (community) it != Repository.Enterprise else true }
+                Pycharm(workspace, repositories).saveFiles()
             }
         }
     }

@@ -13,11 +13,7 @@ import com.github.ajalt.mordant.terminal.Terminal
 import com.github.hubvd.odootools.workspace.Workspace
 import com.github.hubvd.odootools.workspace.WorkspaceConfig
 import com.github.hubvd.odootools.workspace.Workspaces
-import com.github.hubvd.odootools.worktree.OdooStubs
-import com.github.hubvd.odootools.worktree.Virtualenvs
-import com.github.hubvd.odootools.worktree.createGitWorktrees
-import com.github.hubvd.odootools.worktree.processSequence
-import kotlin.io.path.Path
+import com.github.hubvd.odootools.worktree.*
 import kotlin.io.path.createDirectory
 import kotlin.io.path.div
 import kotlin.io.path.exists
@@ -41,6 +37,7 @@ class AddCommand(
         val path = path / name
         if (path.exists()) throw CliktError("$path already exists")
         path.createDirectory()
+        val repositories = Repository.values().filter { if (community) it != Repository.Enterprise else true }
         processSequence(terminal) {
             cd(path)
             createGitWorktrees(
@@ -52,6 +49,7 @@ class AddCommand(
             val workspace = Workspace(name, path)
             venvs.create(workspace)
             stubs.create(workspace)
+            Pycharm(workspace, repositories).saveFiles()
         }
         terminal.println((TextStyles.underline + TextStyles.bold + TextColors.green)("Worktree created"))
     }
