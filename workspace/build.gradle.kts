@@ -1,10 +1,11 @@
 plugins {
     id("kotlin-convention")
-    kotlin("plugin.serialization") version "1.8.0-Beta"
+    @Suppress("DSL_SCOPE_VIOLATION") // TODO: Remove once KTIJ-19369 is fixed
+    alias(libs.plugins.kotlinx.plugin.serialization)
 }
 
 dependencies {
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1")
     implementation(project(":config"))
-    implementation("org.kodein.di:kodein-di:7.16.0")
+    implementation(libs.kodein.di)
+    implementation(libs.serialization.json)
 }

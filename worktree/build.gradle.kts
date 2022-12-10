@@ -1,6 +1,7 @@
 plugins {
     id("cli-application")
-    kotlin("plugin.serialization") version "1.8.0-Beta"
+    @Suppress("DSL_SCOPE_VIOLATION") // TODO: Remove once KTIJ-19369 is fixed 
+    alias(libs.plugins.kotlinx.plugin.serialization)
 }
 
 cli {
@@ -11,10 +12,10 @@ cli {
 dependencies {
     implementation(project(":config"))
     implementation(project(":workspace"))
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.4.1")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
-    implementation("com.github.pgreze:kotlin-process:1.4")
-    implementation("org.kodein.di:kodein-di:7.16.0")
-    implementation("org.redundent:kotlin-xml-builder:1.8.0")
+    implementation(libs.serialization.core)
+    implementation(libs.serialization.json)
+    implementation(libs.coroutines.core)
+    implementation(libs.process)
+    implementation(libs.xmlbuilder)
+    implementation(libs.kodein.di)
 }

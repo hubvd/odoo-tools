@@ -1,10 +1,10 @@
 plugins {
     id("kotlin-convention")
-    kotlin("plugin.serialization") version "1.8.0-Beta"
+    @Suppress("DSL_SCOPE_VIOLATION") // TODO: Remove once KTIJ-19369 is fixed
+    alias(libs.plugins.kotlinx.plugin.serialization)
 }
 
 dependencies {
-    api("org.jetbrains.kotlinx:kotlinx-serialization-core:1.4.1")
-    implementation("com.akuleshov7:ktoml-core:0.3.0")
-    implementation("org.slf4j:slf4j-nop:2.0.4")
+    api(libs.serialization.core)
+    implementation(libs.serialization.toml)
 }

@@ -1,3 +1,3 @@
-plugins {
-    id("com.github.ben-manes.versions")
+allprojects {
+    apply(plugin = "com.github.ben-manes.versions")
 }

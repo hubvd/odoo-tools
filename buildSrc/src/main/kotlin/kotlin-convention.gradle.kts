@@ -8,7 +8,7 @@ plugins {
 
 dependencies {
     implementation(platform(kotlin("bom")))
-    implementation(kotlin("stdlib-jdk8"))
+    implementation(kotlin("stdlib"))
 }
 
 tasks.withType<Test> {
