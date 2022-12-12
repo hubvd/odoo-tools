@@ -65,13 +65,13 @@ class Pycharm(private val workspace: Workspace, private val repositories: List<R
                     "IssueNavigationLink" {
                         "option"("name" to "issueRegexp", "value" to "(?i)(opw|task)[\\W\\-]*(?:id)?[\\W-]*(\\d+)")
                         "option"(
-                            "linkRegexp" to "issueRegexp",
+                            "name" to "issueRegexp",
                             "value" to "https://www.odoo.com/web#view_type=form&amp;model=project.task&amp;id=\$2"
                         )
                     }
                     "IssueNavigationLink" {
                         "option"("name" to "issueRegexp", "value" to "odoo/(.*)#(\\d+)")
-                        "option"("linkRegexp" to "issueRegexp", "value" to "https://github.com/odoo/\$1/pull/\$2")
+                        "option"("name" to "issueRegexp", "value" to "https://github.com/odoo/\$1/pull/\$2")
                     }
                 }
             }
