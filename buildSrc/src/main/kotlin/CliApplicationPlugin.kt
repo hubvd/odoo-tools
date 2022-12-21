@@ -20,7 +20,7 @@ class CliApplicationPlugin : Plugin<Project> {
 
         project.dependencies {
             dependencies.add("implementation", "com.github.ajalt.clikt:clikt:3.5.0")
-            dependencies.add("implementation", "com.github.ajalt.mordant:mordant:2.0.0-beta8")
+            dependencies.add("implementation", "com.github.ajalt.mordant:mordant:2.0.0-beta10")
         }
 
         val extension = project.extensions.create<CliApplicationPluginExtension>("cli")
@@ -48,7 +48,8 @@ class CliApplicationPlugin : Plugin<Project> {
                         imageName.set(extension.name!!)
                         mainClass.set(extension.mainClass!!)
                         requiredVersion.set("22.3")
-                        buildArgs("--static", "--install-exit-handlers", "-H:+PrintClassInitialization")
+                        // --static -> -H:+StaticExecutableWithDynamicLibC TODO: PR for musl libc support in mordant ?
+                        buildArgs("-H:+StaticExecutableWithDynamicLibC", "--install-exit-handlers", "-H:+PrintClassInitialization")
                     }
                 }
             }

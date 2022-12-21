@@ -6,7 +6,6 @@ import com.github.ajalt.clikt.parameters.arguments.multiple
 import com.github.ajalt.clikt.parameters.options.Option
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
-import com.github.ajalt.mordant.rendering.AnsiLevel
 import com.github.ajalt.mordant.rendering.TextColors
 import com.github.ajalt.mordant.terminal.Terminal
 import com.github.hubvd.odootools.odoo.ContextGenerator
@@ -28,7 +27,7 @@ annotation class CmdComputeDsl
 
 val Option.id: String get() = names.maxBy { it.length }.removePrefix("--")
 
-class LaunchCommand(private val workspaces: Workspaces) : CliktCommand(treatUnknownOptionsAsArgs = true) {
+class LaunchCommand(private val workspaces: Workspaces, private val terminal: Terminal) : CliktCommand(treatUnknownOptionsAsArgs = true) {
 
     private val ignores = HashSet<String>()
 
@@ -109,10 +108,7 @@ class LaunchCommand(private val workspaces: Workspaces) : CliktCommand(treatUnkn
             ignores
         ).generate(dryRun)
 
-        // FIXME: detection is run at compile time in native image
-        val terminal = Terminal(AnsiLevel.TRUECOLOR, interactive = true)
-
-        println(buildString {
+       terminal.println(buildString {
             append(TextColors.magenta("workspace"))
             append('=')
             append(workspace.path.toString())

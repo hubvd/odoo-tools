@@ -1,6 +1,5 @@
 package com.github.hubvd.odootools.odoo
 
-import com.github.ajalt.mordant.rendering.AnsiLevel
 import com.github.ajalt.mordant.terminal.Terminal
 import com.github.hubvd.odootools.config.Config
 import com.github.hubvd.odootools.odoo.commands.LaunchCommand
@@ -117,8 +116,8 @@ fun LaunchCommand.computes() {
 
 fun main(args: Array<String>) {
     val di = DI {
-        bind { singleton { LaunchCommand(instance()) } }
-        bind { singleton { Terminal(AnsiLevel.TRUECOLOR, interactive = true, hyperlinks = true) } }
+        bind { singleton { LaunchCommand(instance(), instance()) } }
+        bind { singleton { Terminal() } }
         bind { singleton { Workspaces(instance()) } }
         bind { singleton { Config.get("workspace", WorkspaceConfig.serializer()) } }
     }

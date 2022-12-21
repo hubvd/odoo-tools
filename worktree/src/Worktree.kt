@@ -34,7 +34,7 @@ fun main(args: Array<String>) {
     val di = DI {
         bind { singleton { Config.get("workspace", WorkspaceConfig.serializer()) } }
         bind { singleton { pythonProvider() } }
-        bind { singleton { Terminal(AnsiLevel.TRUECOLOR, interactive = true, hyperlinks = true) } }
+        bind { singleton { Terminal() } }
         bind { singleton { new(::OdooStubs) } }
         bind { singleton { new(::Virtualenvs) } }
         bind { singleton { DataDir } }
