@@ -5,11 +5,12 @@ import kotlin.io.path.*
 
 class OdooStubs(dataDir: DataDir) {
 
-    private val rootPath = dataDir["odoo-stubs"].also { it.createDirectories() }
+    private val rootPath = dataDir["odoo-stubs"]
     private val masterPath = rootPath / "master"
 
     context(ProcessSequenceDslContext)
     suspend fun create(workspace: Workspace) {
+        rootPath.createDirectories()
         if (masterPath.notExists()) clone()
 
         val stubsVersion = when (workspace.version) {

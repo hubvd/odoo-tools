@@ -7,10 +7,11 @@ import kotlin.io.path.*
 
 class Virtualenvs(private val pythonProvider: PythonProvider, dataDir: DataDir) {
 
-    private val rootPath = dataDir["virtualenvs"].also { it.createDirectories() }
+    private val rootPath = dataDir["virtualenvs"]
 
     context(ProcessSequenceDslContext)
     suspend fun create(workspace: Workspace) {
+        rootPath.createDirectories()
         val venvPath = rootPath / workspace.base
         if (venvPath.notExists()) {
             val pythonVersion = when {
