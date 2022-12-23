@@ -16,14 +16,21 @@ set staged_files (
   string match -rg '^[AMRDC]+\s+(.*)$'
 )
 
-function check_qunit
-  if set js_test_files (string match '*/static/tests/*.js' -- $staged_files)
-    set invalid_files (rg -l --no-config 'QUnit\.(debug|only)' $js_test_files)
-    and fail "QUnit.(debug|only) found in $invalid_files"
-  end
+function fail_with_pattern -a glob -a pattern -a flags
+  set files (string match $glob -- $staged_files) || return
+  set matches (rg -l --no-config $flags "$pattern" $files)
+  and fail "Found `$pattern` in $matches"
 end
 
-for check in qunit branch
+function check_debugger
+  fail_with_pattern "*.js" "debugger"
+end
+
+function check_qunit
+  fail_with_pattern "*/static/tests/*.js" "QUnit\s*\.\s*(debug|only)" -U
+end
+
+for check in qunit branch debugger
   check_$check
 end
 
