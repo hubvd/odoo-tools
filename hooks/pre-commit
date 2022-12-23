@@ -1,6 +1,30 @@
 #!/bin/fish
 
-if test "$(worktree base)" = "$(git rev-parse --abbrev-ref HEAD)"
-  echo "Can't commit to a base branch" 2>&1
+function fail
+  echo $argv 2>&1
   exit 1
 end
+
+function check_branch
+  if test "$(worktree base)" = "$(git rev-parse --abbrev-ref HEAD)"
+    fail "Can't commit to a base branch"
+  end
+end
+
+set staged_files (
+  git status --porcelain |
+  string match -rg '^[AMRDC]+\s+(.*)$'
+)
+
+function check_qunit
+  set js_test_files (string match '*/static/tests/*.js' -- $staged_files)
+  if set -q js_test_files[1]
+    set invalid_files (rg -l --no-config 'QUnit\.(debug|only)' $js_test_files)
+    and fail "QUnit.(debug|only) found in $invalid_files"
+  end
+end
+
+for check in qunit branch
+  check_$check
+end
+
