@@ -2,7 +2,7 @@
   "extends": ["eslint:recommended", "plugin:prettier/recommended"],
   "parserOptions": {
     "sourceType": "module",
-    "ecmaVersion": 2019
+    "ecmaVersion": 2022
   },
   "env": {
     "browser": true,
@@ -44,5 +44,6 @@
     "FullCalendar": "readonly",
     "ClipboardJS": "readonly",
     "globalThis": "readonly"
-  }
+  },
+  "root": true
 }

@@ -25,7 +25,7 @@ private infix fun String.eq(value: String) {
 class SavePycharmConfiguration(
     private val terminal: Terminal,
     private val name: String,
-    private val workspace: Workspace
+    private val workspace: Workspace,
 ) : Action {
     override fun run(configuration: RunConfiguration) {
         val conf = xml("component") {
@@ -35,7 +35,7 @@ class SavePycharmConfiguration(
                     "default" to "false",
                     "name" to name,
                     "type" to "PythonConfigurationType",
-                    "factoryName" to "Python"
+                    "factoryName" to "Python",
                 )
                 "module" { attribute("name", workspace.name) }
                 "INTERPRETER_OPTIONS" eq ""

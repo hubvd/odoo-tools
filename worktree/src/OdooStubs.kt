@@ -37,14 +37,13 @@ class OdooStubs(dataDir: DataDir) {
             "git",
             "clone",
             "git@github.com:odoo-ide/odoo-stubs.git",
-            "master"
+            "master",
         )
         cd(masterPath)
         run(
             "git",
             "checkout",
-            "master"
+            "master",
         )
     }
-
 }

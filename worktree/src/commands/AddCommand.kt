@@ -18,7 +18,6 @@ import kotlin.io.path.createDirectory
 import kotlin.io.path.div
 import kotlin.io.path.exists
 
-
 class AddCommand(
     private val config: WorkspaceConfig,
     private val terminal: Terminal,

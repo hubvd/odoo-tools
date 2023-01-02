@@ -12,10 +12,11 @@ interface Action {
 
 class LaunchAction : Action {
     override fun run(configuration: RunConfiguration) {
-        val cmd = if ("no-patch" in configuration.context.flags || configuration.context.workspace.version < 14)
+        val cmd = if ("no-patch" in configuration.context.flags || configuration.context.workspace.version < 14) {
             listOf("venv/bin/python", "odoo/odoo-bin")
-        else
+        } else {
             listOf("venv/bin/python", "/home/hubert/odoo-tools/patches/main.py") // FIXME: config ?
+        }
 
         val process =
             ProcessBuilder()
@@ -32,9 +33,15 @@ class LaunchAction : Action {
         if ("test-enable" in configuration.context.flags) {
             runBlocking {
                 process(
-                    "notify-send", "-h",
-                    *(if (code == 0) arrayOf("string:frcolor:#00FF00", "Tests passed")
-                    else arrayOf("string:frcolor:#FF0000", "Tests failed"))
+                    "notify-send",
+                    "-h",
+                    *(
+                        if (code == 0) {
+                            arrayOf("string:frcolor:#00FF00", "Tests passed")
+                        } else {
+                            arrayOf("string:frcolor:#FF0000", "Tests failed")
+                        }
+                        ),
                 )
             }
         }

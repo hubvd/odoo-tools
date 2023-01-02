@@ -3,7 +3,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     id("java-convention")
     kotlin("jvm")
-    // id("org.jlleitschuh.gradle.ktlint")
+    id("spotless")
 }
 
 dependencies {

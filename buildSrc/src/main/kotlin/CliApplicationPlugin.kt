@@ -38,7 +38,7 @@ class CliApplicationPlugin : Plugin<Project> {
                             project.extensions.getByName<JavaToolchainService>("javaToolchains").launcherFor {
                                 languageVersion.set(JavaLanguageVersion.of(19))
                                 vendor.set(JvmVendorSpec.matching("GraalVM Community"))
-                            }
+                            },
                         )
                     }
                 }
@@ -49,7 +49,11 @@ class CliApplicationPlugin : Plugin<Project> {
                         mainClass.set(extension.mainClass!!)
                         requiredVersion.set("22.3")
                         // --static -> -H:+StaticExecutableWithDynamicLibC TODO: PR for musl libc support in mordant ?
-                        buildArgs("-H:+StaticExecutableWithDynamicLibC", "--install-exit-handlers", "-H:+PrintClassInitialization")
+                        buildArgs(
+                            "-H:+StaticExecutableWithDynamicLibC",
+                            "--install-exit-handlers",
+                            "-H:+PrintClassInitialization",
+                        )
                     }
                 }
             }

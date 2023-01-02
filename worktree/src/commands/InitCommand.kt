@@ -9,7 +9,7 @@ class InitCommand : CliktCommand() {
         - setup remotes
         - install system dependencies
         - setup git hooks
-        */
+         */
         TODO("Not yet implemented")
     }
 }

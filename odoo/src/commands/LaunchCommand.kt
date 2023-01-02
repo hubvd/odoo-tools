@@ -105,35 +105,37 @@ class LaunchCommand(private val workspaces: Workspaces, private val terminal: Te
             graph,
             envs,
             effects,
-            ignores
+            ignores,
         ).generate(dryRun)
 
-       terminal.println(buildString {
-            append(TextColors.magenta("workspace"))
-            append('=')
-            append(workspace.path.toString())
-            append(' ')
-            append(TextColors.magenta("version"))
-            append('=')
-            append(workspace.version.toString())
-            appendLine()
-            for (arg in runConfiguration.args) {
-                val parts = arg.split('=', limit = 2)
-                append(TextColors.magenta(parts[0].removePrefix("--")))
-                if (parts.size > 1) {
-                    append('=')
-                    append(parts[1])
-                }
-                append(' ')
-            }
-            if (runConfiguration.env.isNotEmpty()) appendLine()
-            runConfiguration.env.forEach { (k, v) ->
-                append(TextColors.magenta(k))
+        terminal.println(
+            buildString {
+                append(TextColors.magenta("workspace"))
                 append('=')
-                append(v)
+                append(workspace.path.toString())
                 append(' ')
-            }
-        })
+                append(TextColors.magenta("version"))
+                append('=')
+                append(workspace.version.toString())
+                appendLine()
+                for (arg in runConfiguration.args) {
+                    val parts = arg.split('=', limit = 2)
+                    append(TextColors.magenta(parts[0].removePrefix("--")))
+                    if (parts.size > 1) {
+                        append('=')
+                        append(parts[1])
+                    }
+                    append(' ')
+                }
+                if (runConfiguration.env.isNotEmpty()) appendLine()
+                runConfiguration.env.forEach { (k, v) ->
+                    append(TextColors.magenta(k))
+                    append('=')
+                    append(v)
+                    append(' ')
+                }
+            },
+        )
 
         val action = when {
             dryRun -> null
@@ -142,6 +144,5 @@ class LaunchCommand(private val workspaces: Workspaces, private val terminal: Te
         }
 
         action?.run(runConfiguration)
-
     }
 }

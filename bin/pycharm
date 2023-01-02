@@ -9,11 +9,7 @@ set pycharm_latest_version (
    tail -1
 )
 set pycharm_bin $pycharm_dir/$pycharm_latest_version/bin/pycharm.sh
-
-if not test -f $pycharm_bin
-    notify-send (basename $i)" moved"
-    exit 1
-end
+test -f "$pycharm_bin" || exit 1
 
 function open
     setsid $pycharm_bin $argv &>/dev/null &
@@ -29,7 +25,13 @@ if set -q argv[1]
     exit $status
 end
 
-set choice (worktree path) || set choice (worktree paths | bemenu -p pycharm)
+set choice (worktree path) || begin
+    set names (worktree names)
+    set choice (string join \n $names | bemenu -l (count $names) -p pycharm) || exit 1
+    set index (contains -i $choice $names) || exit 1
+    set paths (worktree paths)
+    set choice $paths[$index]
+end
 
 if test -d "$choice"
     open $choice

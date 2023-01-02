@@ -42,5 +42,4 @@ class Virtualenvs(private val pythonProvider: PythonProvider, dataDir: DataDir) 
         output.toFile().deleteOnExit()
         return output
     }
-
 }

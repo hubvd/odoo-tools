@@ -29,7 +29,6 @@ class ContextGenerator(
     private val ignores: Set<String>,
 ) {
     fun generate(dryRun: Boolean): RunConfiguration {
-
         val flags: HashSet<String>
         val options: HashMap<String, String>
 
@@ -52,7 +51,7 @@ class ContextGenerator(
             workspace = workspace,
             flags = flags,
             options = options,
-            env = HashMap()
+            env = HashMap(),
         )
 
         val queue = computes.keys.toHashSet()
@@ -92,5 +91,4 @@ class ContextGenerator(
 
         return RunConfiguration(args, context.env, workspace.path, context)
     }
-
 }

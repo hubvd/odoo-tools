@@ -10,7 +10,6 @@ import com.github.hubvd.odootools.worktree.*
 import kotlin.io.path.div
 import kotlin.io.path.notExists
 
-
 class RebuildCommand(
     private val terminal: Terminal,
     private val workspaces: Workspaces,

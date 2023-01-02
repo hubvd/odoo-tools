@@ -30,13 +30,14 @@ data class Workspace(val name: String, val path: ShellPath) {
 
     private fun readRelease(): Pair<Float, String> {
         val txt = (path / "odoo/odoo/release.py").readText()
-        val (major, minor, level) = versionRe.find(txt)!!.destructured
+        val (major, minor, level) = VERSION_RE.find(txt)!!.destructured
         val majorNumber = major.removePrefix("saas~")
         val version = "$majorNumber.$minor".toFloat()
-        val base = if (level != "FINAL")
+        val base = if (level != "FINAL") {
             "master"
-        else
+        } else {
             "${major.replace('~', '-')}.$minor"
+        }
         return version to base
     }
 
@@ -45,10 +46,9 @@ data class Workspace(val name: String, val path: ShellPath) {
     }
 
     companion object {
-        private val versionRe =
+        private val VERSION_RE =
             """version_info = ?\(['"]?((?:saas~)?\d+)['"]?,\s*(\d+),\s*\d+,\s*([A-Z]+)""".toRegex()
     }
-
 }
 
 class Workspaces(private val config: WorkspaceConfig) {
@@ -61,7 +61,7 @@ class Workspaces(private val config: WorkspaceConfig) {
         }
         val mainRepository = when {
             attributes.isRegularFile -> Path(
-                dotGit.readText().trimEnd().removePrefix("gitdir: ")
+                dotGit.readText().trimEnd().removePrefix("gitdir: "),
             ).parent.parent.parent
 
             attributes.isDirectory -> repository
@@ -88,7 +88,6 @@ class Workspaces(private val config: WorkspaceConfig) {
     fun default() = list().find { it.name == config.default }!!
 
     fun current() = Path(System.getProperty("user.dir")).let { cwd -> list().find { cwd.startsWith(it.path) } }
-
 }
 
 enum class WorkspaceFormat { Name, Version, Path, Base, Json, Fish }
@@ -115,6 +114,6 @@ fun Workspace.format(format: WorkspaceFormat): String = when (format) {
     }
 }
 
-val workspaceModule = DI.Module("workspace") {
+val WORKSPACE_MODULE = DI.Module("workspace") {
     bind { singleton { Workspaces(instance()) } }
 }

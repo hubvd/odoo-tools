@@ -26,7 +26,7 @@ class Pycharm(private val workspace: Workspace, private val repositories: List<R
                 repositories.forEach { repo ->
                     "sourceFolder"(
                         "url" to "file://\$MODULE_DIR\$/${repo.pathName}",
-                        "isTestSource" to "false"
+                        "isTestSource" to "false",
                     )
                 }
                 "excludeFolder"("url" to "file://\$MODULE_DIR\$/venv")
@@ -40,7 +40,7 @@ class Pycharm(private val workspace: Workspace, private val repositories: List<R
             "default" to "false",
             "name" to "remote debugger",
             "type" to "PyRemoteDebugConfigurationType",
-            "factoryName" to "Python Remote Debug"
+            "factoryName" to "Python Remote Debug",
         ) {
             "module"("name" to workspace.name)
             "PORT" eq 10000
@@ -65,13 +65,13 @@ class Pycharm(private val workspace: Workspace, private val repositories: List<R
                     "IssueNavigationLink" {
                         "option"("name" to "issueRegexp", "value" to "(?i)(opw|task)[\\W\\-]*(?:id)?[\\W-]*(\\d+)")
                         "option"(
-                            "name" to "issueRegexp",
-                            "value" to "https://www.odoo.com/web#view_type=form&amp;model=project.task&amp;id=\$2"
+                            "name" to "linkRegexp",
+                            "value" to "https://www.odoo.com/web#view_type=form&amp;model=project.task&amp;id=\$2",
                         )
                     }
                     "IssueNavigationLink" {
                         "option"("name" to "issueRegexp", "value" to "odoo/(.*)#(\\d+)")
-                        "option"("name" to "issueRegexp", "value" to "https://github.com/odoo/\$1/pull/\$2")
+                        "option"("name" to "linkRegexp", "value" to "https://github.com/odoo/\$1/pull/\$2")
                     }
                 }
             }
@@ -145,5 +145,4 @@ class Pycharm(private val workspace: Workspace, private val repositories: List<R
             path.writeText(generator().toString(PrintOptions(indent = "  ")))
         }
     }
-
 }

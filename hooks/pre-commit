@@ -13,7 +13,9 @@ end
 
 set staged_files (
   git status --porcelain |
-  string match -rg '^[AMRDC]+\s+(.*)$'
+  string match -r '^[AMRDC].*' |
+  string sub -s4 |
+  string unescape --style script
 )
 
 function fail_with_pattern -a glob -a pattern -a flags
@@ -33,4 +35,6 @@ end
 for check in qunit branch debugger
   check_$check
 end
+
+true
 

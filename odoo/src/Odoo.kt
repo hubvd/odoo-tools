@@ -31,7 +31,8 @@ fun LaunchCommand.computes() {
                     and datname = '${options["database"]}'
                     """.trimIndent(),
                     "odoo",
-                    stdout = Redirect.CAPTURE, stderr = Redirect.SILENT
+                    stdout = Redirect.CAPTURE,
+                    stderr = Redirect.SILENT,
                 ).output.firstOrNull()?.trim()?.toIntOrNull() ?: 0
             }
 
@@ -111,7 +112,6 @@ fun LaunchCommand.computes() {
         option("http-port") { if ("test-enable" in flags) "9000" else null }
         option("database") { if ("test-enable" in flags) "${workspace.name}-test" else workspace.name }
     }
-
 }
 
 fun main(args: Array<String>) {

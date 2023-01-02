@@ -10,12 +10,14 @@ import kotlin.io.path.name
 
 data class TestTag(val module: String?, val clazz: String?, val method: String?) {
     companion object {
-        private val tagRe = "(?:\\w+)?(?:/(?<module>\\w+))?(?::(?<class>\\w+))?(?:\\.(?<method>\\w+))?".toRegex()
+        private val TAG_RE = "(?:\\w+)?(?:/(?<module>\\w+))?(?::(?<class>\\w+))?(?:\\.(?<method>\\w+))?".toRegex()
 
         operator fun invoke(tag: String): TestTag {
-            val match = tagRe.matchEntire(tag)!!
+            val match = TAG_RE.matchEntire(tag)!!
             return TestTag(
-                match.groups["module"]?.value, match.groups["class"]?.value, match.groups["method"]?.value
+                match.groups["module"]?.value,
+                match.groups["class"]?.value,
+                match.groups["method"]?.value,
             )
         }
     }
@@ -51,7 +53,7 @@ fun TestTag.toAddons(workspace: Workspace, addonsPath: String?): List<String> {
                         value.startsWith("~/") -> value.replaceRange(0..1, System.getProperty("user.home") + "/")
                         value == "~" -> System.getProperty("user.home")
                         else -> value
-                    }
+                    },
                 )
             }
             .map { path -> if (path.isAbsolute) path else workspace.path / path }

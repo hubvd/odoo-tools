@@ -18,27 +18,31 @@ class ListCommand(private val workspaces: Workspaces, private val terminal: Term
     override fun run() {
         val workspaces = workspaces.list()
         if (terminal.info.outputInteractive && format == null) {
-            terminal.println(table {
-                tableBorders = Borders.ALL
-                header {
-                    style(TextColors.magenta, bold = true)
-                    row("name", "path", "version", "base")
-                }
-                body {
-                    rowStyles(TextColors.blue, TextColors.green)
-                    cellBorders = Borders.LEFT_RIGHT
-                    workspaces.forEach { w ->
-                        row {
-                            cell(w.name)
-                            cell(TextStyles.hyperlink("file://${w.path}")(w.path.toString()))
-                            cell(w.version)
-                            cell(w.base)
+            terminal.println(
+                table {
+                    tableBorders = Borders.ALL
+                    header {
+                        style(TextColors.magenta, bold = true)
+                        row("name", "path", "version", "base")
+                    }
+                    body {
+                        rowStyles(TextColors.blue, TextColors.green)
+                        cellBorders = Borders.LEFT_RIGHT
+                        workspaces.forEach { w ->
+                            row {
+                                cell(w.name)
+                                cell(TextStyles.hyperlink("file://${w.path}")(w.path.toString()))
+                                cell(w.version)
+                                cell(w.base)
+                            }
                         }
                     }
-                }
-            })
-        } else workspaces.forEach {
-            terminal.println(it.format(format ?: WorkspaceFormat.Json))
+                },
+            )
+        } else {
+            workspaces.forEach {
+                terminal.println(it.format(format ?: WorkspaceFormat.Json))
+            }
         }
     }
 }

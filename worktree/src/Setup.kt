@@ -9,7 +9,7 @@ import kotlin.io.path.name
 enum class Repository(val url: String, val pathName: String) {
     Odoo("git@github.com:odoo/odoo.git", "odoo"),
     Enterprise("git@github.com:odoo/enterprise.git", "enterprise"),
-    Stubs("git@github.com:odoo-ide/odoo-stubs.git", "odoo-stubs")
+    Stubs("git@github.com:odoo-ide/odoo-stubs.git", "odoo-stubs"),
 }
 
 private fun repositories(root: Path, community: Boolean = false) =
@@ -34,7 +34,7 @@ suspend fun createGitWorktrees(
         "${root / "master" / repo}",
         "fetch",
         "origin",
-        base
+        base,
     )
 
     run(
