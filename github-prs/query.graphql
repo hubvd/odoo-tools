@@ -1,0 +1,29 @@
+{
+  results: search(
+    type: ISSUE
+    query: "org:odoo involves:<INVOLVES> state:open type:pr"
+    last: 25
+  ) {
+    prs: nodes {
+      ... on PullRequest {
+        title
+        headRefName
+        url
+        isDraft
+        commits(last: 1) {
+          nodes {
+            commit {
+              status {
+                contexts {
+                  state
+                  targetUrl
+                  context
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

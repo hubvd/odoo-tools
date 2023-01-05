@@ -1,0 +1,4 @@
+#!/bin/fish
+
+git -C /home/hubert/src/master/odoo fetch origin (worktree list base | path sort -u)
+git -C /home/hubert/src/master/enterprise fetch origin (worktree list base | path sort -u)

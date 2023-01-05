@@ -1,0 +1,18 @@
+#!/bin/fish
+
+argparse 'l/language=' -- $argv || exit 1
+set -g pipe cat
+set -q _flag_language || set _flag_language txt
+
+switch $_flag_language
+  case xml
+    set -ga pipe '|' xmllint --format -
+  case json
+    set -ga pipe '|' jq .
+  case py python
+    set -ga pipe '|' black -q -
+end
+
+set -ga pipe '|' bat -l $_flag_language
+
+eval $pipe
