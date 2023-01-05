@@ -54,14 +54,23 @@ for pr in parseJson(response.body)["data"]["results"]["prs"].to(seq[PullRequest]
     var pendings: seq[(string, string)]
     var failures: seq[(string, string)]
 
-    for (state, url, name) in pr.commits["nodes"][0]["commit"]["status"]["contexts"].to(seq[Check]):
+    let statusNode = pr.commits["nodes"][0]["commit"]["status"]
+
+    var checks: seq[Check]
+    if statusNode.kind == JNull:
+        status = "pending"
+    else:
+        checks = statusNode["contexts"].to(seq[Check])
+
+    for (state, url, name) in checks:
         if name == "ci/codeowner":
             if isDraft:
                 continue
 
-        if state == "PENDING" and status != "failure":
+        if state == "PENDING":
             pendings.add((name, url))
-            status = "pending"
+            if status != "failure":
+                status = "pending"
 
         if state == "FAILURE":
             failures.add((name, url))
