@@ -19,7 +19,7 @@ class CliApplicationPlugin : Plugin<Project> {
         project.plugins.apply("org.graalvm.buildtools.native")
 
         project.dependencies {
-            dependencies.add("implementation", "com.github.ajalt.clikt:clikt:3.5.0")
+            dependencies.add("implementation", "com.github.ajalt.clikt:clikt:3.5.1")
             dependencies.add("implementation", "com.github.ajalt.mordant:mordant:2.0.0-beta10")
         }
 

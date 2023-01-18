@@ -27,7 +27,9 @@ annotation class CmdComputeDsl
 
 val Option.id: String get() = names.maxBy { it.length }.removePrefix("--")
 
-class LaunchCommand(private val workspaces: Workspaces, private val terminal: Terminal) : CliktCommand(treatUnknownOptionsAsArgs = true) {
+class LaunchCommand(private val workspaces: Workspaces, private val terminal: Terminal) : CliktCommand(
+    treatUnknownOptionsAsArgs = true,
+) {
 
     private val ignores = HashSet<String>()
 

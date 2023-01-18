@@ -24,7 +24,9 @@ class WorktreeCommand : NoOpCliktCommand() {
 }
 
 object DataDir {
-    private val BASE = Path(System.getenv("XDG_DATA_DIRS") ?: (System.getProperty("user.home") + "/.local/share")) / "odoo-tools"
+    private val BASE = Path(
+        System.getenv("XDG_DATA_DIRS") ?: (System.getProperty("user.home") + "/.local/share"),
+    ) / "odoo-tools"
 
     operator fun get(name: String) = BASE / name
 }

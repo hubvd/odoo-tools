@@ -1,3 +1,3 @@
-allprojects {
-    apply(plugin = "com.github.ben-manes.versions")
+plugins {
+    id("com.github.ben-manes.versions") version "0.44.0"
 }
