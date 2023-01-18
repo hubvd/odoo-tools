@@ -1,7 +1,7 @@
 #!/bin/fish
 
 function _pids
-  ps a -o pid,args | string match -rg '^\s+(?P<pid>\d+).*python (?:odoo/odoo-bin|\S+/patches/main.py) (?!shell)'
+  ps a -o pid,args | string match -rg '^\s+(?P<pid>\d+).*python (?:odoo/odoo-bin|\S+/patches/main.py|.*/odoo-tools/launcher/main.py) (?!shell)'
 end
 
 function _get_port_from_pid
