@@ -22,9 +22,9 @@ class LaunchAction : Action {
 
     override fun run(configuration: RunConfiguration) {
         val useCustomLauncher = "no-patch" !in configuration.context.flags &&
-            configuration.context.workspace.version < 14
+            configuration.context.workspace.version > 14
 
-        val main = if (useCustomLauncher) {
+        val main = if (!useCustomLauncher) {
             "odoo/odoo-bin"
         } else {
             val launcherDir = unpackPatchedLauncher()

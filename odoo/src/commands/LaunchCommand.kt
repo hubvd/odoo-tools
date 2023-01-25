@@ -50,6 +50,7 @@ class LaunchCommand(private val workspaces: Workspaces, private val terminal: Te
     private val testTags by option("--test-tags")
     private val init by option("-i", "--init")
     private val save by option("--save").custom()
+    private val quiet by option("-q","--quiet").flag().custom()
 
     private val graph = HashMap<String, List<String>>()
     private val computes = HashMap<String, (DslContext) -> Unit>()
@@ -110,34 +111,36 @@ class LaunchCommand(private val workspaces: Workspaces, private val terminal: Te
             ignores,
         ).generate(dryRun)
 
-        terminal.println(
-            buildString {
-                append(TextColors.magenta("workspace"))
-                append('=')
-                append(workspace.path.toString())
-                append(' ')
-                append(TextColors.magenta("version"))
-                append('=')
-                append(workspace.version.toString())
-                appendLine()
-                for (arg in runConfiguration.args) {
-                    val parts = arg.split('=', limit = 2)
-                    append(TextColors.magenta(parts[0].removePrefix("--")))
-                    if (parts.size > 1) {
-                        append('=')
-                        append(parts[1])
-                    }
-                    append(' ')
-                }
-                if (runConfiguration.env.isNotEmpty()) appendLine()
-                runConfiguration.env.forEach { (k, v) ->
-                    append(TextColors.magenta(k))
+        if (!quiet) {
+            terminal.println(
+                buildString {
+                    append(TextColors.magenta("workspace"))
                     append('=')
-                    append(v)
+                    append(workspace.path.toString())
                     append(' ')
-                }
-            },
-        )
+                    append(TextColors.magenta("version"))
+                    append('=')
+                    append(workspace.version.toString())
+                    appendLine()
+                    for (arg in runConfiguration.args) {
+                        val parts = arg.split('=', limit = 2)
+                        append(TextColors.magenta(parts[0].removePrefix("--")))
+                        if (parts.size > 1) {
+                            append('=')
+                            append(parts[1])
+                        }
+                        append(' ')
+                    }
+                    if (runConfiguration.env.isNotEmpty()) appendLine()
+                    runConfiguration.env.forEach { (k, v) ->
+                        append(TextColors.magenta(k))
+                        append('=')
+                        append(v)
+                        append(' ')
+                    }
+                },
+            )
+        }
 
         val action = when {
             dryRun -> null

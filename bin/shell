@@ -1,0 +1,54 @@
+#!/bin/fish
+
+argparse --ignore-unknown 'd/database=' -- $argv
+
+function _shell
+  set flags
+  set -q _flag_database && set -a flags -d=$_flag_database
+  echo $argv[1] | odoo -q --no-patch shell $flags --log-level=error 2>/dev/null
+end
+
+function _json_shell
+  _shell "import json;print(json.dumps($argv[1], default=str))"
+end
+
+function help
+  for f in (functions)
+    if test "$f" != "help" -a (status filename) = "$(functions -D $f)"
+      echo $f
+    end
+  end
+end
+
+function _ir_ui_view_domain
+  argparse 'm/model=' 't/type=' -- $argv || exit 1
+  set -q _flag_model _flag_type || exit 1
+  echo "[['model', '=', '$_flag_model'], ['type', '=', '$_flag_type']]"
+end
+
+function combined_arch
+  set domain (_ir_ui_view_domain $argv)
+  _json_shell "self.env['ir.ui.view'].search_read($domain, ['id', 'name', 'arch'])" | jq
+end
+
+function studio_view
+  set domain (_ir_ui_view_domain $argv)
+  _shell "
+for rec in self.env['ir.ui.view'].search($domain):
+  print(self.env['ir.ui.view'].search([['inherit_id', '=', rec.id], ['name', 'like', 'Odoo Studio: %']]))
+"
+end
+
+function studio_views
+  _json_shell "self.env['ir.ui.view'].search_read([['name', 'like', 'Odoo Studio: %']], ['id', 'name', 'model', 'type', 'arch', 'inherit_id'])" | jq
+end
+
+if not set -q argv[1]
+  help
+else
+  if string match -qv '_*' "$argv[1]" && functions -q "$argv[1]"
+    $argv
+  else
+    help
+  end
+end
