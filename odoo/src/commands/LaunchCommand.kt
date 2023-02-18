@@ -50,7 +50,7 @@ class LaunchCommand(private val workspaces: Workspaces, private val terminal: Te
     private val testTags by option("--test-tags")
     private val init by option("-i", "--init")
     private val save by option("--save").custom()
-    private val quiet by option("-q","--quiet").flag().custom()
+    private val quiet by option("-q", "--quiet").flag().custom()
 
     private val graph = HashMap<String, List<String>>()
     private val computes = HashMap<String, (DslContext) -> Unit>()

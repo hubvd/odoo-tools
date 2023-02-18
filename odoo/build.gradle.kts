@@ -18,6 +18,13 @@ dependencies {
     implementation(libs.kodein.di)
 }
 
+spotless {
+    python {
+        target("resources/launcher/**/*.py")
+        black("22.12.0")
+    }
+}
+
 sourceSets["main"].resources.srcDir(buildDir.resolve("generated-resources"))
 
 tasks.register("generateLauncherChecksums") {

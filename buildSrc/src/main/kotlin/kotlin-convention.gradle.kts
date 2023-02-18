@@ -1,3 +1,4 @@
+import gradle.kotlin.dsl.accessors._6da864ba4650c27f2bcad2ebfa914628.spotless
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -26,4 +27,10 @@ tasks.withType<KotlinCompile> {
 kotlin {
     sourceSets["main"].kotlin.setSrcDirs(listOf("src"))
     sourceSets["test"].kotlin.setSrcDirs(listOf("test"))
+}
+
+spotless {
+    kotlin {
+        ktlint("0.48.0")
+    }
 }

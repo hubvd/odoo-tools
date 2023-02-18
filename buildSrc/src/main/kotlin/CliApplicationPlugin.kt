@@ -20,7 +20,7 @@ class CliApplicationPlugin : Plugin<Project> {
 
         project.dependencies {
             dependencies.add("implementation", "com.github.ajalt.clikt:clikt:3.5.1")
-            dependencies.add("implementation", "com.github.ajalt.mordant:mordant:2.0.0-beta10")
+            dependencies.add("implementation", "com.github.ajalt.mordant:mordant:2.0.0-beta11")
         }
 
         val extension = project.extensions.create<CliApplicationPluginExtension>("cli")
