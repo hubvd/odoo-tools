@@ -1,6 +1,13 @@
 import odoo
 import logging
-from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TaskProgressColumn, TimeRemainingColumn
+from rich.progress import (
+    Progress,
+    SpinnerColumn,
+    TextColumn,
+    BarColumn,
+    TaskProgressColumn,
+    TimeRemainingColumn,
+)
 from rich.rule import Rule
 from rich.console import Console
 
@@ -25,10 +32,12 @@ class WrappedGraph:
             new.has_progress = True
             new.progress = Progress(
                 SpinnerColumn(),
-                TextColumn("[progress.description]{task.description} ({task.completed} of {task.total})[/]"),
+                TextColumn(
+                    "[progress.description]{task.description} ({task.completed} of {task.total})[/]"
+                ),
                 BarColumn(bar_width=None),
                 TaskProgressColumn(),
-                expand=True
+                expand=True,
             )
             new.progress.start()
             new.task = new.progress.add_task("Loading modules", total=len(new.graph))
@@ -46,7 +55,10 @@ class WrappedGraph:
         else:
             if self.has_progress:
                 self.progress.update(self.task, visible=False)
-                WrappedGraph._logger.info("[bold green underline]All modules loaded ![/]", extra={"markup": True})
+                WrappedGraph._logger.info(
+                    "[bold green underline]All modules loaded ![/]",
+                    extra={"markup": True},
+                )
                 self.progress.remove_task(self.task)
                 old_line = self.progress.live.console.line
                 self.progress.live.console.line = lambda: ...
@@ -59,17 +71,28 @@ class WrappedGraph:
 
 
 class ModuleInstallProgress:
-
     @staticmethod
     def load_module_graph(
-        cr, graph, status=None, perform_checks=True,
-        skip_modules=None, report=None, models_to_check=None
+        cr,
+        graph,
+        status=None,
+        perform_checks=True,
+        skip_modules=None,
+        report=None,
+        models_to_check=None,
     ):
         return ModuleInstallProgress.base_load_module_graph(
-            cr, WrappedGraph(graph), status,
-            perform_checks, skip_modules, report, models_to_check
+            cr,
+            WrappedGraph(graph),
+            status,
+            perform_checks,
+            skip_modules,
+            report,
+            models_to_check,
         )
 
     def apply(self):
-        ModuleInstallProgress.base_load_module_graph = odoo.modules.loading.load_module_graph
+        ModuleInstallProgress.base_load_module_graph = (
+            odoo.modules.loading.load_module_graph
+        )
         odoo.modules.loading.load_module_graph = ModuleInstallProgress.load_module_graph

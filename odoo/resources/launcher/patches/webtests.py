@@ -36,6 +36,8 @@ def init_chrome(super):
     return decorator
 
 
-class QunitLogger():
+class QunitLogger:
     def apply(self):
-        odoo.tests.common.ChromeBrowser.__init__ = init_chrome(odoo.tests.common.ChromeBrowser.__init__)
+        odoo.tests.common.ChromeBrowser.__init__ = init_chrome(
+            odoo.tests.common.ChromeBrowser.__init__
+        )
