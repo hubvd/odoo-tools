@@ -1,0 +1,31 @@
+#!/bin/fish
+
+argparse 'f/fetch' -- $argv
+
+set base (worktree base || exit 1)
+set root (worktree path)
+
+for repo in odoo enterprise
+  set repo_path $root/$repo
+  test -d $repo_path || continue
+  set -q _flag_fetch && git -C $repo_path fetch origin $base
+  if test "$(git -C $repo_path branch --show-current)" != $base
+    echo skipped $repo because $base isn\'t checked out
+    continue
+  end
+
+  set staged_files (
+    git -C $repo_path status --porcelain |
+    string match -r '^[AMRDC].*' |
+    string sub -s4 |
+    string unescape --style script
+  )
+
+  if test (count $staged_files) -gt 0
+    echo skipped $repo because there are changes
+    continue
+  end
+
+  git -C $repo_path reset --hard origin/$base
+end
+
