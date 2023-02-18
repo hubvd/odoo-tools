@@ -28,7 +28,7 @@ end
 
 function combined_arch
   set domain (_ir_ui_view_domain $argv)
-  _json_shell "self.env['ir.ui.view'].search_read($domain, ['id', 'name', 'arch'])" | jq
+  _json_shell "self.env['ir.ui.view'].search_read($domain, ['id', 'priority', 'name', 'inherit_id', 'arch'])" | jq
 end
 
 function studio_view
@@ -39,16 +39,23 @@ for rec in self.env['ir.ui.view'].search($domain):
 "
 end
 
+function get_view
+  argparse 'm/model=' 't/type=' -- $argv || exit 1
+  _json_shell "self.env['$_flag_model'].with_context(studio=True).get_views(views=[[False, '$_flag_type']])" |
+    jq '.views.form.arch' -r |
+    format -l xml
+end
+
 function studio_views
   _json_shell "self.env['ir.ui.view'].search_read([['name', 'like', 'Odoo Studio: %']], ['id', 'name', 'model', 'type', 'arch', 'inherit_id'])" | jq
 end
 
-if not set -q argv[1]
-  help
+function delete_studio_views
+  _shell "self.env['ir.ui.view'].search([['name', 'like', 'Odoo Studio: %']]).active = False"
+end
+
+if string match -qv '_*' "$argv[1]" && functions -q "$argv[1]"
+  $argv
 else
-  if string match -qv '_*' "$argv[1]" && functions -q "$argv[1]"
-    $argv
-  else
-    help
-  end
+  help
 end

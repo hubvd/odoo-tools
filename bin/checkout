@@ -2,7 +2,7 @@
 
 worktree repository &>/dev/null || exit 1
 
-argparse 'v/version' -- $argv
+argparse 'v/version' 'f/fetch' -- $argv
 
 if set -q _flag_version
   set remote origin
@@ -27,4 +27,4 @@ end
 if not git rev-parse --quiet --verify $remote/$branch >/dev/null
   git fetch $remote $branch || exit 1
 end
-git checkout $branch
+set -q _flag_fetch || git checkout $branch

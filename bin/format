@@ -5,14 +5,14 @@ set -g pipe cat
 set -q _flag_language || set _flag_language txt
 
 switch $_flag_language
-  case xml
-    set -ga pipe '|' xmllint --format -
-  case json
-    set -ga pipe '|' jq .
+  case xml html json
+    set parser $_flag_language
+    test $parser = xml && set parser html
+    set -ga pipe '|' prettier --print-width (tput cols) --parser $parser
   case py python
     set -ga pipe '|' black -q -
 end
 
-set -ga pipe '|' bat -l $_flag_language
+set -ga pipe '|' bat -p -l $_flag_language
 
 eval $pipe
