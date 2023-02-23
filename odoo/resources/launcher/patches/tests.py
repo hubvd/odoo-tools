@@ -42,9 +42,18 @@ def browser_js(super):
     return decorator
 
 
+def start_tour(super):
+    def decorator(*args, **kwargs):
+        if os.environ.get("STEP_DELAY"):
+            kwargs["step_delay"] = int(os.environ.get("STEP_DELAY"))
+        super(*args, **kwargs)
+
+    return decorator
+
 class ProgressTestResultPatch:
     def apply(self):
         odoo.tests.runner.OdooTestResult.startTest = startTest(
             unittest.result.TestResult.startTest
         )
         odoo.tests.HttpCase.browser_js = browser_js(odoo.tests.HttpCase.browser_js)
+        odoo.tests.HttpCase.start_tour = start_tour(odoo.tests.HttpCase.start_tour)

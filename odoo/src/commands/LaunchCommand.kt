@@ -42,6 +42,7 @@ class LaunchCommand(private val workspaces: Workspaces, private val terminal: Te
     private val addonsPath by option("--addons-path")
     private val mobile by option("--mobile").flag().custom()
     private val watch by option("--watch").flag().custom()
+    private val stepDelay by option("--step-delay").custom()
     private val drop by option("--drop").flag().custom()
     private val httpPort by option("-p", "--http-port")
     private val database by option("-d", "--database")

@@ -91,6 +91,10 @@ fun LaunchCommand.computes() {
         if ("watch" in flags) "1" else null
     }
 
+    env("STEP_DELAY") {
+        options["step-delay"]?.toIntOrNull()?.toString()
+    }
+
     env("ODOO_WORKSPACE") {
         workspace.path.toString()
     }

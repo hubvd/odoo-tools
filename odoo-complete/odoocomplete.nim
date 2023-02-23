@@ -161,6 +161,7 @@ let completions = [
   newCompletion(@["--mobile"]),
   newCompletion(@["--failslow"]),
   newCompletion(@["--watch"]),
+  newCompletion(@["--step-delay"], true),
   newCompletion(@["--dry-run"]),
   newCompletion(@["--no-patch"]),
   newCompletion(@["--addons-path"], true),
