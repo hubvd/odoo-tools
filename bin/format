@@ -5,7 +5,7 @@ set -g pipe cat
 set -q _flag_language || set _flag_language txt
 
 switch $_flag_language
-  case xml html json
+  case xml html json css
     set parser $_flag_language
     test $parser = xml && set parser html
     set -ga pipe '|' prettier --print-width (tput cols) --parser $parser
