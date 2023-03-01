@@ -1,7 +1,9 @@
 #!/usr/bin/fish
 
+argparse 's/sentry' -- $argv
 set -q argv[1] || exit 1
 set ws (worktree base) || exit 1
-set branch $ws-opw-$argv[1]-huvw
+set -q _flag_sentry && set name sentry || set name opw
+set branch $ws-$name-$argv[1]-huvw
 git rev-parse --quiet --verify $branch > /dev/null || set flags -b
 git checkout $flags $branch
