@@ -67,7 +67,6 @@ class RichLogger:
         return decorator
 
     def apply(self):
-
         werkzeug_logger = logging.getLogger("werkzeug")
 
         def log_request(self, code="-", size="-"):

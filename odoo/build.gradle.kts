@@ -21,7 +21,7 @@ dependencies {
 spotless {
     python {
         target("resources/launcher/**/*.py")
-        black("22.12.0")
+        black("23.1.0")
     }
 }
 
