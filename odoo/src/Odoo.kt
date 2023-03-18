@@ -62,6 +62,7 @@ fun LaunchCommand.computes() {
                 .splitToSequence(',')
                 .filter { !it.startsWith('-') }
                 .flatMap { TestTag(it).toAddons(workspace, options["addons-path"]) }
+                .toHashSet()
                 .joinToString(",")
         }
     }
@@ -115,6 +116,7 @@ fun LaunchCommand.computes() {
         option("max-cron-thread") { if ("test-enable" in flags) "0" else null }
         option("http-port") { if ("test-enable" in flags) "9000" else null }
         option("database") { if ("test-enable" in flags) "${workspace.name}-test" else workspace.name }
+        option("log-handler") { if ("test-enable" in flags) "werkzeug:ERROR" else null }
     }
 }
 

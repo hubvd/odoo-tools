@@ -14,7 +14,8 @@ from zoneinfo import ZoneInfo
 class MyRichHandler(RichHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.db_style = Style(bold=False, color="rgb(241, 179, 135)", italic=True)
+        self._log_render.show_time = False
+        self._log_render.show_level = False
 
     def render(self, *, record, traceback, message_renderable):
         path = record.name
@@ -38,7 +39,10 @@ class MyRichHandler(RichHandler):
     def render_message(self, record: "LogRecord", message: str) -> "ConsoleRenderable":
         message_text = super().render_message(record, message)
         dbname = getattr(threading.current_thread(), "dbname", "?")
-        message_text._spans.append(Span(0, len(dbname), self.db_style))
+        level_name = record.levelname
+        message_text._spans.append(
+            Span(0, len(dbname), f"logging.level.{level_name.lower()}")
+        )
         return message_text
 
 

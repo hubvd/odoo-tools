@@ -40,6 +40,7 @@ class LaunchCommand(private val workspaces: Workspaces, private val terminal: Te
     private val dryRun by option("--dry-run").flag().custom()
     private val testQunit by option("--test-qunit").custom()
     private val addonsPath by option("--addons-path")
+    private val logHandler by option("--log-handler")
     private val mobile by option("--mobile").flag().custom()
     private val watch by option("--watch").flag().custom()
     private val stepDelay by option("--step-delay").custom()

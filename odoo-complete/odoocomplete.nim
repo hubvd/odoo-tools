@@ -165,6 +165,7 @@ let completions = [
   newCompletion(@["--dry-run"]),
   newCompletion(@["--no-patch"]),
   newCompletion(@["--addons-path"], true),
+  newCompletion(@["--log-handler"], true),
 ]
 
 var completed = false
