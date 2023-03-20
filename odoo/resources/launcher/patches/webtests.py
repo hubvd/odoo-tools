@@ -1,6 +1,13 @@
 import logging
 import re
+import os
+import time
 import odoo.tests.common
+from odoo.release import version_info
+
+major_version = version_info[0]
+if isinstance(major_version, str):
+    major_version = int(major_version.lstrip("saas~"))
 
 
 class LogReplacement:
@@ -88,6 +95,40 @@ def _spawn_chrome(super):
     return decorator
 
 
+def _find_websocket(self):
+    version = self._json_command("version")
+    self._logger.info("Browser version: %s", version["Browser"])
+    infos = self._json_command("", get_key=0)  # Infos about the first tab
+    self.ws_url = infos["webSocketDebuggerUrl"]
+    self.dev_tools_frontend_url = infos.get("devtoolsFrontendUrl")
+    self._logger.info(
+        "Chrome headless temporary user profile dir: %s", self.user_data_dir
+    )
+
+
+@classmethod
+def start_browser(cls):
+    # start browser on demand
+    if cls.browser is None:
+        cls.browser = odoo.tests.common.ChromeBrowser(
+            cls._logger, cls.browser_size, cls.__name__
+        )
+        cls.addClassCleanup(cls.terminate_browser)
+    if os.environ.get("QUNIT_WATCH") == "1":
+        debug_front_end = f"http://127.0.0.1:{cls.browser.devtools_port}{cls.browser.dev_tools_frontend_url}"
+        cls.browser._spawn_chrome([cls.browser.executable, debug_front_end])
+        time.sleep(3)
+
+
+def _wait_code_ok(super):
+    def decorator(self, code, timeout):
+        if os.environ.get("QUNIT_WATCH") == "1":
+            timeout = max(timeout * 10, 3600)
+        return super(self, code, timeout)
+
+    return decorator
+
+
 class QunitLogger:
     def apply(self):
         odoo.tests.common.ChromeBrowser.__init__ = init_chrome(
@@ -97,3 +138,10 @@ class QunitLogger:
         odoo.tests.common.ChromeBrowser._spawn_chrome = _spawn_chrome(
             odoo.tests.common.ChromeBrowser._spawn_chrome
         )
+
+        if major_version < 16:
+            odoo.tests.common.ChromeBrowser._find_websocket = _find_websocket
+            odoo.tests.common.ChromeBrowser._wait_code_ok = _wait_code_ok(
+                odoo.tests.common.ChromeBrowser._wait_code_ok
+            )
+            odoo.tests.HttpCase.start_browser = start_browser
