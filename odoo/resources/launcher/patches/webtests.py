@@ -2,6 +2,7 @@ import logging
 import re
 import os
 import time
+import subprocess
 import odoo.tests.common
 from odoo.release import version_info
 
@@ -57,6 +58,11 @@ class CustomAdapter(logging.LoggerAdapter):
             return self.logger.log(*args, **kwargs)
         level, fmt, msg = args[:3]
         msg = str(msg)
+
+        # TODO: match fmt in replacements
+        if fmt == "Screenshot in: %s" and os.environ.get("TERM") == "xterm-kitty":
+            subprocess.run(["kitty", "+kitten", "icat", msg])
+            return
 
         for replacement in self.replacements:
             if match := replacement.regex.match(msg):
