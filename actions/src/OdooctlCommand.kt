@@ -1,0 +1,42 @@
+package com.github.hubvd.odootools.actions
+
+import com.github.ajalt.clikt.core.CliktCommand
+import com.github.ajalt.clikt.parameters.options.flag
+import com.github.ajalt.clikt.parameters.options.option
+import com.github.ajalt.mordant.rendering.TextColors
+import com.github.ajalt.mordant.table.Borders
+import com.github.ajalt.mordant.table.table
+import com.github.ajalt.mordant.terminal.Terminal
+
+class OdooctlCommand(private val odooctl: Odooctl, private val terminal: Terminal) : CliktCommand() {
+    private val killall by option("-k").flag()
+
+    override fun run() {
+        if (killall) {
+            odooctl.killAll()
+            return
+        }
+
+        terminal.println(
+            table {
+                tableBorders = Borders.ALL
+                header {
+                    style(TextColors.magenta, bold = true)
+                    row("pid", "workspace", "db", "url")
+                }
+                body {
+                    rowStyles(TextColors.blue, TextColors.green)
+                    cellBorders = Borders.LEFT_RIGHT
+                    odooctl.instances().forEach { instance ->
+                        row {
+                            cell(instance.pid)
+                            cell(instance.workspace.name)
+                            cell(instance.database)
+                            cell(instance.baseUrl)
+                        }
+                    }
+                }
+            },
+        )
+    }
+}

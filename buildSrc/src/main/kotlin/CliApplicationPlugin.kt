@@ -6,10 +6,11 @@ import org.gradle.api.plugins.ExtensionAware
 import org.gradle.jvm.toolchain.JavaLanguageVersion
 import org.gradle.jvm.toolchain.JavaToolchainService
 import org.gradle.jvm.toolchain.JvmVendorSpec
-import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.create
 import org.gradle.kotlin.dsl.dependencies
 import org.gradle.kotlin.dsl.getByName
+import org.gradle.kotlin.dsl.withType
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 open class CliApplicationPluginExtension {
     var name: String? = "name"
@@ -27,6 +28,12 @@ class CliApplicationPlugin : Plugin<Project> {
         }
 
         val extension = project.extensions.create<CliApplicationPluginExtension>("cli")
+
+        project.tasks.withType<KotlinCompile> {
+            compilerOptions {
+                freeCompilerArgs.add("-opt-in=com.github.ajalt.mordant.terminal.ExperimentalTerminalApi")
+            }
+        }
 
         project.tasks.getByName("build") {
             dependsOn("nativeCompile")

@@ -1,34 +1,3 @@
 #!/bin/fish
 
-set instances (odooctl instances)
-
-function error
-  notify-send -h string:frcolor:#FF0000 $argv
-  exit 1
-end
-
-function success
-  notify-send -h string:frcolor:#00FF00 $argv
-end
-
-if test (count $instances) -eq 0
-  error 'No instances running'
-else if test (count $instances) -eq 1
-  set index 1
-else
-  for i in $instances
-    echo $i | read -d: pid port db
-    set -a display_names "pid $pid listening on $port with database $db"
-  end
-  set answer (string join \n $display_names | bemenu -p attach)
-  set index (contains -i $answer $display_names) || exit 1
-end
-echo $instances[$index] | read -d: pid port db
-set url "http://localhost:$port/debug/attach"
-set curl_status (timeout 2s curl -o /dev/null -s -w "%{http_code}\n" $url)
-
-if not string match -q "2*" $curl_status
-  error 'An error occurred..'
-else
-  success 'Attached successfully'
-end
+actions attach $argv
