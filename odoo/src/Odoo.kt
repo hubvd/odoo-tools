@@ -114,7 +114,13 @@ fun LaunchCommand.computes() {
         flag("stop-after-init") { "test-enable" in flags }
         option("log-level") { if ("test-enable" in flags) "test" else null }
         option("max-cron-thread") { if ("test-enable" in flags) "0" else null }
-        option("http-port") { if ("test-enable" in flags) "9000" else null }
+        option("http-port") {
+            if ("test-enable" in flags) {
+                "9000"
+            } else {
+                workspace.version.toString().replace(".", "") + "00"
+            }
+        }
         option("database") { if ("test-enable" in flags) "${workspace.name}-test" else workspace.name }
         option("log-handler") { if ("test-enable" in flags) "werkzeug:ERROR" else null }
     }

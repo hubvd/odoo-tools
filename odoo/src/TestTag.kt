@@ -58,6 +58,7 @@ fun TestTag.toAddons(workspace: Workspace, addonsPath: String?): List<String> {
             }
             .map { path -> if (path.isAbsolute) path else workspace.path / path }
             .forEach { rgArg += it.toString() }
+        rgArg += (workspace.path / "odoo/odoo/addons").toString()
     } else {
         rgArg += workspace.path.toString()
     }

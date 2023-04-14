@@ -1,0 +1,14 @@
+[
+    {
+        "directory": "org.jetbrains.kotlin/kotlin-stdlib",
+        "module": "org.jetbrains.kotlin:kotlin-stdlib"
+    },
+    {
+        "directory": "org.jetbrains.kotlin/kotlin-reflect",
+        "module": "org.jetbrains.kotlin:kotlin-reflect"
+    },
+    {
+        "directory": "com.github.ajalt.mordant/mordant",
+        "module": "com.github.ajalt.mordant:mordant"
+    }
+]

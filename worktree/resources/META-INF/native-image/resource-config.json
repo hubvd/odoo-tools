@@ -1,7 +1,0 @@
-{
-  "resources":{
-  "includes":[{
-      "pattern":"\\Qcom/sun/jna/linux-x86-64/libjnidispatch.so\\E"
-    }]},
-  "bundles":[]
-}

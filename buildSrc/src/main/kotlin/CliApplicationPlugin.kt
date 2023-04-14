@@ -1,9 +1,12 @@
 import org.graalvm.buildtools.gradle.dsl.GraalVMExtension
+import org.graalvm.buildtools.gradle.dsl.GraalVMReachabilityMetadataRepositoryExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.plugins.ExtensionAware
 import org.gradle.jvm.toolchain.JavaLanguageVersion
 import org.gradle.jvm.toolchain.JavaToolchainService
 import org.gradle.jvm.toolchain.JvmVendorSpec
+import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.create
 import org.gradle.kotlin.dsl.dependencies
 import org.gradle.kotlin.dsl.getByName
@@ -19,8 +22,8 @@ class CliApplicationPlugin : Plugin<Project> {
         project.plugins.apply("org.graalvm.buildtools.native")
 
         project.dependencies {
-            dependencies.add("implementation", "com.github.ajalt.clikt:clikt:3.5.1")
-            dependencies.add("implementation", "com.github.ajalt.mordant:mordant:2.0.0-beta11")
+            dependencies.add("implementation", "com.github.ajalt.clikt:clikt:3.5.2")
+            dependencies.add("implementation", "com.github.ajalt.mordant:mordant:2.0.0-beta13")
         }
 
         val extension = project.extensions.create<CliApplicationPluginExtension>("cli")
@@ -31,6 +34,10 @@ class CliApplicationPlugin : Plugin<Project> {
 
         project.afterEvaluate {
             project.extensions.configure<GraalVMExtension>("graalvmNative") {
+                (this as ExtensionAware).extensions.configure<GraalVMReachabilityMetadataRepositoryExtension>("metadataRepository") {
+                    uri(project.rootDir.resolve("reachability-metadata"))
+                    enabled.set(true)
+                }
                 testSupport.set(false)
                 binaries {
                     named("main") {
