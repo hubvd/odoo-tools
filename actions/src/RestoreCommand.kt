@@ -151,6 +151,7 @@ class RestoreCommand(private val terminal: Terminal, private val config: Actions
                 "UPDATE ir_mail_server SET active = 'f'",
                 "UPDATE res_users SET login = 'admin' WHERE id = 2",
                 "UPDATE res_users SET password = 'admin'",
+                "UPDATE res_users SET totp_secret = NULL",
                 "UPDATE ir_config_parameter SET value = '2998-05-07 13:16:50' WHERE key = 'database.expiration_date'",
                 "DELETE FROM ir_config_parameter WHERE key = 'database.expiration_reason'",
                 "UPDATE ir_config_parameter SET value = '${UUID.randomUUID()}' WHERE key = 'database.uuid'",
