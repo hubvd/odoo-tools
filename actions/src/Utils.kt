@@ -67,7 +67,7 @@ class Pycharm {
 
     private val pycharmBin = System.getProperty("user.home") + "/.local/share/JetBrains/Toolbox/scripts/pycharm"
 
-    fun open(path: String, line: Int? = null, column: Int? = null) {
+    fun open(path: String, line: Int? = null, column: Int? = null, blocking: Boolean = false) {
         val cmd = buildList {
             add(pycharmBin)
             line?.let {
@@ -81,13 +81,11 @@ class Pycharm {
             add(path)
         }
 
-        runBlocking {
-            process(
-                *cmd.toTypedArray(),
-                stdout = Redirect.SILENT,
-                stderr = Redirect.SILENT,
-            )
-        }
+        ProcessBuilder(*cmd.toTypedArray())
+            .apply {
+                redirectOutput(ProcessBuilder.Redirect.DISCARD)
+                redirectError(ProcessBuilder.Redirect.DISCARD)
+            }.start().takeIf { blocking }?.waitFor()
     }
 }
 

@@ -1,4 +1,3 @@
-import gradle.kotlin.dsl.accessors._6da864ba4650c27f2bcad2ebfa914628.spotless
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile

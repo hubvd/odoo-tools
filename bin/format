@@ -5,9 +5,10 @@ set -g pipe cat
 set -q _flag_language || set _flag_language txt
 
 switch $_flag_language
-  case xml html json css
+  case xml html json css js ts
     set parser $_flag_language
     test $parser = xml && set parser html
+    contains -- $parser ts js && set parser typescript
     set -ga pipe '|' prettier --print-width (tput cols) --parser $parser
   case py python
     set -ga pipe '|' black -q -
