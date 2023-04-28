@@ -1,5 +1,6 @@
 package com.github.hubvd.odootools.odoo.actions
 
+import com.github.ajalt.mordant.terminal.Terminal
 import com.github.hubvd.odootools.odoo.RunConfiguration
 import com.github.pgreze.process.process
 import kotlinx.coroutines.runBlocking
@@ -18,7 +19,7 @@ interface Action {
     fun run(configuration: RunConfiguration)
 }
 
-class LaunchAction : Action {
+class LaunchAction(private val terminal: Terminal) : Action {
 
     override fun run(configuration: RunConfiguration) {
         val useCustomLauncher = "no-patch" !in configuration.context.flags &&
@@ -41,7 +42,12 @@ class LaunchAction : Action {
                 .directory(configuration.context.workspace.path.toFile())
                 .start()
 
-        Runtime.getRuntime().addShutdownHook(thread(start = false) { process.destroy() })
+        Runtime.getRuntime().addShutdownHook(
+            thread(start = false) {
+                terminal.cursor.show()
+                process.destroy()
+            },
+        )
 
         val code = process.waitFor()
 
@@ -105,11 +111,13 @@ class LaunchAction : Action {
             .filter { it.isNotBlank() }
             .map { it.trim().split(':', limit = 2) }
             .associateTo(HashMap()) { it[0].toLong() to it[1] }
+
     private fun File.checksum(): Long {
         ADLER_32.reset()
         ADLER_32.update(readBytes())
         return ADLER_32.value
     }
+
     companion object {
         val ADLER_32 by lazy { Adler32() }
     }

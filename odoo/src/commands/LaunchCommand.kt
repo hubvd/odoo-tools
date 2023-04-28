@@ -148,7 +148,7 @@ class LaunchCommand(private val workspaces: Workspaces, private val terminal: Te
         val action = when {
             dryRun -> null
             save != null -> SavePycharmConfiguration(terminal, save!!, workspace)
-            else -> LaunchAction()
+            else -> LaunchAction(terminal)
         }
 
         action?.run(runConfiguration)
