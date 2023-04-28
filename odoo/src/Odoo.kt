@@ -100,6 +100,10 @@ fun LaunchCommand.computes() {
         workspace.path.toString()
     }
 
+    env("ODOO_DEBUG") {
+        if ("debug" in flags) "1" else null
+    }
+
     depends("test-qunit", "mobile") {
         option("test-tags") {
             when {

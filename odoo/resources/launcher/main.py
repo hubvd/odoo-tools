@@ -10,6 +10,17 @@ from patches import progress
 from patches import tests
 from patches import webtests
 
+if os.environ.get("ODOO_DEBUG") == "1":
+    import pydevd
+
+    pydevd.settrace(
+        "localhost",
+        port=10000,
+        stdoutToServer=True,
+        stderrToServer=True,
+        suspend=True,
+    )
+
 patches = [
     richlogger.RichLogger(),
     progress.ModuleInstallProgress(),
