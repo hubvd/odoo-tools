@@ -2,26 +2,37 @@ package com.github.hubvd.odootools.actions
 
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.arguments.argument
-import com.github.ajalt.clikt.parameters.arguments.optional
-import com.github.ajalt.clikt.parameters.options.option
-import com.github.ajalt.clikt.parameters.types.int
+import com.github.ajalt.clikt.parameters.arguments.multiple
 import com.github.hubvd.odootools.workspace.Workspaces
 import kotlin.system.exitProcess
 
 class PycharmCommand(private val workspaces: Workspaces) : CliktCommand() {
-    private val line by option("--line").int()
-    private val column by option("--column").int()
-    private val path by argument().optional()
+    private val paths by argument().multiple()
+
+    private val pathRe = "^(?<path>.*?)(?:#(?<line>\\d+)(?::(?<column>\\d+))?)?\$".toRegex()
+
+    private fun extractPosition(pathDescriptor: String): Triple<String, Int?, Int?> {
+        val match = pathRe.find(pathDescriptor) ?: return Triple(pathDescriptor, null, null)
+        return Triple(
+            match.groups["path"]?.value ?: "",
+            match.groups["line"]?.value?.toInt(),
+            match.groups["column"]?.value?.toInt(),
+        )
+    }
 
     override fun run() {
-        if (path != null) {
-            Pycharm().open(path!!, line, column)
+        val pycharm = Pycharm()
+        if (paths.isNotEmpty()) {
+            paths.forEach {
+                val (path, line, column) = extractPosition(it)
+                pycharm.open(path, line, column, blocking = true)
+            }
         } else {
             val workspace = workspaces.current()
                 ?: menu(workspaces.list()) { it.name }
                 ?: exitProcess(1)
 
-            Pycharm().open(workspace.path.toString())
+            pycharm.open(workspace.path.toString())
         }
     }
 }
