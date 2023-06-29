@@ -9,6 +9,7 @@ from patches import richlogger
 from patches import progress
 from patches import tests
 from patches import webtests
+from patches import minifier
 
 if os.environ.get("ODOO_DEBUG") == "1":
     import pydevd
@@ -16,8 +17,8 @@ if os.environ.get("ODOO_DEBUG") == "1":
     pydevd.settrace(
         "localhost",
         port=10000,
-        stdoutToServer=True,
-        stderrToServer=True,
+        stdoutToServer=False,
+        stderrToServer=False,
         suspend=True,
     )
 
@@ -26,6 +27,7 @@ patches = [
     progress.ModuleInstallProgress(),
     tests.ProgressTestResultPatch(),
     webtests.QunitLogger(),
+    minifier.Minifier(),
 ]
 
 for patch in patches:

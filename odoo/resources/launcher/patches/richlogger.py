@@ -21,6 +21,14 @@ class MyRichHandler(RichHandler):
         path = record.name
         if path.startswith("odoo.addons."):
             path = "@" + path[12:]
+
+        if len(path) > 36:
+            parts = path.split(".")
+            if len(parts) > 1:
+                path = parts[-1][:33] + "..."
+            else:
+                path = path[:33] + "..."
+
         level = self.get_level_text(record)
         time_format = None if self.formatter is None else self.formatter.datefmt
         log_time = datetime.fromtimestamp(record.created, ZoneInfo("Europe/Brussels"))

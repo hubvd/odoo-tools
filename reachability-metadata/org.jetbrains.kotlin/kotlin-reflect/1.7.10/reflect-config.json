@@ -10,7 +10,6 @@
         "condition": {
             "typeReachable": "kotlin.reflect.jvm.internal.impl.descriptors.runtime.components.ReflectClassStructure"
         },
-        "name": "kotlin.Metadata",
         "methods": [
             {
                 "name": "bv",
@@ -44,7 +43,8 @@
                 "name": "xs",
                 "parameterTypes": []
             }
-        ]
+        ],
+        "name": "kotlin.Metadata"
     },
     {
         "condition": {
@@ -75,19 +75,19 @@
         "condition": {
             "typeReachable": "kotlin.jvm.internal.Reflection"
         },
-        "name": "kotlin.reflect.jvm.internal.ReflectionFactoryImpl",
         "methods": [
             {
                 "name": "<init>",
                 "parameterTypes": []
             }
-        ]
+        ],
+        "name": "kotlin.reflect.jvm.internal.ReflectionFactoryImpl"
     },
     {
+        "allPublicFields": true,
         "condition": {
             "typeReachable": "kotlin.reflect.jvm.internal.impl.resolve.scopes.DescriptorKindFilter"
         },
-        "name": "kotlin.reflect.jvm.internal.impl.resolve.scopes.DescriptorKindFilter",
-        "allPublicFields": true
+        "name": "kotlin.reflect.jvm.internal.impl.resolve.scopes.DescriptorKindFilter"
     }
 ]

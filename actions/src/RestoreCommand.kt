@@ -16,13 +16,14 @@ import com.github.pgreze.process.InputSource
 import com.github.pgreze.process.Redirect
 import com.github.pgreze.process.process
 import kotlinx.coroutines.runBlocking
+import org.http4k.core.HttpHandler
+import org.http4k.core.Method
+import org.http4k.core.Request
+import org.http4k.core.body.form
 import java.io.File
 import java.io.FileInputStream
 import java.io.InputStream
 import java.net.URI
-import java.net.http.HttpClient
-import java.net.http.HttpRequest
-import java.net.http.HttpResponse
 import java.nio.file.Files
 import java.util.*
 import java.util.zip.ZipInputStream
@@ -44,7 +45,11 @@ sealed class DumpSource {
     }
 }
 
-class RestoreCommand(private val terminal: Terminal, private val config: ActionsConfig) : CliktCommand() {
+class RestoreCommand(
+    private val terminal: Terminal,
+    private val dumpPassword: Secret,
+    private val httpHandler: HttpHandler,
+) : CliktCommand() {
     private val source by mutuallyExclusiveOptions(
         option("-z").file(mustExist = true, canBeFile = true, canBeDir = false)
             .convert { DumpSource.ZipSource(it) }
@@ -64,22 +69,13 @@ class RestoreCommand(private val terminal: Terminal, private val config: Actions
     }
 
     private fun download(source: DumpSource.RemoteSource): InputStream {
-        val remote = URI.create("https://${source.uri.host.replace("-all", "")}/web/database/backup")
-        val client = HttpClient.newBuilder().build()
-        val request = HttpRequest.newBuilder(remote)
-            .POST(
-                HttpRequest.BodyPublishers.ofString(
-                    mapOf(
-                        "master_pwd" to config.password,
-                        "name" to source.name,
-                        "backup_format" to "zip",
-                    ).entries.joinToString("&") { it.key + "=" + it.value },
-                ),
-            )
+        val remote = "https://${source.uri.host.replace("-all", "")}/web/database/backup"
+        val request = Request(Method.POST, remote)
+            .form("master_pwd", dumpPassword.value)
+            .form("name", source.name)
+            .form("backup_format", "zip")
             .header("Content-Type", "application/x-www-form-urlencoded")
-            .build()
-        val response = client.send(request, HttpResponse.BodyHandlers.ofInputStream())
-        return response.body()
+        return httpHandler(request).body.stream
     }
 
     private fun unzip(inputStream: InputStream) {

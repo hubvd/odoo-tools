@@ -3,7 +3,6 @@
         "name": "com.sun.jna.Callback"
     },
     {
-        "name": "com.sun.jna.CallbackReference",
         "methods": [
             {
                 "name": "getCallback",
@@ -34,33 +33,33 @@
                     "com.sun.jna.CallbackReference$AttachOptions"
                 ]
             }
-        ]
+        ],
+        "name": "com.sun.jna.CallbackReference"
     },
     {
         "name": "com.sun.jna.CallbackReference$AttachOptions"
     },
     {
-        "name": "com.sun.jna.FromNativeConverter",
         "methods": [
             {
                 "name": "nativeType",
                 "parameterTypes": []
             }
-        ]
+        ],
+        "name": "com.sun.jna.FromNativeConverter"
     },
     {
-        "name": "com.sun.jna.IntegerType",
         "fields": [
             {
                 "name": "value"
             }
-        ]
+        ],
+        "name": "com.sun.jna.IntegerType"
     },
     {
         "name": "com.sun.jna.JNIEnv"
     },
     {
-        "name": "com.sun.jna.Native",
         "methods": [
             {
                 "name": "dispose",
@@ -101,10 +100,10 @@
                     "java.lang.Object"
                 ]
             }
-        ]
+        ],
+        "name": "com.sun.jna.Native"
     },
     {
-        "name": "com.sun.jna.Native$ffi_callback",
         "methods": [
             {
                 "name": "invoke",
@@ -114,19 +113,19 @@
                     "long"
                 ]
             }
-        ]
+        ],
+        "name": "com.sun.jna.Native$ffi_callback"
     },
     {
-        "name": "com.sun.jna.NativeMapped",
         "methods": [
             {
                 "name": "toNative",
                 "parameterTypes": []
             }
-        ]
+        ],
+        "name": "com.sun.jna.NativeMapped"
     },
     {
-        "name": "com.sun.jna.Pointer",
         "fields": [
             {
                 "name": "peer"
@@ -139,18 +138,18 @@
                     "long"
                 ]
             }
-        ]
+        ],
+        "name": "com.sun.jna.Pointer"
     },
     {
-        "name": "com.sun.jna.PointerType",
         "fields": [
             {
                 "name": "pointer"
             }
-        ]
+        ],
+        "name": "com.sun.jna.PointerType"
     },
     {
-        "name": "com.sun.jna.Structure",
         "fields": [
             {
                 "name": "memory"
@@ -179,13 +178,13 @@
                     "long"
                 ]
             }
-        ]
+        ],
+        "name": "com.sun.jna.Structure"
     },
     {
         "name": "com.sun.jna.Structure$ByValue"
     },
     {
-        "name": "com.sun.jna.Structure$FFIType$FFITypes",
         "fields": [
             {
                 "name": "ffi_type_double"
@@ -226,10 +225,10 @@
             {
                 "name": "ffi_type_void"
             }
-        ]
+        ],
+        "name": "com.sun.jna.Structure$FFIType$FFITypes"
     },
     {
-        "name": "com.sun.jna.WString",
         "methods": [
             {
                 "name": "<init>",
@@ -237,10 +236,10 @@
                     "java.lang.String"
                 ]
             }
-        ]
+        ],
+        "name": "com.sun.jna.WString"
     },
     {
-        "name": "java.lang.Boolean",
         "fields": [
             {
                 "name": "TYPE"
@@ -262,10 +261,10 @@
                     "java.lang.String"
                 ]
             }
-        ]
+        ],
+        "name": "java.lang.Boolean"
     },
     {
-        "name": "java.lang.Byte",
         "fields": [
             {
                 "name": "TYPE"
@@ -281,10 +280,10 @@
                     "byte"
                 ]
             }
-        ]
+        ],
+        "name": "java.lang.Byte"
     },
     {
-        "name": "java.lang.Character",
         "fields": [
             {
                 "name": "TYPE"
@@ -300,19 +299,19 @@
                     "char"
                 ]
             }
-        ]
+        ],
+        "name": "java.lang.Character"
     },
     {
-        "name": "java.lang.Class",
         "methods": [
             {
                 "name": "getComponentType",
                 "parameterTypes": []
             }
-        ]
+        ],
+        "name": "java.lang.Class"
     },
     {
-        "name": "java.lang.Double",
         "fields": [
             {
                 "name": "TYPE"
@@ -328,10 +327,10 @@
                     "double"
                 ]
             }
-        ]
+        ],
+        "name": "java.lang.Double"
     },
     {
-        "name": "java.lang.Float",
         "fields": [
             {
                 "name": "TYPE"
@@ -347,10 +346,10 @@
                     "float"
                 ]
             }
-        ]
+        ],
+        "name": "java.lang.Float"
     },
     {
-        "name": "java.lang.Integer",
         "fields": [
             {
                 "name": "TYPE"
@@ -366,10 +365,10 @@
                     "int"
                 ]
             }
-        ]
+        ],
+        "name": "java.lang.Integer"
     },
     {
-        "name": "java.lang.Long",
         "fields": [
             {
                 "name": "TYPE"
@@ -385,19 +384,19 @@
                     "long"
                 ]
             }
-        ]
+        ],
+        "name": "java.lang.Long"
     },
     {
-        "name": "java.lang.Object",
         "methods": [
             {
                 "name": "toString",
                 "parameterTypes": []
             }
-        ]
+        ],
+        "name": "java.lang.Object"
     },
     {
-        "name": "java.lang.Short",
         "fields": [
             {
                 "name": "TYPE"
@@ -413,10 +412,10 @@
                     "short"
                 ]
             }
-        ]
+        ],
+        "name": "java.lang.Short"
     },
     {
-        "name": "java.lang.String",
         "methods": [
             {
                 "name": "<init>",
@@ -445,10 +444,10 @@
                 "name": "toCharArray",
                 "parameterTypes": []
             }
-        ]
+        ],
+        "name": "java.lang.String"
     },
     {
-        "name": "java.lang.System",
         "methods": [
             {
                 "name": "getProperty",
@@ -456,18 +455,18 @@
                     "java.lang.String"
                 ]
             }
-        ]
+        ],
+        "name": "java.lang.System"
     },
     {
-        "name": "java.lang.Void",
         "fields": [
             {
                 "name": "TYPE"
             }
-        ]
+        ],
+        "name": "java.lang.Void"
     },
     {
-        "name": "java.lang.reflect.Method",
         "methods": [
             {
                 "name": "getParameterTypes",
@@ -477,19 +476,19 @@
                 "name": "getReturnType",
                 "parameterTypes": []
             }
-        ]
+        ],
+        "name": "java.lang.reflect.Method"
     },
     {
-        "name": "java.nio.Buffer",
         "methods": [
             {
                 "name": "position",
                 "parameterTypes": []
             }
-        ]
+        ],
+        "name": "java.nio.Buffer"
     },
     {
-        "name": "java.nio.ByteBuffer",
         "methods": [
             {
                 "name": "array",
@@ -499,10 +498,10 @@
                 "name": "arrayOffset",
                 "parameterTypes": []
             }
-        ]
+        ],
+        "name": "java.nio.ByteBuffer"
     },
     {
-        "name": "java.nio.CharBuffer",
         "methods": [
             {
                 "name": "array",
@@ -512,10 +511,10 @@
                 "name": "arrayOffset",
                 "parameterTypes": []
             }
-        ]
+        ],
+        "name": "java.nio.CharBuffer"
     },
     {
-        "name": "java.nio.DoubleBuffer",
         "methods": [
             {
                 "name": "array",
@@ -525,10 +524,10 @@
                 "name": "arrayOffset",
                 "parameterTypes": []
             }
-        ]
+        ],
+        "name": "java.nio.DoubleBuffer"
     },
     {
-        "name": "java.nio.FloatBuffer",
         "methods": [
             {
                 "name": "array",
@@ -538,10 +537,10 @@
                 "name": "arrayOffset",
                 "parameterTypes": []
             }
-        ]
+        ],
+        "name": "java.nio.FloatBuffer"
     },
     {
-        "name": "java.nio.IntBuffer",
         "methods": [
             {
                 "name": "array",
@@ -551,10 +550,10 @@
                 "name": "arrayOffset",
                 "parameterTypes": []
             }
-        ]
+        ],
+        "name": "java.nio.IntBuffer"
     },
     {
-        "name": "java.nio.LongBuffer",
         "methods": [
             {
                 "name": "array",
@@ -564,10 +563,10 @@
                 "name": "arrayOffset",
                 "parameterTypes": []
             }
-        ]
+        ],
+        "name": "java.nio.LongBuffer"
     },
     {
-        "name": "java.nio.ShortBuffer",
         "methods": [
             {
                 "name": "array",
@@ -577,10 +576,10 @@
                 "name": "arrayOffset",
                 "parameterTypes": []
             }
-        ]
+        ],
+        "name": "java.nio.ShortBuffer"
     },
     {
-        "name": "sun.management.VMManagementImpl",
         "fields": [
             {
                 "name": "compTimeMonitoringSupport"
@@ -606,6 +605,7 @@
             {
                 "name": "threadContentionMonitoringSupport"
             }
-        ]
+        ],
+        "name": "sun.management.VMManagementImpl"
     }
 ]

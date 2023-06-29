@@ -15,11 +15,18 @@ dependencies {
     implementation(libs.process)
     implementation(libs.xmlbuilder)
     implementation(libs.kodein.di)
+    implementation(libs.kotlin.reflect)
 }
 
 spotless {
     python {
         target("resources/launcher/**/*.py")
         black("23.3.0")
+    }
+    json {
+        target("resources/odoo/META-INF/native-image/*.json")
+        gson()
+            .indentWithSpaces(4)
+            .sortByKeys()
     }
 }

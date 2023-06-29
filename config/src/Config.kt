@@ -1,6 +1,7 @@
 package com.github.hubvd.odootools.config
 
 import com.akuleshov7.ktoml.Toml
+import com.akuleshov7.ktoml.TomlInputConfig
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
@@ -13,8 +14,9 @@ import java.nio.file.Path
 import kotlin.io.path.Path
 import kotlin.io.path.readText
 
-typealias ShellPath = @Serializable(PathSerializer::class)
-Path
+typealias ShellPath =
+    @Serializable(PathSerializer::class)
+    Path
 
 object PathSerializer : KSerializer<Path> {
     override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("Path", PrimitiveKind.STRING)
@@ -35,6 +37,6 @@ object Config {
     private val CONTENT = Path(System.getProperty("user.home"), ".config/odoo/config.toml").readText()
 
     fun <T> get(section: String, deserializer: DeserializationStrategy<T>): T {
-        return Toml.partiallyDecodeFromString(deserializer, CONTENT, section)
+        return Toml.partiallyDecodeFromString(deserializer, CONTENT, section, TomlInputConfig(ignoreUnknownNames = true))
     }
 }

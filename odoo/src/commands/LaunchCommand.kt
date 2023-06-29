@@ -6,26 +6,52 @@ import com.github.ajalt.clikt.parameters.arguments.multiple
 import com.github.ajalt.clikt.parameters.options.Option
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
-import com.github.ajalt.mordant.rendering.TextColors
+import com.github.ajalt.mordant.markdown.Markdown
+import com.github.ajalt.mordant.rendering.*
+import com.github.ajalt.mordant.table.grid
 import com.github.ajalt.mordant.terminal.Terminal
 import com.github.hubvd.odootools.odoo.ContextGenerator
+import com.github.hubvd.odootools.odoo.RunConfiguration
 import com.github.hubvd.odootools.odoo.actions.LaunchAction
 import com.github.hubvd.odootools.odoo.actions.SavePycharmConfiguration
 import com.github.hubvd.odootools.odoo.computes
 import com.github.hubvd.odootools.workspace.Workspace
 import com.github.hubvd.odootools.workspace.Workspaces
 
-data class DslContext(
-    val workspace: Workspace,
+interface DslContext : OdooOptions {
+    val workspace: Workspace
+}
+
+class MutableDslContext(
+    override val workspace: Workspace,
+    private val odooOptions: OdooOptions,
     val flags: MutableSet<String>,
     val options: MutableMap<String, String>,
     val env: MutableMap<String, String>,
-)
+) : DslContext, OdooOptions by odooOptions
 
 @DslMarker
 annotation class CmdComputeDsl
 
 val Option.id: String get() = names.maxBy { it.length }.removePrefix("--")
+
+interface OdooOptions {
+    val community: Boolean
+    val noPatch: Boolean
+    val dryRun: Boolean
+    val testQunit: String?
+    val addonsPath: String?
+    val mobile: Boolean
+    val watch: Boolean
+    val stepDelay: String?
+    val drop: Boolean
+    val database: String?
+    val testTags: String?
+    val save: String?
+    val quiet: Boolean
+    val debug: Boolean
+    val testEnable: Boolean
+}
 
 class LaunchCommand(private val workspaces: Workspaces, private val terminal: Terminal) : CliktCommand(
     treatUnknownOptionsAsArgs = true,
@@ -34,32 +60,35 @@ class LaunchCommand(private val workspaces: Workspaces, private val terminal: Te
     private val ignores = HashSet<String>()
 
     private fun <T : Option> T.custom(): T = apply { ignores += id }
-    private val stopAfterInit by option("--stop-after-init").flag()
-    private val community by option("--community").flag().custom()
-    private val noPatch by option("--no-patch").flag().custom()
-    private val dryRun by option("--dry-run").flag().custom()
-    private val testQunit by option("--test-qunit").custom()
-    private val addonsPath by option("--addons-path")
-    private val logHandler by option("--log-handler")
-    private val mobile by option("--mobile").flag().custom()
-    private val watch by option("--watch").flag().custom()
-    private val stepDelay by option("--step-delay").custom()
-    private val drop by option("--drop").flag().custom()
-    private val httpPort by option("-p", "--http-port")
-    private val database by option("-d", "--database")
-    private val help by option("-h", "--help").flag()
     private val arguments by argument().multiple()
-    private val testTags by option("--test-tags")
-    private val init by option("-i", "--init")
-    private val save by option("--save").custom()
-    private val quiet by option("-q", "--quiet").flag().custom()
-    private val debug by option("--debug").flag().custom()
 
     private val graph = HashMap<String, List<String>>()
-    private val computes = HashMap<String, (DslContext) -> Unit>()
+    private val computes = HashMap<String, (MutableDslContext) -> Unit>()
 
-    private val effects = ArrayList<(DslContext) -> Unit>()
-    private val envs = HashMap<String, (DslContext) -> String?>()
+    private val effects = ArrayList<(MutableDslContext) -> Unit>()
+    private val envs = HashMap<String, (MutableDslContext) -> String?>()
+
+    init {
+        registerOption(option("--stop-after-init").flag())
+        registerOption(option("--community").flag().custom())
+        registerOption(option("--no-patch").flag().custom())
+        registerOption(option("--dry-run").flag().custom())
+        registerOption(option("--test-qunit").custom())
+        registerOption(option("--addons-path"))
+        registerOption(option("--log-handler"))
+        registerOption(option("--mobile").flag().custom())
+        registerOption(option("--watch").flag().custom())
+        registerOption(option("--step-delay").custom())
+        registerOption(option("--drop").flag().custom())
+        registerOption(option("-p", "--http-port"))
+        registerOption(option("-d", "--database"))
+        registerOption(option("-h", "--help").flag())
+        registerOption(option("--test-tags"))
+        registerOption(option("-i", "--init"))
+        registerOption(option("--save").custom())
+        registerOption(option("-q", "--quiet").flag().custom())
+        registerOption(option("--debug").flag().custom())
+    }
 
     data class Depends(val depends: List<String>)
 
@@ -112,45 +141,98 @@ class LaunchCommand(private val workspaces: Workspaces, private val terminal: Te
             envs,
             effects,
             ignores,
-        ).generate(dryRun)
+        ).generate()
 
-        if (!quiet) {
+        val context = runConfiguration.context
+
+        if (!context.quiet) {
             terminal.println(
-                buildString {
-                    append(TextColors.magenta("workspace"))
-                    append('=')
-                    append(workspace.path.toString())
-                    append(' ')
-                    append(TextColors.magenta("version"))
-                    append('=')
-                    append(workspace.version.toString())
-                    appendLine()
-                    for (arg in runConfiguration.args) {
-                        val parts = arg.split('=', limit = 2)
-                        append(TextColors.magenta(parts[0].removePrefix("--")))
-                        if (parts.size > 1) {
-                            append('=')
-                            append(parts[1])
+                grid {
+                    row {
+                        cell(Markdown("# Odoo")) {
+                            columnSpan = 2
                         }
-                        append(' ')
                     }
-                    if (runConfiguration.env.isNotEmpty()) appendLine()
-                    runConfiguration.env.forEach { (k, v) ->
-                        append(TextColors.magenta(k))
-                        append('=')
-                        append(v)
-                        append(' ')
+                    row {
+                        align = TextAlign.CENTER
+                        cell(EnvWidget(runConfiguration))
+                        cell(ArgWidget(runConfiguration))
                     }
                 },
             )
         }
 
         val action = when {
-            dryRun -> null
-            save != null -> SavePycharmConfiguration(terminal, save!!, workspace)
+            context.dryRun -> null
+            context.save != null -> SavePycharmConfiguration(terminal, context.save!!, workspace)
             else -> LaunchAction(terminal)
         }
 
         action?.run(runConfiguration)
     }
+}
+
+class EnvWidget(private val runConfiguration: RunConfiguration) : Widget {
+    override fun measure(t: Terminal, width: Int): WidthRange {
+        return WidthRange(
+            "workspace=${runConfiguration.context.workspace.path}".length,
+            "workspace=${runConfiguration.context.workspace.path}".length,
+        )
+    }
+
+    override fun render(t: Terminal, width: Int) = Lines(
+        buildList(2 + runConfiguration.env.size) {
+            add(
+                Line(
+                    listOf(
+                        Span.word("workspace", TextColors.green),
+                        Span.word("=", TextColors.gray),
+                        Span.word("${runConfiguration.context.workspace.path}"),
+                    ),
+                ),
+            )
+            add(
+                Line(
+                    listOf(
+                        Span.word("version", TextColors.green),
+                        Span.word("=", TextColors.gray),
+                        Span.word("${runConfiguration.context.workspace.version}"),
+                    ),
+                ),
+            )
+            runConfiguration.env.forEach { (k, v) ->
+                add(
+                    Line(
+                        listOf(
+                            Span.word(k, TextColors.green),
+                            Span.word("=", TextColors.gray),
+                            Span.word(v),
+                        ),
+                    ),
+                )
+            }
+        },
+    )
+}
+
+class ArgWidget(private val runConfiguration: RunConfiguration) : Widget {
+    override fun measure(t: Terminal, width: Int): WidthRange {
+        val width = runConfiguration.args.maxOf { it.length }
+        return WidthRange(width, width)
+    }
+
+    override fun render(t: Terminal, width: Int) = Lines(
+        buildList(runConfiguration.args.size) {
+            runConfiguration.args.forEach { arg ->
+                val line = ArrayList<Span>(3)
+                val parts = arg.split('=', limit = 2)
+                line += Span.word(parts[0], style = TextColors.magenta)
+                if (parts.size > 1) {
+                    line += Span.word("=", style = TextColors.gray)
+                    line += Span.word(parts[1])
+                }
+                add(Line(line))
+            }
+        },
+    )
 }

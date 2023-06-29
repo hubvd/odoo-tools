@@ -12,7 +12,9 @@ dependencies {
     implementation(project(":config"))
     implementation(project(":workspace"))
 
+    implementation(libs.serialization.json)
     implementation(libs.coroutines.core)
     implementation(libs.process)
     implementation(libs.kodein.di)
+    implementation(libs.http4k.core)
 }

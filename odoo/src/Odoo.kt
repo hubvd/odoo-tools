@@ -19,7 +19,7 @@ import kotlin.system.exitProcess
 
 fun LaunchCommand.computes() {
     effect {
-        if ("drop" in flags && "database" in options) {
+        if (drop && database != null) {
             val count = runBlocking {
                 process(
                     "psql",
@@ -28,7 +28,7 @@ fun LaunchCommand.computes() {
                     select count(*)
                     from pg_stat_activity
                     where backend_type = 'client backend'
-                    and datname = '${options["database"]}'
+                    and datname = '$database'
                     """.trimIndent(),
                     "odoo",
                     stdout = Redirect.CAPTURE,
@@ -38,7 +38,7 @@ fun LaunchCommand.computes() {
 
             if (count == 0) {
                 runBlocking {
-                    process("dropdb", options["database"]!!, stdout = Redirect.SILENT, stderr = Redirect.SILENT)
+                    process("dropdb", database!!, stdout = Redirect.SILENT, stderr = Redirect.SILENT)
                 }
             } else {
                 println("database is in use")
@@ -51,17 +51,17 @@ fun LaunchCommand.computes() {
     option("limit-time-real") { "99999" }
 
     depends("test-tags", "test-qunit") {
-        flag("test-enable") { "test-tags" in options || "test-qunit" in options }
+        flag("test-enable") { testTags != null || testQunit != null }
     }
 
     depends("test-qunit", "test-tags", "addons-path") {
         option("init") {
-            if ("test-qunit" in options) return@option "qunit"
-            val testTags = options["test-tags"] ?: return@option null
+            if (testQunit != null) return@option "qunit"
+            val testTags = testTags ?: return@option null
             testTags
                 .splitToSequence(',')
                 .filter { !it.startsWith('-') }
-                .flatMap { TestTag(it).toAddons(workspace, options["addons-path"]) }
+                .flatMap { TestTag(it).toAddons(workspace, addonsPath) }
                 .toHashSet()
                 .joinToString(",")
         }
@@ -71,7 +71,7 @@ fun LaunchCommand.computes() {
         option("addons-path") {
             buildList {
                 add("odoo/addons")
-                if ("community" !in flags && (workspace.path / "enterprise").isDirectory()) {
+                if (!community && (workspace.path / "enterprise").isDirectory()) {
                     add("enterprise")
                 }
                 add("~/odoo-tools/addons")
@@ -80,20 +80,20 @@ fun LaunchCommand.computes() {
     }
 
     env("QUNIT_FILTER") {
-        val testTags = options["test-qunit"] ?: return@env null
+        val testTags = testQunit ?: return@env null
         URLEncoder.encode(testTags, "utf-8")
     }
 
     env("QUNIT_MOBILE") {
-        if ("mobile" in flags) "1" else null
+        if (mobile) "1" else null
     }
 
     env("QUNIT_WATCH") {
-        if ("watch" in flags) "1" else null
+        if (watch) "1" else null
     }
 
     env("STEP_DELAY") {
-        options["step-delay"]?.toIntOrNull()?.toString()
+        stepDelay?.toIntOrNull()?.toString()
     }
 
     env("ODOO_WORKSPACE") {
@@ -101,32 +101,32 @@ fun LaunchCommand.computes() {
     }
 
     env("ODOO_DEBUG") {
-        if ("debug" in flags) "1" else null
+        if (debug) "1" else null
     }
 
     depends("test-qunit", "mobile") {
         option("test-tags") {
             when {
-                "test-qunit" in options && "mobile" in flags -> "/qunit:WebSuiteMobile"
-                "test-qunit" in options -> "/qunit:WebSuite"
+                testQunit != null && mobile -> "/qunit:WebSuiteMobile"
+                testQunit != null -> "/qunit:WebSuite"
                 else -> null
             }
         }
     }
 
     depends("test-enable") {
-        flag("stop-after-init") { "test-enable" in flags }
-        option("log-level") { if ("test-enable" in flags) "test" else null }
-        option("max-cron-thread") { if ("test-enable" in flags) "0" else null }
+        flag("stop-after-init") { testEnable }
+        option("log-level") { if (testEnable) "test" else null }
+        option("max-cron-thread") { if (testEnable) "0" else null }
         option("http-port") {
-            if ("test-enable" in flags) {
+            if (testEnable) {
                 "9000"
             } else {
                 workspace.version.toString().replace(".", "") + "00"
             }
         }
-        option("database") { if ("test-enable" in flags) "${workspace.name}-test" else workspace.name }
-        option("log-handler") { if ("test-enable" in flags) "werkzeug:ERROR" else null }
+        option("database") { if (testEnable) "${workspace.name}-test" else workspace.name }
+        option("log-handler") { if (testEnable) "werkzeug:ERROR" else null }
     }
 }
 

@@ -8,8 +8,8 @@ repositories {
 
 java {
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(19))
-        vendor.set(JvmVendorSpec.GRAAL_VM)
+        languageVersion = JavaLanguageVersion.of(20)
+        vendor = JvmVendorSpec.GRAAL_VM
     }
 }
 

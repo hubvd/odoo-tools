@@ -6,3 +6,5 @@ node_modules/
 pnpm-lock.yaml
 __pycache__/
 /github-prs/query
+bin/odoocomplete
+

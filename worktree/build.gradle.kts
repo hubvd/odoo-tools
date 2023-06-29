@@ -1,6 +1,7 @@
 plugins {
     id("cli-application")
     alias(libs.plugins.kotlinx.plugin.serialization)
+    id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
 cli {

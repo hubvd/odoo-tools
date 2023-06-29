@@ -26,8 +26,8 @@ class DebugController(Controller):
                 pydevd.settrace(
                     "localhost",
                     port=int(port),
-                    stdoutToServer=True,
-                    stderrToServer=True,
+                    stdoutToServer=False,
+                    stderrToServer=False,
                     suspend=False,
                 )
             return Response(response="ok")

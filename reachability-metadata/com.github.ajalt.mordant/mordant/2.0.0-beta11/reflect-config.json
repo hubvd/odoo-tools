@@ -1,10 +1,9 @@
 [
     {
-        "name": "com.github.ajalt.mordant.internal.PosixLibC$winsize",
-        "allDeclaredFields": true
+        "allDeclaredFields": true,
+        "name": "com.github.ajalt.mordant.internal.PosixLibC$winsize"
     },
     {
-        "name": "com.sun.jna.CallbackProxy",
         "methods": [
             {
                 "name": "callback",
@@ -12,10 +11,10 @@
                     "java.lang.Object[]"
                 ]
             }
-        ]
+        ],
+        "name": "com.sun.jna.CallbackProxy"
     },
     {
-        "name": "java.lang.Object",
         "methods": [
             {
                 "name": "equals",
@@ -31,19 +30,19 @@
                 "name": "toString",
                 "parameterTypes": []
             }
-        ]
+        ],
+        "name": "java.lang.Object"
     },
     {
-        "name": "java.lang.Thread",
         "methods": [
             {
                 "name": "isVirtual",
                 "parameterTypes": []
             }
-        ]
+        ],
+        "name": "java.lang.Thread"
     },
     {
-        "name": "java.lang.Throwable",
         "methods": [
             {
                 "name": "addSuppressed",
@@ -51,10 +50,10 @@
                     "java.lang.Throwable"
                 ]
             }
-        ]
+        ],
+        "name": "java.lang.Throwable"
     },
     {
-        "name": "java.lang.invoke.MethodHandle",
         "methods": [
             {
                 "name": "bindTo",
@@ -68,10 +67,10 @@
                     "java.lang.Object[]"
                 ]
             }
-        ]
+        ],
+        "name": "java.lang.invoke.MethodHandle"
     },
     {
-        "name": "java.lang.invoke.MethodHandles",
         "methods": [
             {
                 "name": "lookup",
@@ -84,10 +83,10 @@
                     "java.lang.invoke.MethodHandles$Lookup"
                 ]
             }
-        ]
+        ],
+        "name": "java.lang.invoke.MethodHandles"
     },
     {
-        "name": "java.lang.invoke.MethodHandles$Lookup",
         "methods": [
             {
                 "name": "findSpecial",
@@ -111,10 +110,10 @@
                     "java.lang.Class"
                 ]
             }
-        ]
+        ],
+        "name": "java.lang.invoke.MethodHandles$Lookup"
     },
     {
-        "name": "java.lang.invoke.MethodType",
         "methods": [
             {
                 "name": "methodType",
@@ -123,18 +122,18 @@
                     "java.lang.Class[]"
                 ]
             }
-        ]
+        ],
+        "name": "java.lang.invoke.MethodType"
     },
     {
-        "name": "java.lang.management.ThreadInfo",
         "fields": [
             {
                 "name": "virtual"
             }
-        ]
+        ],
+        "name": "java.lang.management.ThreadInfo"
     },
     {
-        "name": "java.lang.reflect.Method",
         "methods": [
             {
                 "name": "isDefault",
@@ -144,7 +143,8 @@
                 "name": "isVarArgs",
                 "parameterTypes": []
             }
-        ]
+        ],
+        "name": "java.lang.reflect.Method"
     },
     {
         "name": "java.nio.Buffer"
@@ -153,21 +153,21 @@
         "name": "java.security.SecureRandomParameters"
     },
     {
-        "name": "sun.security.provider.NativePRNG",
         "methods": [
             {
                 "name": "<init>",
                 "parameterTypes": []
             }
-        ]
+        ],
+        "name": "sun.security.provider.NativePRNG"
     },
     {
-        "name": "sun.security.provider.SHA",
         "methods": [
             {
                 "name": "<init>",
                 "parameterTypes": []
             }
-        ]
+        ],
+        "name": "sun.security.provider.SHA"
     }
 ]

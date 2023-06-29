@@ -28,8 +28,7 @@ fun pythonProvider(): PythonProvider {
 
 class SystemPythonProvider : PythonProvider {
     context(ProcessSequenceDslContext)
-    override suspend fun installOrGetVersion(version: String) =
-        Path(capture("which", "python3").first().trim())
+    override suspend fun installOrGetVersion(version: String) = Path(capture("which", "python3").first().trim())
 }
 
 class PyenvPythonProvider(private val path: Path) : PythonProvider {

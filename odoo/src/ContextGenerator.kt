@@ -4,9 +4,15 @@ import com.github.ajalt.clikt.parameters.options.FlagOption
 import com.github.ajalt.clikt.parameters.options.Option
 import com.github.ajalt.clikt.parameters.options.OptionWithValues
 import com.github.hubvd.odootools.odoo.commands.DslContext
+import com.github.hubvd.odootools.odoo.commands.MutableDslContext
+import com.github.hubvd.odootools.odoo.commands.OdooOptions
 import com.github.hubvd.odootools.odoo.commands.id
 import com.github.hubvd.odootools.workspace.Workspace
+import java.lang.reflect.Proxy
 import java.nio.file.Path
+import kotlin.reflect.full.declaredMemberProperties
+import kotlin.reflect.jvm.javaGetter
+import kotlin.reflect.typeOf
 
 private typealias StringOption = OptionWithValues<String?, String, String>
 private typealias Flag = FlagOption<Boolean>
@@ -22,41 +28,67 @@ class ContextGenerator(
     private val options: List<Option>,
     private val arguments: List<String>,
     private val workspace: Workspace,
-    private val computes: Map<String, (DslContext) -> Unit>,
+    private val computes: Map<String, (MutableDslContext) -> Unit>,
     private val graph: Map<String, List<String>>,
-    private val envs: Map<String, (DslContext) -> String?>,
-    private val effects: List<(DslContext) -> Unit>,
+    private val envs: Map<String, (MutableDslContext) -> String?>,
+    private val effects: List<(MutableDslContext) -> Unit>,
     private val ignores: Set<String>,
 ) {
-    fun generate(dryRun: Boolean): RunConfiguration {
-        val flags: HashSet<String>
-        val options: HashMap<String, String>
+    fun generate(): RunConfiguration {
+        val flags = HashSet<String>()
+        val options = HashMap<String, String>()
+        val env = HashMap<String, String>()
 
-        this.options
-            .partition { it is FlagOption<*> }
-            .let {
-                @Suppress("UNCHECKED_CAST")
-                it as Pair<List<Flag>, List<StringOption>>
-            }
-            .let { (allFlags, allOptions) ->
-                flags = allFlags.filter { it.value }
-                    .map { it.id }
-                    .toHashSet()
-                options = allOptions.filter { it.value != null }
-                    .associate { it.id to it.value!! }
-                    .toMap(HashMap())
-            }
+        for (option in this.options) {
+            when (option) {
+                is FlagOption<*> -> {
+                    @Suppress("UNCHECKED_CAST")
+                    option as Flag
+                    if (option.value) {
+                        flags += option.id
+                    }
+                }
 
-        val context = DslContext(
+                else -> {
+                    @Suppress("UNCHECKED_CAST")
+                    option as StringOption
+                    option.value?.let { options[option.id] = it }
+                }
+            }
+        }
+
+        val camelCaseRe = Regex("([a-z])([A-Z])")
+
+        val proxy = Proxy.newProxyInstance(
+            this.javaClass.classLoader,
+            arrayOf(OdooOptions::class.java),
+        ) { _, method, _ ->
+            val getter = method.declaringClass.kotlin.declaredMemberProperties
+                .find { it.javaGetter == method }
+                ?: error("Unsupported method ${method.name}")
+
+            val optionName = camelCaseRe.replace(getter.name, "\$1-\$2").lowercase()
+
+            when (getter.returnType) {
+                typeOf<String?>() -> options[optionName]
+
+                typeOf<Boolean>() -> flags.contains(optionName)
+
+                else -> error("Unsupported property type")
+            }
+        } as OdooOptions
+
+        val context = MutableDslContext(
             workspace = workspace,
+            odooOptions = proxy,
             flags = flags,
             options = options,
-            env = HashMap(),
+            env = env,
         )
 
         val queue = computes.keys.toHashSet()
-        queue.removeAll(context.flags)
-        queue.removeAll(context.options.keys)
+        queue.removeAll(flags)
+        queue.removeAll(options.keys)
 
         // TODO: topological sort
         while (queue.isNotEmpty()) {
@@ -73,7 +105,7 @@ class ContextGenerator(
 
         envs.forEach { (name, func) -> func(context)?.let { context.env[name] = it } }
 
-        if (!dryRun) {
+        if (!context.dryRun) {
             effects.forEach { it(context) }
         }
 

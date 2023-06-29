@@ -3,12 +3,12 @@
         "condition": {
             "typeReachable": "kotlin.internal.jdk8.JDK8PlatformImplementations"
         },
-        "name": "kotlin.internal.jdk8.JDK8PlatformImplementations",
         "methods": [
             {
                 "name": "<init>",
                 "parameterTypes": []
             }
-        ]
+        ],
+        "name": "kotlin.internal.jdk8.JDK8PlatformImplementations"
     }
 ]

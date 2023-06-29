@@ -15,8 +15,8 @@ class Virtualenvs(private val pythonProvider: PythonProvider, dataDir: DataDir) 
         val venvPath = rootPath / workspace.base
         if (venvPath.notExists()) {
             val pythonVersion = when {
-                workspace.version < 16 -> "3.9.15"
-                else -> "3.11.2"
+                workspace.version < 16 -> "3.9.17"
+                else -> "3.11.4"
             }
             val pythonPath = pythonProvider.installOrGetVersion(pythonVersion)
             cd(rootPath)
@@ -27,7 +27,7 @@ class Virtualenvs(private val pythonProvider: PythonProvider, dataDir: DataDir) 
                 "$pip",
                 "install",
                 "-r",
-                "${generateRequirements(workspace.path / "odoo/requirements.txt", pythonVersion)}",
+                "${generateRequirements(workspace.path / "odoo/requirements.txt", workspace.version)}",
             )
         }
         val target = workspace.path / "venv"
@@ -35,48 +35,24 @@ class Virtualenvs(private val pythonProvider: PythonProvider, dataDir: DataDir) 
         target.createSymbolicLinkPointingTo(venvPath)
     }
 
-    private fun generateRequirements(requirements: Path, pythonVersion: String): Path {
-        val allReplacements = mapOf(
-            "3.11.2" to mapOf(
-                "gevent" to "22.10.2",
-                "greenlet" to "2.0.2",
-                "lxml" to "4.9.2",
-                "psycopg2" to "2.9.5",
-                "reportlab" to "3.6.12",
-            ),
-        )
-
-        val replacements = allReplacements[pythonVersion] ?: emptyMap()
+    private fun generateRequirements(requirements: Path, odooVersion: Float): Path {
         val output = Files.createTempFile("requirements-", ".txt")
-        val matches = hashSetOf<String>()
-
         output.bufferedWriter().use { writer ->
-            requirements.forEachLine { line ->
-                val name = line.split("==", limit = 2).firstOrNull() ?: return@forEachLine
-                if (name in replacements) {
-                    matches += name
-                } else {
-                    writer.appendLine(line)
+            sequence {
+                requirements.forEachLine { if (it.contains("==")) yield(it) }
+                arrayOf(
+                    "pydevd-pycharm",
+                    "websocket-client",
+                    "mock",
+                    "pydevd-odoo",
+                    "rich",
+                    "ptpython",
+                    "dbfread",
+                ).forEach { yield(it) }
+                if (14 < odooVersion && odooVersion < 16.4) {
+                    yield("rjsmin")
                 }
-            }
-            matches.forEach { name ->
-                writer.append(name)
-                writer.append("==")
-                writer.append(replacements[name]!!)
-                writer.appendLine()
-            }
-            arrayOf(
-                "pydevd-pycharm",
-                "websocket-client",
-                "mock",
-                "pydevd-odoo",
-                "rich",
-                "ptpython",
-                "dbfread",
-            ).forEach {
-                writer.newLine()
-                writer.append(it)
-            }
+            }.forEach { writer.appendLine(it) }
         }
         output.toFile().deleteOnExit()
         return output

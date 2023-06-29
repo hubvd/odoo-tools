@@ -1,25 +1,26 @@
 package com.github.hubvd.odootools.actions
 
+import com.github.ajalt.clikt.core.Abort
 import com.github.ajalt.clikt.core.CliktCommand
-import java.net.URI
-import java.net.http.HttpClient
-import java.net.http.HttpRequest
-import java.net.http.HttpResponse
-import kotlin.system.exitProcess
+import com.github.ajalt.clikt.core.CliktError
+import org.http4k.core.HttpHandler
+import org.http4k.core.Method
+import org.http4k.core.Request
 
-class AttachCommand(private val odooctl: Odooctl) : CliktCommand() {
+class AttachCommand(
+    private val odooctl: Odooctl,
+    private val httpHandler: HttpHandler,
+) : CliktCommand() {
     override fun run() {
         val instances = odooctl.instances()
-        if (instances.isEmpty()) exitProcess(1)
-        val choice = menu(instances) { it.workspace.name } ?: exitProcess(1)
+        if (instances.isEmpty()) throw CliktError("No instances running")
+        val choice = menu(instances) { it.workspace.name } ?: throw Abort()
 
-        val client = HttpClient.newBuilder().build()
-        val request = HttpRequest.newBuilder(URI.create(choice.baseUrl + "/debug/attach")).build()
-        val response = client.send(request, HttpResponse.BodyHandlers.ofString())
+        val request = Request(Method.GET, choice.baseUrl + "/debug/attach")
+        val response = httpHandler(request)
 
-        if (response.statusCode() !in 200..299) {
-            println(response.body())
-            exitProcess(1)
+        if (!response.status.successful) {
+            throw CliktError("Couldn't attach debugger " + response.bodyString())
         }
     }
 }

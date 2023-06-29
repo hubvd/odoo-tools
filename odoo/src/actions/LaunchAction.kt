@@ -22,7 +22,7 @@ interface Action {
 class LaunchAction(private val terminal: Terminal) : Action {
 
     override fun run(configuration: RunConfiguration) {
-        val useCustomLauncher = "no-patch" !in configuration.context.flags &&
+        val useCustomLauncher = !configuration.context.noPatch &&
             configuration.context.workspace.version > 14
 
         val main = if (!useCustomLauncher) {
@@ -51,7 +51,7 @@ class LaunchAction(private val terminal: Terminal) : Action {
 
         val code = process.waitFor()
 
-        if ("test-enable" in configuration.context.flags) {
+        if (configuration.context.testEnable) {
             runBlocking {
                 process(
                     "notify-send",

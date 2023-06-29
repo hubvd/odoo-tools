@@ -19,25 +19,29 @@ tasks.withType<Test> {
 
 tasks.withType<KotlinCompile> {
     compilerOptions {
-        jvmTarget.set(JvmTarget.JVM_19)
-        javaParameters.set(true)
-        freeCompilerArgs.set(
+        jvmTarget = JvmTarget.JVM_20
+        javaParameters = true
+        freeCompilerArgs =
             listOf(
                 "-Xcontext-receivers",
                 "-opt-in=kotlin.ExperimentalStdlibApi",
             )
-        )
-        languageVersion.set(KotlinVersion.KOTLIN_2_0)
+        languageVersion = KotlinVersion.KOTLIN_2_0
     }
 }
 
 kotlin {
     sourceSets["main"].kotlin.setSrcDirs(listOf("src"))
     sourceSets["test"].kotlin.setSrcDirs(listOf("test"))
+
+    // Needed since kotlin 1.9 ??
+    sourceSets["main"].resources.setSrcDirs(listOf("resources"))
+    sourceSets["test"].resources.setSrcDirs(listOf("test-resources"))
 }
 
 spotless {
     kotlin {
-        ktlint("0.48.0")
+        ktlint("0.49.1")
+            .setEditorConfigPath("${project.rootDir}/.editorconfig")
     }
 }
