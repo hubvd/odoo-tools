@@ -71,6 +71,7 @@ class LaunchAction(private val terminal: Terminal) : Action {
     }
 
     private fun unpackPatchedLauncher(): Path {
+        System.getenv("ODOO_TOOLS_LAUNCHER")?.run { return Path(this) }
         val dataDir = Path(System.getenv("XDG_DATA_DIRS") ?: (System.getProperty("user.home") + "/.local/share"))
         val launcherDir = (dataDir / "odoo-tools/launcher").apply { createDirectories() }
 

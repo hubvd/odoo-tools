@@ -1,4 +1,7 @@
 #!/bin/fish
 
-git -C /home/hubert/src/master/odoo fetch origin (worktree list base | path sort -u)
-git -C /home/hubert/src/master/enterprise fetch origin (worktree list base | path sort -u)
+set branches (worktree list base | path sort -u)
+set root (worktree default path)
+git -C $root/odoo fetch origin $branches &
+git -C $root/enterprise fetch origin $branches &
+wait

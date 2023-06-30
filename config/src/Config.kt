@@ -37,6 +37,11 @@ object Config {
     private val CONTENT = Path(System.getProperty("user.home"), ".config/odoo/config.toml").readText()
 
     fun <T> get(section: String, deserializer: DeserializationStrategy<T>): T {
-        return Toml.partiallyDecodeFromString(deserializer, CONTENT, section, TomlInputConfig(ignoreUnknownNames = true))
+        return Toml.partiallyDecodeFromString(
+            deserializer,
+            CONTENT,
+            section,
+            TomlInputConfig(ignoreUnknownNames = true),
+        )
     }
 }

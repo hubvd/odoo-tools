@@ -23,8 +23,8 @@ class CheckoutCommand(
         .defaultLazy { runBlocking { process("wl-paste", stdout = CAPTURE).output.first() } }
 
     override fun run() {
-        val ref = branchLookup(branch) ?:
-            throw CliktError("Couldn't extract base branch")
+        val ref = branchLookup(branch)
+            ?: throw CliktError("Couldn't extract base branch")
 
         var workspace = workspaces.current()
         if (workspace != null && workspace.base != ref.base) {
@@ -58,9 +58,7 @@ class CheckoutCommand(
             .filter { it.second.contains(ref.remote) }
             .find { (_, remote) -> ref.remote == remote.substring(remote.indexOf(ref.remote)).takeWhile { it != '/' } }
             ?.first
-            ?: run {
-                throw CliktError("Couldn't find remote ${ref.remote}")
-            }
+            ?: throw CliktError("Couldn't find remote ${ref.remote}")
 
         val fetchResult = process("git", "fetch", remote, ref.branch, directory = workDir, stderr = SILENT)
         if (fetchResult.resultCode == 128) {
