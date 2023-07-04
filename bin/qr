@@ -1,3 +1,0 @@
-#!/usr/bin/fish
-
-actions qr $argv

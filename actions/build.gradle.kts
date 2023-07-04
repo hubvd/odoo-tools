@@ -6,6 +6,13 @@ plugins {
 cli {
     name = "actions"
     mainClass = "com.github.hubvd.odootools.actions.ActionsKt"
+    generateSubcommandBinaries = listOf(
+        "odooctl",
+        "pycharm",
+        "restore",
+        "qr",
+        "checkout"
+    )
 }
 
 dependencies {
