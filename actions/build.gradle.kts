@@ -11,7 +11,8 @@ cli {
         "pycharm",
         "restore",
         "qr",
-        "checkout"
+        "checkout",
+        "new",
     )
 }
 

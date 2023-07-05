@@ -16,7 +16,20 @@ value class Secret(val value: String) {
 }
 
 @Serializable
-data class ActionsConfig(val dumpPassword: String, val apiKey: String, val userId: Long, val githubApiKey: String)
+data class BrowserConfig(
+    val firefox: List<String> = listOf("firefox"),
+    val chrome: List<String> = listOf("chromium"),
+    val default: String = "firefox",
+)
+
+@Serializable
+data class ActionsConfig(
+    val dumpPassword: String,
+    val apiKey: String,
+    val userId: Long,
+    val githubApiKey: String,
+    val browsers: BrowserConfig = BrowserConfig(),
+)
 
 val ACTIONS_CONFIG_MODULE = DI.Module("actions_config") {
     bind { singleton { Config.get("actions", ActionsConfig.serializer()) } }

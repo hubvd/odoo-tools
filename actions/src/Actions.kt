@@ -46,6 +46,8 @@ fun main(args: Array<String>) {
 
         bind { singleton { CompositeBranchLookup(instance<Set<BranchLookup>>().toList()) } }
 
+        bind<BrowserService> { singleton { BrowserServiceImpl(instance<ActionsConfig>().browsers) } }
+
         bindSet {
             add { singleton { new(::PycharmCommand) } }
             add { singleton { new(::OpenCommand) } }
@@ -64,6 +66,7 @@ fun main(args: Array<String>) {
             add { singleton { new(::OpenGitCommand) } }
             add { singleton { new(::QrCommand) } }
             add { singleton { new(::CheckoutCommand) } }
+            add { singleton { new(::NewCommand) } }
         }
 
         bind { singleton { MainCommand().subcommands(instance<Set<CliktCommand>>()) } }

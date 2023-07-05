@@ -7,10 +7,11 @@ import com.github.pgreze.process.Redirect
 import com.github.pgreze.process.process
 import kotlinx.coroutines.runBlocking
 import kotlin.io.path.Path
-import kotlin.io.path.readText
+import kotlin.jvm.optionals.getOrNull
+import kotlin.streams.asSequence
 
 data class OdooInstance(
-    val pid: Int,
+    val pid: Long,
     val port: Int,
     val database: String,
     val workspace: Workspace,
@@ -27,11 +28,11 @@ data class OdooInstance(
 class Odooctl(private val workspaces: Workspaces) {
     fun instances(): List<OdooInstance> = runBlocking {
         val workspaceList = workspaces.list()
-        process("ps", "ax", "-o", "pid,args", stdout = Redirect.CAPTURE, stderr = Redirect.SILENT)
-            .output
+        ProcessHandle.allProcesses()
             .asSequence()
-            .mapNotNull { ODOO_PROC_RE.find(it)?.groups?.get(1)?.value }
-            .map { pid -> pid to Path("/proc/$pid/cmdline").readText().split('\u0000') }
+            .filter { it.info().command().getOrNull()?.contains("/python") ?: false }
+            .filter { it.info().arguments().getOrNull()?.any { it.contains("odoo") } ?: false }
+            .map { it.pid() to it.info().arguments().get() }
             .filter { !it.second.contains("shell") }
             .mapNotNull { (pid, cmdline) ->
                 val db = cmdline.find { it.startsWith("--database=") }?.removePrefix("--database=")
@@ -42,7 +43,7 @@ class Odooctl(private val workspaces: Workspaces) {
                     ?: 8069
 
                 OdooInstance(
-                    pid = pid.toInt(),
+                    pid = pid,
                     port = port,
                     db,
                     workspaceList.first { it.path == Path("/proc/$pid/cwd").toRealPath() },
@@ -51,15 +52,9 @@ class Odooctl(private val workspaces: Workspaces) {
     }
 
     fun killAll() {
-        runBlocking {
-            instances().takeIf { it.isNotEmpty() }?.run {
-                process("kill", *map { it.pid.toString() }.toTypedArray())
-            }
-        }
-    }
-
-    companion object {
-        val ODOO_PROC_RE = """^\s+(\d+) \S*python .*odoo""".toRegex()
+        instances()
+            .mapNotNull { ProcessHandle.of(it.pid).getOrNull() }
+            .forEach { it.destroy() }
     }
 }
 
