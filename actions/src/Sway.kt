@@ -31,7 +31,12 @@ object Sway {
         "$scratchPad focus"()
     }
 
-    private suspend operator fun String.invoke() = process("sway", this)
+    private suspend operator fun String.invoke() = process(
+        "sway",
+        this,
+        stdout = SILENT,
+        stderr = SILENT,
+    )
 
     suspend fun openGit(workspace: Workspace) {
         runScratchpadIfClosed()

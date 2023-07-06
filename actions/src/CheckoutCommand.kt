@@ -9,6 +9,8 @@ import com.github.hubvd.odootools.workspace.Workspaces
 import com.github.pgreze.process.Redirect.CAPTURE
 import com.github.pgreze.process.Redirect.SILENT
 import com.github.pgreze.process.process
+import kotlinx.coroutines.joinAll
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import java.io.File
 
@@ -40,8 +42,10 @@ class CheckoutCommand(
         notificationService.info("Fetching ${ref.branch}", "from ${ref.remote}")
 
         runBlocking {
-            fetchAndCheckout(ref, workspace.path.resolve("odoo").toFile())
-            fetchAndCheckout(ref, workspace.path.resolve("enterprise").toFile())
+            joinAll(
+                launch { fetchAndCheckout(ref, workspace.path.resolve("odoo").toFile()) },
+                launch { fetchAndCheckout(ref, workspace.path.resolve("enterprise").toFile()) },
+            )
             if (!terminal.info.outputInteractive) {
                 Sway.openGit(workspace)
             }
