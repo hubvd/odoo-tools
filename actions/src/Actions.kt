@@ -10,7 +10,7 @@ import org.http4k.core.HttpHandler
 import org.kodein.di.*
 import kotlin.system.exitProcess
 
-class MainCommand : NoOpCliktCommand()
+class MainCommand : NoOpCliktCommand(name = "actions")
 
 fun main(args: Array<String>) {
     val di = DI {
@@ -84,24 +84,26 @@ fun main(args: Array<String>) {
 
     try {
         mainCommand.parse(args)
-    } catch (e: ProgramResult) {
-        exitProcess(e.statusCode)
-    } catch (e: PrintHelpMessage) {
-        echo(e.command.getFormattedHelp())
-        exitProcess(if (e.error) 1 else 0)
-    } catch (e: PrintCompletionMessage) {
-        echo(e.message)
-        exitProcess(0)
-    } catch (e: PrintMessage) {
-        echo(e.message, e.error)
-        exitProcess(if (e.error) 1 else 0)
-    } catch (e: UsageError) {
-        echo(e.helpMessage(), error = true)
-        exitProcess(e.statusCode)
     } catch (e: CliktError) {
-        echo(e.message, error = true)
-        exitProcess(1)
-    } catch (e: Abort) {
-        exitProcess(if (e.error) 1 else 0)
+        getFormattedHelp(e, mainCommand)
+            ?.takeIf { it.isNotEmpty() }
+            ?.let { echo(it, error = e.printError) }
+        exitProcess(e.statusCode)
     }
+}
+
+private fun getFormattedHelp(error: CliktError, rootCommand: CliktCommand): String? {
+    if (error !is ContextCliktError) return error.message
+    val ctx = error.context ?: rootCommand.currentContext
+    val command = ctx.command
+    val programName = ctx.commandNameWithParents()
+        .let { if (it.size == 1) it else it.drop(1) }
+        .joinToString(" ")
+    return ctx.helpFormatter(ctx).formatHelp(
+        error as? UsageError,
+        command.commandHelp(ctx),
+        command.commandHelpEpilog(ctx),
+        command.allHelpParams(),
+        programName,
+    )
 }

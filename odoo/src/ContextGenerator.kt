@@ -1,6 +1,5 @@
 package com.github.hubvd.odootools.odoo
 
-import com.github.ajalt.clikt.parameters.options.FlagOption
 import com.github.ajalt.clikt.parameters.options.Option
 import com.github.ajalt.clikt.parameters.options.OptionWithValues
 import com.github.hubvd.odootools.odoo.commands.DslContext
@@ -15,7 +14,7 @@ import kotlin.reflect.jvm.javaGetter
 import kotlin.reflect.typeOf
 
 private typealias StringOption = OptionWithValues<String?, String, String>
-private typealias Flag = FlagOption<Boolean>
+private typealias Flag = OptionWithValues<Boolean, Boolean, Boolean>
 
 data class RunConfiguration(
     val args: List<String>,
@@ -40,8 +39,8 @@ class ContextGenerator(
         val env = HashMap<String, String>()
 
         for (option in this.options) {
-            when (option) {
-                is FlagOption<*> -> {
+            when {
+                option.nvalues == 0..0 -> {
                     @Suppress("UNCHECKED_CAST")
                     option as Flag
                     if (option.value) {

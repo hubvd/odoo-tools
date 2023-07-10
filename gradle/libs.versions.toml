@@ -1,6 +1,6 @@
 [versions]
 kotlinx-serialization = "1.5.1"
-kotlin = "1.9.0-Beta"
+kotlin = "1.9.0"
 
 [libraries]
 kotlin-bom = { module = "org.jetbrains.kotlin:kotlin-bom", version.ref = "kotlin" }
@@ -9,11 +9,11 @@ serialization = { module = "org.jetbrains.kotlin:kotlin-serialization", version.
 serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "kotlinx-serialization" }
 serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
 serialization-toml = "com.akuleshov7:ktoml-core:0.5.0"
-coroutines-core = "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1"
+coroutines-core = "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.2"
 process = "com.github.pgreze:kotlin-process:1.4.1"
 xmlbuilder = "org.redundent:kotlin-xml-builder:1.9.0"
-kodein-di = "org.kodein.di:kodein-di:7.20.1"
-http4k-core = "org.http4k:http4k-core:4.47.2.0"
+kodein-di = "org.kodein.di:kodein-di:7.20.2"
+http4k-core = "org.http4k:http4k-core:5.3.0.0"
 
 [plugins]
 kotlinx-plugin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }

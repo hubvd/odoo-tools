@@ -55,6 +55,7 @@ interface OdooOptions {
 
 class LaunchCommand(private val workspaces: Workspaces, private val terminal: Terminal) : CliktCommand(
     treatUnknownOptionsAsArgs = true,
+    name = "odoo",
 ) {
 
     private val ignores = HashSet<String>()

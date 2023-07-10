@@ -26,8 +26,8 @@ class CliApplicationPlugin : Plugin<Project> {
         project.plugins.apply("org.graalvm.buildtools.native")
 
         project.dependencies {
-            dependencies.add("implementation", "com.github.ajalt.clikt:clikt:3.5.2")
-            dependencies.add("implementation", "com.github.ajalt.mordant:mordant:2.0.0-beta13")
+            dependencies.add("implementation", "com.github.ajalt.clikt:clikt:4.0.0")
+            dependencies.add("implementation", "com.github.ajalt.mordant:mordant:2.0.0")
         }
 
         this.extension = project.extensions.create<CliApplicationPluginExtension>("cli")
