@@ -3,10 +3,10 @@ import org.graalvm.buildtools.gradle.dsl.GraalVMReachabilityMetadataRepositoryEx
 import org.gradle.api.DefaultTask
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.artifacts.VersionCatalogsExtension
 import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
-import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.TaskAction
 import org.gradle.kotlin.dsl.*
@@ -25,9 +25,10 @@ class CliApplicationPlugin : Plugin<Project> {
         project.plugins.apply("kotlin-convention")
         project.plugins.apply("org.graalvm.buildtools.native")
 
+        val libs = project.extensions.getByType<VersionCatalogsExtension>().named("libs")
         project.dependencies {
-            dependencies.add("implementation", "com.github.ajalt.clikt:clikt:4.0.0")
-            dependencies.add("implementation", "com.github.ajalt.mordant:mordant:2.0.0")
+            dependencies.add("implementation", libs.findLibrary("clikt").get())
+            dependencies.add("implementation", libs.findLibrary("mordant").get())
         }
 
         this.extension = project.extensions.create<CliApplicationPluginExtension>("cli")
