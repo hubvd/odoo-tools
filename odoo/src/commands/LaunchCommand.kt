@@ -4,19 +4,11 @@ import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.arguments.argument
 import com.github.ajalt.clikt.parameters.arguments.multiple
 import com.github.ajalt.clikt.parameters.options.Option
-import com.github.ajalt.clikt.parameters.options.flag
-import com.github.ajalt.clikt.parameters.options.option
-import com.github.ajalt.mordant.markdown.Markdown
-import com.github.ajalt.mordant.rendering.*
-import com.github.ajalt.mordant.table.grid
 import com.github.ajalt.mordant.terminal.Terminal
 import com.github.hubvd.odootools.odoo.ContextGenerator
-import com.github.hubvd.odootools.odoo.RunConfiguration
 import com.github.hubvd.odootools.odoo.actions.LaunchAction
 import com.github.hubvd.odootools.odoo.actions.SavePycharmConfiguration
-import com.github.hubvd.odootools.odoo.commands.CompletionType.*
 import com.github.hubvd.odootools.odoo.computes
-import com.github.hubvd.odootools.odoo.odooCompletion
 import com.github.hubvd.odootools.workspace.Workspace
 import com.github.hubvd.odootools.workspace.Workspaces
 
@@ -50,7 +42,6 @@ interface OdooOptions {
     val database: String?
     val testTags: String?
     val save: String?
-    val quiet: Boolean
     val debug: Boolean
     val testEnable: Boolean
 }
@@ -73,28 +64,13 @@ class LaunchCommand(private val workspaces: Workspaces, private val terminal: Te
     private val envs = HashMap<String, (MutableDslContext) -> String?>()
 
     init {
-        arrayOf(
-            option("--stop-after-init").flag(),
-            option("--community").flag().custom(),
-            option("--no-patch").flag().custom(),
-            option("--dry-run").flag().custom(),
-            option("--test-qunit", completionCandidates = odooCompletion(Qunit)).custom(),
-            option("--addons-path"),
-            option("--log-handler", metavar = "PREFIX:LEVEL"),
-            option("--mobile").flag().custom(),
-            option("--watch").flag().custom(),
-            option("--step-delay").custom(),
-            option("--drop").flag().custom(),
-            option("-p", "--http-port", help = "Listen port for the main HTTP service"),
-            option("-d", "--database", help = "Specify the database name"),
-            option("--odoo-help", help = "Show the output of odoo-bin --help").flag(),
-            option("--test-tags", completionCandidates = odooCompletion(TestTag)),
-            option("-i", "--init", help = "Install one or more modules", completionCandidates = odooCompletion(Addon)),
-            option("-u", "--update", help = "Update one or more modules", completionCandidates = odooCompletion(Addon)),
-            option("--save").custom(),
-            option("-q", "--quiet").flag().custom(),
-            option("--debug").flag().custom(),
-        ).forEach { registerOption(it) }
+        val patchedLauncherOptionGroup = PatchedLauncherOptionGroup()
+        registerOptionGroup(patchedLauncherOptionGroup)
+        patchedLauncherOptionGroup.options.forEach { registerOption(it.custom()) }
+
+        val odooOptionGroup = OdooOptionGroup()
+        registerOptionGroup(odooOptionGroup)
+        odooOptionGroup.options.forEach { registerOption(it) }
     }
 
     data class Depends(val depends: List<String>)
@@ -153,23 +129,7 @@ class LaunchCommand(private val workspaces: Workspaces, private val terminal: Te
         ).generate()
 
         val context = runConfiguration.context
-
-        if (!context.quiet) {
-            terminal.println(
-                grid {
-                    row {
-                        cell(Markdown("# Odoo")) {
-                            columnSpan = 2
-                        }
-                    }
-                    row {
-                        align = TextAlign.CENTER
-                        cell(EnvWidget(runConfiguration))
-                        cell(ArgWidget(runConfiguration))
-                    }
-                },
-            )
-        }
+        terminal.println(runConfigurationWidget(runConfiguration))
 
         val action = when {
             context.dryRun -> null
@@ -179,69 +139,4 @@ class LaunchCommand(private val workspaces: Workspaces, private val terminal: Te
 
         action?.run(runConfiguration)
     }
-}
-
-class EnvWidget(private val runConfiguration: RunConfiguration) : Widget {
-    override fun measure(t: Terminal, width: Int): WidthRange {
-        return WidthRange(
-            "workspace=${runConfiguration.context.workspace.path}".length,
-            "workspace=${runConfiguration.context.workspace.path}".length,
-        )
-    }
-
-    override fun render(t: Terminal, width: Int) = Lines(
-        buildList(2 + runConfiguration.env.size) {
-            add(
-                Line(
-                    listOf(
-                        Span.word("workspace", TextColors.green),
-                        Span.word("=", TextColors.gray),
-                        Span.word("${runConfiguration.context.workspace.path}"),
-                    ),
-                ),
-            )
-            add(
-                Line(
-                    listOf(
-                        Span.word("version", TextColors.green),
-                        Span.word("=", TextColors.gray),
-                        Span.word("${runConfiguration.context.workspace.version}"),
-                    ),
-                ),
-            )
-            runConfiguration.env.forEach { (k, v) ->
-                add(
-                    Line(
-                        listOf(
-                            Span.word(k, TextColors.green),
-                            Span.word("=", TextColors.gray),
-                            Span.word(v),
-                        ),
-                    ),
-                )
-            }
-        },
-    )
-}
-
-class ArgWidget(private val runConfiguration: RunConfiguration) : Widget {
-    override fun measure(t: Terminal, width: Int): WidthRange {
-        val width = runConfiguration.args.maxOf { it.length }
-        return WidthRange(width, width)
-    }
-
-    override fun render(t: Terminal, width: Int) = Lines(
-        buildList(runConfiguration.args.size) {
-            runConfiguration.args.forEach { arg ->
-                val line = ArrayList<Span>(3)
-                val parts = arg.split('=', limit = 2)
-                line += Span.word(parts[0], style = TextColors.magenta)
-                if (parts.size > 1) {
-                    line += Span.word("=", style = TextColors.gray)
-                    line += Span.word(parts[1])
-                }
-                add(Line(line))
-            }
-        },
-    )
 }
