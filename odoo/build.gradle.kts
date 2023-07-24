@@ -1,6 +1,7 @@
 plugins {
     id("cli-application")
     id("launcher-checksums")
+    alias(libs.plugins.kotlinx.plugin.serialization)
 }
 
 cli {
@@ -16,6 +17,7 @@ dependencies {
     implementation(libs.xmlbuilder)
     implementation(libs.kodein.di)
     implementation(libs.kotlin.reflect)
+    implementation(libs.serialization.json)
 }
 
 spotless {

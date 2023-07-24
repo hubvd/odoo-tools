@@ -1,6 +1,8 @@
 package com.github.hubvd.odootools.odoo
 
+import com.github.ajalt.clikt.core.subcommands
 import com.github.ajalt.mordant.terminal.Terminal
+import com.github.hubvd.odootools.odoo.commands.CompleteCommand
 import com.github.hubvd.odootools.odoo.commands.LaunchCommand
 import com.github.hubvd.odootools.workspace.WORKSPACE_MODULE
 import com.github.hubvd.odootools.workspace.WorkspaceProvider
@@ -131,7 +133,7 @@ fun LaunchCommand.computes() {
 
 fun main(args: Array<String>) {
     val di = DI {
-        bind { singleton { LaunchCommand(instance(), instance()) } }
+        bind { singleton { LaunchCommand(instance(), instance()).subcommands(CompleteCommand(instance())) } }
         bind { singleton { Terminal() } }
         import(WORKSPACE_MODULE)
         bind { singleton { WorkspaceProvider(instance()).cached() } }

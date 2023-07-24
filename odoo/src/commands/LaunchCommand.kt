@@ -14,7 +14,9 @@ import com.github.hubvd.odootools.odoo.ContextGenerator
 import com.github.hubvd.odootools.odoo.RunConfiguration
 import com.github.hubvd.odootools.odoo.actions.LaunchAction
 import com.github.hubvd.odootools.odoo.actions.SavePycharmConfiguration
+import com.github.hubvd.odootools.odoo.commands.CompletionType.*
 import com.github.hubvd.odootools.odoo.computes
+import com.github.hubvd.odootools.odoo.odooCompletion
 import com.github.hubvd.odootools.workspace.Workspace
 import com.github.hubvd.odootools.workspace.Workspaces
 
@@ -55,6 +57,7 @@ interface OdooOptions {
 
 class LaunchCommand(private val workspaces: Workspaces, private val terminal: Terminal) : CliktCommand(
     treatUnknownOptionsAsArgs = true,
+    invokeWithoutSubcommand = true,
     name = "odoo",
 ) {
 
@@ -70,25 +73,28 @@ class LaunchCommand(private val workspaces: Workspaces, private val terminal: Te
     private val envs = HashMap<String, (MutableDslContext) -> String?>()
 
     init {
-        registerOption(option("--stop-after-init").flag())
-        registerOption(option("--community").flag().custom())
-        registerOption(option("--no-patch").flag().custom())
-        registerOption(option("--dry-run").flag().custom())
-        registerOption(option("--test-qunit").custom())
-        registerOption(option("--addons-path"))
-        registerOption(option("--log-handler"))
-        registerOption(option("--mobile").flag().custom())
-        registerOption(option("--watch").flag().custom())
-        registerOption(option("--step-delay").custom())
-        registerOption(option("--drop").flag().custom())
-        registerOption(option("-p", "--http-port"))
-        registerOption(option("-d", "--database"))
-        registerOption(option("-h", "--help").flag())
-        registerOption(option("--test-tags"))
-        registerOption(option("-i", "--init"))
-        registerOption(option("--save").custom())
-        registerOption(option("-q", "--quiet").flag().custom())
-        registerOption(option("--debug").flag().custom())
+        arrayOf(
+            option("--stop-after-init").flag(),
+            option("--community").flag().custom(),
+            option("--no-patch").flag().custom(),
+            option("--dry-run").flag().custom(),
+            option("--test-qunit", completionCandidates = odooCompletion(Qunit)).custom(),
+            option("--addons-path"),
+            option("--log-handler", metavar = "PREFIX:LEVEL"),
+            option("--mobile").flag().custom(),
+            option("--watch").flag().custom(),
+            option("--step-delay").custom(),
+            option("--drop").flag().custom(),
+            option("-p", "--http-port", help = "Listen port for the main HTTP service"),
+            option("-d", "--database", help = "Specify the database name"),
+            option("--odoo-help", help = "Show the output of odoo-bin --help").flag(),
+            option("--test-tags", completionCandidates = odooCompletion(TestTag)),
+            option("-i", "--init", help = "Install one or more modules", completionCandidates = odooCompletion(Addon)),
+            option("-u", "--update", help = "Update one or more modules", completionCandidates = odooCompletion(Addon)),
+            option("--save").custom(),
+            option("-q", "--quiet").flag().custom(),
+            option("--debug").flag().custom(),
+        ).forEach { registerOption(it) }
     }
 
     data class Depends(val depends: List<String>)
@@ -131,6 +137,8 @@ class LaunchCommand(private val workspaces: Workspaces, private val terminal: Te
     }
 
     override fun run() {
+        if (currentContext.invokedSubcommand != null) return
+
         computes()
         val workspace = workspaces.current() ?: workspaces.default()
         val runConfiguration = ContextGenerator(

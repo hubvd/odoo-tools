@@ -8,13 +8,15 @@ import kotlin.io.path.Path
 import kotlin.io.path.div
 import kotlin.io.path.name
 
-data class TestTag(val module: String?, val clazz: String?, val method: String?) {
+data class TestTag(val prefix: String?, val module: String?, val clazz: String?, val method: String?) {
     companion object {
-        private val TAG_RE = "(?:\\w+)?(?:/(?<module>\\w+))?(?::(?<class>\\w+))?(?:\\.(?<method>\\w+))?".toRegex()
+        private val TAG_RE = "(?<prefix>.*?)?(?:/(?<module>\\w*))?(?::(?<class>\\w*))?(?:\\.(?<method>\\w*))?"
+            .toRegex()
 
         operator fun invoke(tag: String): TestTag {
             val match = TAG_RE.matchEntire(tag)!!
             return TestTag(
+                match.groups["prefix"]?.value,
                 match.groups["module"]?.value,
                 match.groups["class"]?.value,
                 match.groups["method"]?.value,

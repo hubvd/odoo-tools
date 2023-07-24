@@ -43,7 +43,7 @@ class ContextGenerator(
                 option.nvalues == 0..0 -> {
                     @Suppress("UNCHECKED_CAST")
                     option as Flag
-                    if (option.value) {
+                    if (option.id != "help" && option.value) {
                         flags += option.id
                     }
                 }
@@ -114,7 +114,13 @@ class ContextGenerator(
             addAll(args)
             context.flags
                 .filter { it !in ignores }
-                .forEach { add("--$it") }
+                .forEach {
+                    if (it == "odoo-help") {
+                        add("--help") // FIXME
+                    } else {
+                        add("--$it")
+                    }
+                }
             context.options
                 .filter { it.key !in ignores }
                 .forEach { add("--${it.key}=${it.value}") }
