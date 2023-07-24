@@ -121,7 +121,8 @@ abstract class GenerateSubcommandBinariesTask : DefaultTask() {
     @TaskAction
     fun generatesubcommandBinaries() {
         val subcommands: List<String> = generateSubcommandBinaries.orNull?.takeIf { it.isNotEmpty() } ?: return
-        val subcommandDir = project.buildDir.resolve("subcommands").also { it.mkdir() }
+        val buildDir = project.layout.buildDirectory.asFile.get()
+        val subcommandDir = buildDir.resolve("subcommands").also { it.mkdir() }
         val generatedDir = subcommandDir.resolve("generated").also { it.mkdir() }
         val outDir = subcommandDir.resolve("out").also { it.mkdir() }
         subcommands.forEach { subcommand ->

@@ -16,7 +16,8 @@ class LauncherChecksumPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         val sourceSets = target.extensions.getByType(JavaPluginExtension::class.java).sourceSets
         val resources = sourceSets["main"].resources
-        val generatedResourcesDir = target.buildDir.resolve("generated-resources")
+        val buildDir = target.layout.buildDirectory.asFile.get()
+        val generatedResourcesDir = buildDir.resolve("generated-resources")
 
         target.tasks.register<LauncherChecksumTask>("generateLauncherChecksums") {
             this.group = "launcher"
