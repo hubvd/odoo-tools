@@ -51,10 +51,10 @@ class RestoreCommand(
     private val httpHandler: HttpHandler,
 ) : CliktCommand() {
     private val source by mutuallyExclusiveOptions(
-        option("-z").file(mustExist = true, canBeFile = true, canBeDir = false)
+        option("-z", "--zip").file(mustExist = true, canBeFile = true, canBeDir = false)
             .convert { DumpSource.ZipSource(it) }
             .validate { it.file.name.endsWith(".zip") },
-        option("-u").convert { DumpSource.RemoteSource(URI.create(it)) },
+        option("-u", "--url").convert { DumpSource.RemoteSource(URI.create(it)) },
     ).single().required()
 
     private val name by argument().defaultLazy { source.name }

@@ -1,6 +1,6 @@
 #!/usr/bin/fish
 
-argparse 'amend' 's/sentry' -- $argv
+argparse 'no-verify' 'amend' 's/sentry' -- $argv
 
 function modules --inherit _flag_amend
   if set -q _flag_amend
@@ -49,8 +49,7 @@ function msg
   string join \n\n $parts
 end
 
-if set -q _flag_amend
-  git commit --amend -eF (msg | psub)
-else
-  git commit -eF (msg | psub)
-end
+set -q _flag_no_verify && set -a flags --no-verify
+set -q _flag_amend && set -a flags --amend
+
+git commit $flags -eF (msg | psub)

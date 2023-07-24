@@ -1,5 +1,6 @@
 package com.github.hubvd.odootools.worktree.commands
 
+import com.github.ajalt.clikt.completion.CompletionCandidates.Custom.Companion.fromStdout
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.CliktError
 import com.github.ajalt.clikt.parameters.options.*
@@ -24,7 +25,7 @@ class AddCommand(
 ) : CliktCommand() {
     private val name by option().required()
         .check("name must be a valid path name") { "^[a-zA-Z0-9-_.]*$".toRegex().matches(it) }
-    private val base by option().required()
+    private val base by option(completionCandidates = fromStdout("worktree list base")).required()
     private val path by option().path(canBeFile = false).default(config.root)
 
     private val community by option().flag()
@@ -34,7 +35,7 @@ class AddCommand(
         val path = path / name
         if (path.exists()) throw CliktError("$path already exists")
         path.createDirectory()
-        val repositories = Repository.values().filter { if (community) it != Repository.Enterprise else true }
+        val repositories = Repository.entries.filter { if (community) it != Repository.Enterprise else true }
         processSequence(terminal) {
             cd(path)
             createGitWorktrees(

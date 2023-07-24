@@ -9,7 +9,7 @@ import com.github.ajalt.mordant.table.table
 import com.github.ajalt.mordant.terminal.Terminal
 
 class OdooctlCommand(private val odooctl: Odooctl, private val terminal: Terminal) : CliktCommand() {
-    private val killall by option("-k").flag()
+    private val killall by option("-k", "--kill-all").flag()
 
     override fun run() {
         if (killall) {
@@ -17,6 +17,7 @@ class OdooctlCommand(private val odooctl: Odooctl, private val terminal: Termina
             return
         }
 
+        val instances = odooctl.instances().ifEmpty { return }
         terminal.println(
             table {
                 tableBorders = Borders.ALL
@@ -27,7 +28,7 @@ class OdooctlCommand(private val odooctl: Odooctl, private val terminal: Termina
                 body {
                     rowStyles(TextColors.blue, TextColors.green)
                     cellBorders = Borders.LEFT_RIGHT
-                    odooctl.instances().forEach { instance ->
+                    instances.forEach { instance ->
                         row {
                             cell(instance.pid)
                             cell(instance.workspace.name)

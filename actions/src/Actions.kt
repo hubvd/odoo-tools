@@ -2,9 +2,8 @@ package com.github.hubvd.odootools.actions
 
 import com.github.ajalt.clikt.core.*
 import com.github.ajalt.mordant.terminal.Terminal
-import com.github.hubvd.odootools.config.Config
 import com.github.hubvd.odootools.workspace.WORKSPACE_MODULE
-import com.github.hubvd.odootools.workspace.WorkspaceConfig
+import com.github.hubvd.odootools.workspace.WorkspaceProvider
 import org.http4k.client.JavaHttpClient
 import org.http4k.core.HttpHandler
 import org.kodein.di.*
@@ -14,8 +13,8 @@ class MainCommand : NoOpCliktCommand(name = "actions")
 
 fun main(args: Array<String>) {
     val di = DI {
-        bind { singleton { Config.get("workspace", WorkspaceConfig.serializer()) } }
         import(WORKSPACE_MODULE)
+        bind { singleton { WorkspaceProvider(instance()).cached() } }
 
         import(ACTIONS_CONFIG_MODULE)
 
@@ -76,10 +75,10 @@ fun main(args: Array<String>) {
     val notificationService by di.instance<NotificationService>()
     val terminal by di.instance<Terminal>()
 
-    fun echo(message: String?, error: Boolean = false) = if (error) {
-        notificationService.warn(message ?: "")
+    fun echo(message: String, error: Boolean = false) = if (error) {
+        notificationService.warn(message)
     } else {
-        notificationService.info(message ?: "")
+        notificationService.info(message)
     }
 
     try {
@@ -87,7 +86,13 @@ fun main(args: Array<String>) {
     } catch (e: CliktError) {
         getFormattedHelp(e, mainCommand)
             ?.takeIf { it.isNotEmpty() }
-            ?.let { echo(it, error = e.printError) }
+            ?.let {
+                if (e is PrintCompletionMessage) {
+                    println(it)
+                } else {
+                    echo(it, error = e.printError)
+                }
+            }
         exitProcess(e.statusCode)
     }
 }

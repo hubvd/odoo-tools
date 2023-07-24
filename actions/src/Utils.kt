@@ -30,9 +30,10 @@ class Odooctl(private val workspaces: Workspaces) {
         val workspaceList = workspaces.list()
         ProcessHandle.allProcesses()
             .asSequence()
-            .filter { it.info().command().getOrNull()?.contains("/python") ?: false }
-            .filter { it.info().arguments().getOrNull()?.any { it.contains("odoo") } ?: false }
-            .map { it.pid() to it.info().arguments().get() }
+            .map { it.pid() to it.info() }
+            .filter { it.second.command().getOrNull()?.contains("/python") ?: false }
+            .filter { it.second.arguments().getOrNull()?.any { it.contains("odoo") } ?: false }
+            .map { it.first to it.second.arguments().get() }
             .filter { !it.second.contains("shell") }
             .mapNotNull { (pid, cmdline) ->
                 val db = cmdline.find { it.startsWith("--database=") }?.removePrefix("--database=")

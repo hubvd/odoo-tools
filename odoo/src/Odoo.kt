@@ -1,10 +1,9 @@
 package com.github.hubvd.odootools.odoo
 
 import com.github.ajalt.mordant.terminal.Terminal
-import com.github.hubvd.odootools.config.Config
 import com.github.hubvd.odootools.odoo.commands.LaunchCommand
-import com.github.hubvd.odootools.workspace.WorkspaceConfig
-import com.github.hubvd.odootools.workspace.Workspaces
+import com.github.hubvd.odootools.workspace.WORKSPACE_MODULE
+import com.github.hubvd.odootools.workspace.WorkspaceProvider
 import com.github.pgreze.process.Redirect
 import com.github.pgreze.process.process
 import kotlinx.coroutines.runBlocking
@@ -134,8 +133,8 @@ fun main(args: Array<String>) {
     val di = DI {
         bind { singleton { LaunchCommand(instance(), instance()) } }
         bind { singleton { Terminal() } }
-        bind { singleton { Workspaces(instance()) } }
-        bind { singleton { Config.get("workspace", WorkspaceConfig.serializer()) } }
+        import(WORKSPACE_MODULE)
+        bind { singleton { WorkspaceProvider(instance()).cached() } }
     }
 
     val command by di.instance<LaunchCommand>()

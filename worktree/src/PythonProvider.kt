@@ -15,7 +15,6 @@ fun pythonProvider(): PythonProvider {
     val systemPaths = System.getenv("PATH").split(':').map { Path(it) }
 
     fun findExe(paths: List<Path>, exe: String) = paths
-        .toHashSet()
         .asSequence()
         .map { it / exe }
         .filter { it.exists() }

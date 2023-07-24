@@ -30,7 +30,7 @@ class RebuildCommand(
                 venvs.create(workspace)
                 stubs.create(workspace)
                 val community = (workspace.path / "enterprise").notExists()
-                val repositories = Repository.values().filter { if (community) it != Repository.Enterprise else true }
+                val repositories = Repository.entries.filter { if (community) it != Repository.Enterprise else true }
                 Pycharm(workspace, repositories).saveFiles()
             }
         }

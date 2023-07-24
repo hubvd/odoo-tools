@@ -4,6 +4,8 @@ import com.github.hubvd.odootools.workspace.Workspace
 import org.redundent.kotlin.xml.Node
 import org.redundent.kotlin.xml.PrintOptions
 import org.redundent.kotlin.xml.xml
+import java.nio.file.FileAlreadyExistsException
+import java.nio.file.StandardOpenOption
 import kotlin.io.path.createDirectories
 import kotlin.io.path.div
 import kotlin.io.path.writeText
@@ -142,7 +144,12 @@ class Pycharm(private val workspace: Workspace, private val repositories: List<R
         }.map { workspace.path / ".idea" / it.first to it.second }.toList()
         generators.map { it.first.parent }.toHashSet().forEach { it.createDirectories() }
         generators.forEach { (path, generator) ->
-            path.writeText(generator().toString(PrintOptions(indent = "  ")))
+            try {
+                path.writeText(
+                    generator().toString(PrintOptions(indent = "  ")),
+                    options = arrayOf(StandardOpenOption.CREATE_NEW),
+                )
+            } catch (_: FileAlreadyExistsException) {}
         }
     }
 }

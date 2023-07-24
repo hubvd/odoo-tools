@@ -4,9 +4,8 @@ import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.NoOpCliktCommand
 import com.github.ajalt.clikt.core.subcommands
 import com.github.ajalt.mordant.terminal.Terminal
-import com.github.hubvd.odootools.config.Config
 import com.github.hubvd.odootools.workspace.WORKSPACE_MODULE
-import com.github.hubvd.odootools.workspace.WorkspaceConfig
+import com.github.hubvd.odootools.workspace.WorkspaceProvider
 import com.github.hubvd.odootools.worktree.commands.COMMAND_MODULE
 import org.kodein.di.*
 import kotlin.io.path.Path
@@ -33,7 +32,7 @@ object DataDir {
 
 fun main(args: Array<String>) {
     val di = DI {
-        bind { singleton { Config.get("workspace", WorkspaceConfig.serializer()) } }
+        bind { singleton { WorkspaceProvider(instance()).cached() } }
         bind { singleton { pythonProvider() } }
         bind { singleton { Terminal() } }
         bind { singleton { new(::OdooStubs) } }
