@@ -28,7 +28,7 @@ function eslint
   argparse fix -- $argv
   set js_files (string match -r '.*(?:\.d\.ts|\.js)$' $argv)
   and set -q js_files[1]
-  and _run eslint $_flag_fix --resolve-plugins-relative-to=$root $js_files
+  and _run eslint --config=$root/.eslintrc.json $_flag_fix --resolve-plugins-relative-to=$root $js_files
 end
 
 function lint
