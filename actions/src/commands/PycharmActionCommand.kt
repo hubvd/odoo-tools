@@ -1,4 +1,4 @@
-package com.github.hubvd.odootools.actions
+package com.github.hubvd.odootools.actions.commands
 
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.arguments.argument

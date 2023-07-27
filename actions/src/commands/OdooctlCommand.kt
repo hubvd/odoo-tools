@@ -1,4 +1,4 @@
-package com.github.hubvd.odootools.actions
+package com.github.hubvd.odootools.actions.commands
 
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.options.flag
@@ -7,6 +7,7 @@ import com.github.ajalt.mordant.rendering.TextColors
 import com.github.ajalt.mordant.table.Borders
 import com.github.ajalt.mordant.table.table
 import com.github.ajalt.mordant.terminal.Terminal
+import com.github.hubvd.odootools.actions.utils.Odooctl
 
 class OdooctlCommand(private val odooctl: Odooctl, private val terminal: Terminal) : CliktCommand() {
     private val killall by option("-k", "--kill-all").flag()

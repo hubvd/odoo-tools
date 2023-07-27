@@ -2,6 +2,9 @@ package com.github.hubvd.odootools.actions
 
 import com.github.ajalt.clikt.core.*
 import com.github.ajalt.mordant.terminal.Terminal
+import com.github.hubvd.odootools.actions.commands.COMMANDS_MODULE
+import com.github.hubvd.odootools.actions.commands.MainCommand
+import com.github.hubvd.odootools.actions.utils.*
 import com.github.hubvd.odootools.workspace.WORKSPACE_MODULE
 import com.github.hubvd.odootools.workspace.WorkspaceProvider
 import org.http4k.client.JavaHttpClient
@@ -9,14 +12,13 @@ import org.http4k.core.HttpHandler
 import org.kodein.di.*
 import kotlin.system.exitProcess
 
-class MainCommand : NoOpCliktCommand(name = "actions")
-
 fun main(args: Array<String>) {
     val di = DI {
         import(WORKSPACE_MODULE)
         bind { singleton { WorkspaceProvider(instance()).cached() } }
 
         import(ACTIONS_CONFIG_MODULE)
+        import(COMMANDS_MODULE)
 
         bind { singleton { di } }
         bind { singleton { new(::Odooctl) } }
@@ -46,29 +48,6 @@ fun main(args: Array<String>) {
         bind { singleton { CompositeBranchLookup(instance<Set<BranchLookup>>().toList()) } }
 
         bind<BrowserService> { singleton { BrowserServiceImpl(instance<ActionsConfig>().browsers) } }
-
-        bindSet {
-            add { singleton { new(::PycharmCommand) } }
-            add { singleton { new(::OpenCommand) } }
-            add { singleton { new(::RunTestCommand) } }
-            add { singleton { new(::AttachCommand) } }
-            add { singleton { new(::OdooctlCommand) } }
-            add {
-                singleton {
-                    RestoreCommand(
-                        terminal = instance(),
-                        dumpPassword = instance(tag = "odoo_dump_password"),
-                        httpHandler = instance(),
-                    )
-                }
-            }
-            add { singleton { new(::OpenGitCommand) } }
-            add { singleton { new(::QrCommand) } }
-            add { singleton { new(::CheckoutCommand) } }
-            add { singleton { new(::NewCommand) } }
-        }
-
-        bind { singleton { MainCommand().subcommands(instance<Set<CliktCommand>>()) } }
     }
 
     val mainCommand by di.instance<MainCommand>()

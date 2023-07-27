@@ -1,4 +1,6 @@
-package com.github.hubvd.odootools.actions
+package com.github.hubvd.odootools.actions.utils
+
+import com.github.hubvd.odootools.actions.BrowserConfig
 
 interface BrowserService {
     fun open(url: String)

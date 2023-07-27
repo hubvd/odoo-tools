@@ -1,9 +1,10 @@
-package com.github.hubvd.odootools.actions
+package com.github.hubvd.odootools.actions.commands
 
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.mordant.rendering.*
 import com.github.ajalt.mordant.table.grid
 import com.github.ajalt.mordant.terminal.Terminal
+import com.github.hubvd.odootools.actions.utils.Odooctl
 import com.github.hubvd.odootools.workspace.Workspaces
 import com.github.pgreze.process.Redirect
 import com.github.pgreze.process.process

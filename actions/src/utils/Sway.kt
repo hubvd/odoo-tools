@@ -1,4 +1,4 @@
-package com.github.hubvd.odootools.actions
+package com.github.hubvd.odootools.actions.utils
 
 import com.github.hubvd.odootools.workspace.Workspace
 import com.github.pgreze.process.Redirect.SILENT

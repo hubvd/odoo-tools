@@ -1,4 +1,4 @@
-package com.github.hubvd.odootools.actions
+package com.github.hubvd.odootools.actions.utils
 
 import com.github.ajalt.mordant.rendering.TextColors.green
 import com.github.ajalt.mordant.rendering.TextColors.red

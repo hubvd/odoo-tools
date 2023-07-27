@@ -1,6 +1,7 @@
-package com.github.hubvd.odootools.actions
+package com.github.hubvd.odootools.actions.commands
 
 import com.github.ajalt.clikt.core.Abort
+import com.github.hubvd.odootools.actions.utils.Sway
 import com.github.pgreze.process.process
 import kotlinx.coroutines.runBlocking
 import org.kodein.di.DI

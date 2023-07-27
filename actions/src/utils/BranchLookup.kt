@@ -1,5 +1,6 @@
-package com.github.hubvd.odootools.actions
+package com.github.hubvd.odootools.actions.utils
 
+import com.github.hubvd.odootools.actions.Secret
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonObject

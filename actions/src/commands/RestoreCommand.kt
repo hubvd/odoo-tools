@@ -1,4 +1,4 @@
-package com.github.hubvd.odootools.actions
+package com.github.hubvd.odootools.actions.commands
 
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.arguments.argument
@@ -12,6 +12,7 @@ import com.github.ajalt.clikt.parameters.options.validate
 import com.github.ajalt.clikt.parameters.types.file
 import com.github.ajalt.mordant.animation.progressAnimation
 import com.github.ajalt.mordant.terminal.Terminal
+import com.github.hubvd.odootools.actions.Secret
 import com.github.pgreze.process.InputSource
 import com.github.pgreze.process.Redirect
 import com.github.pgreze.process.process
