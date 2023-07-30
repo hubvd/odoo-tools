@@ -5,6 +5,7 @@ include("config")
 include("worktree")
 include("addons")
 include("actions")
+include("mordant-native")
 include("reachability-metadata")
 
 pluginManagement {
