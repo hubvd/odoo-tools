@@ -50,7 +50,9 @@ class RestoreCommand(
     private val terminal: Terminal,
     private val dumpPassword: Secret,
     private val httpHandler: HttpHandler,
-) : CliktCommand() {
+) : CliktCommand(
+    help = "Restore an odoo database dump, either from a runbot or a zip",
+) {
     private val source by mutuallyExclusiveOptions(
         option("-z", "--zip").file(mustExist = true, canBeFile = true, canBeDir = false)
             .convert { DumpSource.ZipSource(it) }

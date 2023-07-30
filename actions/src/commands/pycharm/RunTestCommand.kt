@@ -1,12 +1,12 @@
-package com.github.hubvd.odootools.actions.commands
+package com.github.hubvd.odootools.actions.commands.pycharm
 
 import com.github.ajalt.clikt.core.Abort
 import com.github.hubvd.odootools.actions.utils.Sway
+import com.github.hubvd.odootools.workspace.Workspaces
 import com.github.pgreze.process.process
 import kotlinx.coroutines.runBlocking
-import org.kodein.di.DI
 
-class RunTestCommand(override val di: DI) : PycharmActionCommand() {
+class RunTestCommand(override val workspaces: Workspaces) : BasePycharmAction() {
     override fun run() {
         if (selection.isEmpty()) throw Abort()
 

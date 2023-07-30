@@ -20,7 +20,6 @@ fun main(args: Array<String>) {
         import(ACTIONS_CONFIG_MODULE)
         import(COMMANDS_MODULE)
 
-        bind { singleton { di } }
         bind { singleton { new(::Odooctl) } }
         bind { singleton { Terminal() } }
         bind<HttpHandler> { singleton { JavaHttpClient() } }
@@ -33,19 +32,21 @@ fun main(args: Array<String>) {
             }
         }
 
-        bindSet {
-            add {
-                singleton {
-                    GithubBranchLookup(
-                        instance(tag = "github_api_key"),
-                        instance(),
-                    )
-                }
+        bind {
+            singleton {
+                GithubClient(
+                    instance(tag = "github_api_key"),
+                    instance(),
+                )
             }
+        }
+
+        bindSet {
+            add { singleton { new(::GithubBranchLookup) } }
             add { instance(CommitRefBranchLookup) }
         }
 
-        bind { singleton { CompositeBranchLookup(instance<Set<BranchLookup>>().toList()) } }
+        bind { singleton { CompositeBranchLookup(instance<Set<BranchLookup>>()) } }
 
         bind<BrowserService> { singleton { BrowserServiceImpl(instance<ActionsConfig>().browsers) } }
     }

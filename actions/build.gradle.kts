@@ -13,6 +13,7 @@ cli {
         "qr",
         "checkout",
         "new",
+        "pr",
     )
 }
 
@@ -25,4 +26,5 @@ dependencies {
     implementation(libs.process)
     implementation(libs.kodein.di)
     implementation(libs.http4k.core)
+    implementation(libs.arrow.core)
 }

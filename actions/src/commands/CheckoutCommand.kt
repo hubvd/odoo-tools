@@ -23,8 +23,9 @@ class CheckoutCommand(
     private val terminal: Terminal,
     private val notificationService: NotificationService,
     private val branchLookup: BranchLookup,
-) :
-    CliktCommand() {
+) : CliktCommand(
+    help = "Checkout a pull request from a github url or a commit ref (remote:branch)",
+) {
     private val branch by argument()
         .defaultLazy { runBlocking { process("wl-paste", stdout = CAPTURE).output.first() } }
 

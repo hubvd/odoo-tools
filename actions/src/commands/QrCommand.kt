@@ -18,7 +18,9 @@ class QrCommand(
     private val terminal: Terminal,
     private val odooctl: Odooctl,
     private val workspaces: Workspaces,
-) : CliktCommand() {
+) : CliktCommand(
+    help = "Show a QR code pointing to running odoo instances",
+) {
     override fun run() {
         val interfaces = NetworkInterface.networkInterfaces()
             .asSequence()

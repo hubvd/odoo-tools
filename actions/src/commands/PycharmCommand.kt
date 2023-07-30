@@ -8,7 +8,9 @@ import com.github.hubvd.odootools.actions.utils.Pycharm
 import com.github.hubvd.odootools.actions.utils.menu
 import com.github.hubvd.odootools.workspace.Workspaces
 
-class PycharmCommand(private val workspaces: Workspaces) : CliktCommand() {
+class PycharmCommand(private val workspaces: Workspaces) : CliktCommand(
+    help = "Open selected files in Pycharm",
+) {
     private val paths by argument().multiple()
 
     private val pathRe = "^(?<path>.*?)(?:#(?<line>\\d+)(?::(?<column>\\d+))?)?\$".toRegex()

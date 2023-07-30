@@ -12,7 +12,9 @@ import org.http4k.core.Request
 class AttachCommand(
     private val odooctl: Odooctl,
     private val httpHandler: HttpHandler,
-) : CliktCommand() {
+) : CliktCommand(
+    help = "Attach the selected odoo instances to a remote debugger",
+) {
     override fun run() {
         val instances = odooctl.instances()
         if (instances.isEmpty()) throw CliktError("No instances running")

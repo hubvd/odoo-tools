@@ -16,7 +16,9 @@ import kotlinx.coroutines.runBlocking
 class NewCommand(
     private val workspaces: Workspaces,
     private val notificationService: NotificationService,
-) : CliktCommand() {
+) : CliktCommand(
+    help = "Create or switch to a branch with the selected id",
+) {
     private val isSentry by option("-s", "--sentry").flag()
     private val id by argument().int()
     private val description by argument().optional()

@@ -1,4 +1,4 @@
-package com.github.hubvd.odootools.actions.commands
+package com.github.hubvd.odootools.actions.commands.pycharm
 
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.arguments.argument
@@ -6,8 +6,7 @@ import com.github.ajalt.clikt.parameters.arguments.convert
 import com.github.ajalt.clikt.parameters.arguments.multiple
 import com.github.ajalt.clikt.parameters.arguments.transformAll
 import com.github.hubvd.odootools.workspace.Workspaces
-import org.kodein.di.DIAware
-import org.kodein.di.instance
+import org.kodein.di.*
 import kotlin.io.path.Path
 
 /**
@@ -18,12 +17,19 @@ import kotlin.io.path.Path
  * the following should be put in the Arguments input:
  * example "$ProjectFileDir$" "$FilePath$" "$LineNumber$" "$ColumnNumber$" $SelectedText$
  */
-abstract class PycharmActionCommand(name: String? = null) : CliktCommand(name = name), DIAware {
-    private val workspaces by instance<Workspaces>()
+abstract class BasePycharmAction(name: String? = null) : CliktCommand(name = name, hidden = true) {
+    protected abstract val workspaces: Workspaces
 
     protected val workspace by argument().convert { option -> workspaces.list().first { it.path == Path(option) } }
     protected val file by argument()
     protected val line by argument()
     protected val column by argument()
     protected val selection by argument().multiple().transformAll { it.joinToString(" ") }
+}
+
+val PYCHARM_ACTIONS_MODULE by DI.Module {
+    inBindSet<CliktCommand> {
+        add { singleton { new(::RunTestCommand) } }
+        add { singleton { new(::OpenGitCommand) } }
+    }
 }

@@ -7,9 +7,11 @@ import com.github.hubvd.odootools.actions.utils.BrowserService
 import com.github.hubvd.odootools.actions.utils.Odooctl
 import com.github.hubvd.odootools.actions.utils.menu
 
-class OpenCommand(private val odooctl: Odooctl, private val browserService: BrowserService) : CliktCommand() {
-    private val qunit by option("-q").flag()
-    private val firefox by option("-f").flag()
+class OpenCommand(private val odooctl: Odooctl, private val browserService: BrowserService) : CliktCommand(
+    help = "Open the selected odoo instance in a web browser",
+) {
+    private val qunit by option("-q", "--qunit", help = "If enabled, open the QUnit test page").flag()
+    private val firefox by option("-f", "--firefox", help = "Use Firefox").flag()
 
     override fun run() {
         val instances = odooctl.instances()

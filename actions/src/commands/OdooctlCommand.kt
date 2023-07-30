@@ -9,7 +9,9 @@ import com.github.ajalt.mordant.table.table
 import com.github.ajalt.mordant.terminal.Terminal
 import com.github.hubvd.odootools.actions.utils.Odooctl
 
-class OdooctlCommand(private val odooctl: Odooctl, private val terminal: Terminal) : CliktCommand() {
+class OdooctlCommand(private val odooctl: Odooctl, private val terminal: Terminal) : CliktCommand(
+    help = "List information about running odoo instances",
+) {
     private val killall by option("-k", "--kill-all").flag()
 
     override fun run() {

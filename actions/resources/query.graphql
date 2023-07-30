@@ -2,7 +2,7 @@
   results: search(
     type: ISSUE
     query: "org:odoo involves:<INVOLVES> state:open type:pr"
-    last: 25
+    last: 100
   ) {
     prs: nodes {
       ... on PullRequest {
