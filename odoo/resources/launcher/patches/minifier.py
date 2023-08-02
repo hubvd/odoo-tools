@@ -1,4 +1,5 @@
 import rjsmin
+
 from odoo.addons.base.models import assetsbundle
 
 

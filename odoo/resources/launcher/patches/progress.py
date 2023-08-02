@@ -1,15 +1,14 @@
-import odoo
 import logging
+
 from rich.progress import (
     Progress,
     SpinnerColumn,
     TextColumn,
     BarColumn,
     TaskProgressColumn,
-    TimeRemainingColumn,
 )
-from rich.rule import Rule
-from rich.console import Console
+
+import odoo
 
 
 class WrappedGraph:

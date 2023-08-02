@@ -1,14 +1,15 @@
-import odoo.netsvc
-from odoo.netsvc import DBFormatter, PerfFilter
 import logging
 import logging.handlers
 import threading
-from rich.logging import RichHandler
-from rich.text import Text, Span
-from rich.style import Style
-import werkzeug.serving
 from datetime import datetime
 from zoneinfo import ZoneInfo
+
+import werkzeug.serving
+from rich.logging import RichHandler
+from rich.text import Span
+
+import odoo.netsvc
+from odoo.netsvc import DBFormatter, PerfFilter
 
 
 class MyRichHandler(RichHandler):

@@ -26,7 +26,7 @@ patches = [
     richlogger.RichLogger(),
     progress.ModuleInstallProgress(),
     tests.ProgressTestResultPatch(),
-    webtests.QunitLogger(),
+    webtests.WebTests(),
     minifier.Minifier(),
 ]
 
