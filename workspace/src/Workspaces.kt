@@ -63,7 +63,7 @@ class WorkspaceProvider(private val config: WorkspaceConfig) : BaseWorkspaceProv
         .filter { it.name == "odoo" }
         .map { it.parent }
         .map { Workspace(it.name, it) }
-        .sortedBy { it.name.removePrefix("saas-") }
+        .sortedWith(compareBy({ it.version }, { it.name }))
 
     fun cached(): Workspaces = CachedWorkspaces(config.default, this)
 }

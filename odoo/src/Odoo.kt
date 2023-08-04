@@ -50,6 +50,7 @@ fun LaunchCommand.computes() {
 
     option("limit-time-cpu") { "99999" }
     option("limit-time-real") { "99999" }
+    option("http-port") { "0" }
 
     depends("test-tags", "test-qunit") {
         flag("test-enable") { testTags != null || testQunit != null }
@@ -119,13 +120,6 @@ fun LaunchCommand.computes() {
         flag("stop-after-init") { testEnable }
         option("log-level") { if (testEnable) "test" else null }
         option("max-cron-thread") { if (testEnable) "0" else null }
-        option("http-port") {
-            if (testEnable) {
-                "9000"
-            } else {
-                workspace.version.toString().replace(".", "") + "00"
-            }
-        }
         option("database") { if (testEnable) "${workspace.name}-test" else workspace.name }
         option("log-handler") { if (testEnable) "werkzeug:ERROR" else null }
     }

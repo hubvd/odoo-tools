@@ -1,63 +1,9 @@
 package com.github.hubvd.odootools.actions.utils
 
-import com.github.hubvd.odootools.workspace.Workspace
-import com.github.hubvd.odootools.workspace.Workspaces
 import com.github.pgreze.process.InputSource
 import com.github.pgreze.process.Redirect
 import com.github.pgreze.process.process
 import kotlinx.coroutines.runBlocking
-import kotlin.io.path.Path
-import kotlin.jvm.optionals.getOrNull
-import kotlin.streams.asSequence
-
-data class OdooInstance(
-    val pid: Long,
-    val port: Int,
-    val database: String,
-    val workspace: Workspace,
-) {
-    val baseUrl: String
-        get() {
-            // Use unique host in order to not have shared cookies
-            val host = "127.0.0." + workspace.version.toString().replace(".", "")
-            @Suppress("HttpUrlsUsage")
-            return "http://$host:$port"
-        }
-}
-
-class Odooctl(private val workspaces: Workspaces) {
-    fun instances(): List<OdooInstance> = runBlocking {
-        val workspaceList = workspaces.list()
-        ProcessHandle.allProcesses()
-            .asSequence()
-            .map { it.pid() to it.info() }
-            .filter { it.second.command().getOrNull()?.contains("/python") ?: false }
-            .filter { it.second.arguments().getOrNull()?.any { it.contains("odoo") } ?: false }
-            .map { it.first to it.second.arguments().get() }
-            .filter { !it.second.contains("shell") }
-            .mapNotNull { (pid, cmdline) ->
-                val db = cmdline.find { it.startsWith("--database=") }?.removePrefix("--database=")
-                    ?: return@mapNotNull null
-
-                val port = cmdline.find { it.startsWith("--http-port=") }?.removePrefix("--http-port=")
-                    ?.toInt()
-                    ?: 8069
-
-                OdooInstance(
-                    pid = pid,
-                    port = port,
-                    db,
-                    workspaceList.first { it.path == Path("/proc/$pid/cwd").toRealPath() },
-                )
-            }.toList()
-    }
-
-    fun killAll() {
-        instances()
-            .mapNotNull { ProcessHandle.of(it.pid).getOrNull() }
-            .forEach { it.destroy() }
-    }
-}
 
 class Pycharm {
 

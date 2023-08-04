@@ -15,7 +15,19 @@ class OpenCommand(private val odooctl: Odooctl, private val browserService: Brow
 
     override fun run() {
         val instances = odooctl.instances()
-        val choice = menu(instances) { it.workspace.name } ?: return
+        val choice = menu(instances) {
+            buildString {
+                append(it.workspace.name)
+                if (it.workspace.name != it.workspace.version.toString()) {
+                    append(" (")
+                    append(it.workspace.version)
+                    append(')')
+                }
+                append(" [")
+                append(it.port)
+                append(']')
+            }
+        } ?: return
         val path = if (qunit) "/web/tests" else "/web"
         val url = "${choice.baseUrl}$path?debug=assets"
         if (firefox) browserService.firefox(url) else browserService.chrome(url)

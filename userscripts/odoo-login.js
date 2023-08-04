@@ -4,8 +4,8 @@
 // @match       https://*.runbot*.odoo.com/*/web/login
 // @match       http://localhost:*/web/login
 // @match       http://localhost:*/*/web/login
-// @match       http://127.0.0.*:*/web/login
-// @match       http://127.0.0.*:*/*/web/login
+// @match       http://127.*.*.*:*/web/login
+// @match       http://127.*.*.*:*/*/web/login
 // @grant       none
 // @version     1.0
 // @author      hubvd
