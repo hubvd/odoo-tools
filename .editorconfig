@@ -15,3 +15,6 @@ ktlint_standard_no-wildcard-imports = disabled
 ktlint_standard_import-ordering = disabled
 ktlint_standard_function-naming = disabled
 ktlint_experimental = enabled
+
+[*.graphql]
+indent_size = 2

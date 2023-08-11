@@ -53,7 +53,8 @@
     "py": "readonly",
     "FullCalendar": "readonly",
     "ClipboardJS": "readonly",
-    "globalThis": "readonly"
+    "globalThis": "readonly",
+    "JSON": "readonly"
   },
   "root": true
 }

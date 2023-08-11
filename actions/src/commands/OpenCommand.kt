@@ -18,9 +18,9 @@ class OpenCommand(private val odooctl: Odooctl, private val browserService: Brow
         val choice = menu(instances) {
             buildString {
                 append(it.workspace.name)
-                if (it.workspace.name != it.workspace.version.toString()) {
+                if (it.database != it.workspace.name) {
                     append(" (")
-                    append(it.workspace.version)
+                    append(it.database)
                     append(')')
                 }
                 append(" [")

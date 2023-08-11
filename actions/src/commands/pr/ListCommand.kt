@@ -70,7 +70,10 @@ fun pullRequestWidget(pullRequest: PullRequest): Widget {
         CheckState.PENDING -> blue
     }
     val normalizedTitle = pullRequest.normalizedTitle()
-    val (_, tags, title) = TAG_RE.find(normalizedTitle)?.groupValues ?: listOf("", "", normalizedTitle)
+    var (_, tags, title) = TAG_RE.find(normalizedTitle)?.groupValues ?: listOf("", "", normalizedTitle)
+    if (pullRequest.isInConflict()) {
+        tags += "[CONFLICT]"
+    }
 
     return Text(
         buildString {

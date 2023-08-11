@@ -10,6 +10,24 @@
         headRefName
         url
         isDraft
+        mergeable
+        timelineItems(first: 100, itemTypes: [ISSUE_COMMENT, PULL_REQUEST_COMMIT]) {
+          nodes {
+            ... on IssueComment {
+              type: __typename
+              body
+              author {
+                login
+              }
+            }
+            ... on PullRequestCommit {
+              type: __typename
+              commit {
+                title: messageHeadline
+              }
+            }
+          }
+        }
         commits(last: 1) {
           nodes {
             commit {
