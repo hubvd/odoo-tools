@@ -27,6 +27,7 @@ val COMMANDS_MODULE = DI.Module("Commands") {
         add { singleton { new(::QrCommand) } }
         add { singleton { new(::CheckoutCommand) } }
         add { singleton { new(::NewCommand) } }
+        add { singleton { new(::BisectCommand) } }
     }
     import(PR_COMMAND_MODULE)
     import(PYCHARM_ACTIONS_MODULE)

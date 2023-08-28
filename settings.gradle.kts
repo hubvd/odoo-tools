@@ -7,6 +7,7 @@ include("addons")
 include("actions")
 include("mordant-native")
 include("reachability-metadata")
+include("odoo-client")
 
 pluginManagement {
     repositories {

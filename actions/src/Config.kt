@@ -25,17 +25,18 @@ data class BrowserConfig(
 @Serializable
 data class ActionsConfig(
     val dumpPassword: String,
-    val apiKey: String,
+    val runbotSession: String,
     val userId: Long,
     val githubApiKey: String,
     val browsers: BrowserConfig = BrowserConfig(),
 )
 
 val ACTIONS_CONFIG_MODULE = DI.Module("actions_config") {
-    bind { singleton { Config.get("actions", ActionsConfig.serializer()) } }
+    bind { singleton { instance<Config>().get("actions", ActionsConfig.serializer()) } }
 
     // FIXME: deserialize directly into value classes
     bind { singleton { UserId(instance<ActionsConfig>().userId) } }
     bind(tag = "odoo_dump_password") { singleton { Secret(instance<ActionsConfig>().dumpPassword) } }
     bind(tag = "github_api_key") { singleton { Secret(instance<ActionsConfig>().githubApiKey) } }
+    bind(tag = "runbot_session") { singleton { Secret(instance<ActionsConfig>().runbotSession) } }
 }

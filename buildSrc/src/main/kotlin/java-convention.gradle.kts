@@ -9,7 +9,6 @@ repositories {
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(20)
-        vendor = JvmVendorSpec.GRAAL_VM
     }
 }
 

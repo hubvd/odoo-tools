@@ -1,17 +1,14 @@
 import org.graalvm.buildtools.gradle.dsl.GraalVMExtension
-import org.graalvm.buildtools.gradle.dsl.GraalVMReachabilityMetadataRepositoryExtension
 import org.gradle.api.DefaultTask
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.ModuleDependency
 import org.gradle.api.artifacts.VersionCatalogsExtension
-import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.TaskAction
 import org.gradle.kotlin.dsl.*
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 interface CliApplicationPluginExtension {
     val name: Property<String>
@@ -24,7 +21,7 @@ class CliApplicationPlugin : Plugin<Project> {
 
     override fun apply(project: Project) {
         project.plugins.apply("kotlin-convention")
-        project.plugins.apply("org.graalvm.buildtools.native")
+        project.plugins.apply("native-image-convention")
 
         val libs = project.extensions.getByType<VersionCatalogsExtension>().named("libs")
         project.dependencies {
@@ -45,7 +42,6 @@ class CliApplicationPlugin : Plugin<Project> {
         }
 
         project.tasks.getByName("build") {
-            dependsOn("nativeCompile")
             dependsOn("generateSubcommandBinaries")
         }
 
@@ -54,21 +50,12 @@ class CliApplicationPlugin : Plugin<Project> {
 
     private fun afterEvaluate(project: Project) {
         project.extensions.configure<GraalVMExtension>("graalvmNative") {
-            (this as ExtensionAware).extensions.configure<GraalVMReachabilityMetadataRepositoryExtension>("metadataRepository") {
-                uri(project.rootDir.resolve("reachability-metadata"))
-                enabled = true
-            }
-            testSupport = false
             binaries {
                 named("main") {
                     imageName = extension.name.get()
                     mainClass = extension.mainClass.get()
 
                     buildArgs(
-                        "--static",
-                        "--install-exit-handlers",
-                        "-H:+PrintClassInitialization",
-                        "-march=native",
                         "--exclude-config",
                         "/mordant-jvm\\.jar",
                         "^/META-INF/native-image/.*",

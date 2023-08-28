@@ -10,6 +10,9 @@ import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
+import org.kodein.di.DI
+import org.kodein.di.bind
+import org.kodein.di.instance
 import java.nio.file.Path
 import kotlin.io.path.Path
 import kotlin.io.path.readText
@@ -33,10 +36,14 @@ object PathSerializer : KSerializer<Path> {
     }
 }
 
-object Config {
+interface Config {
+    fun <T> get(section: String, deserializer: DeserializationStrategy<T>): T
+}
+
+private object TomlConfig : Config {
     private val CONTENT = Path(System.getProperty("user.home"), ".config/odoo/config.toml").readText()
 
-    fun <T> get(section: String, deserializer: DeserializationStrategy<T>): T {
+    override fun <T> get(section: String, deserializer: DeserializationStrategy<T>): T {
         return Toml.partiallyDecodeFromString(
             deserializer,
             CONTENT,
@@ -44,4 +51,8 @@ object Config {
             TomlInputConfig(ignoreUnknownNames = true),
         )
     }
+}
+
+val CONFIG_MODULE by DI.Module {
+    bind<Config>() with instance(TomlConfig)
 }

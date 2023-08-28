@@ -4,6 +4,7 @@ import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.NoOpCliktCommand
 import com.github.ajalt.clikt.core.subcommands
 import com.github.ajalt.mordant.terminal.Terminal
+import com.github.hubvd.odootools.config.CONFIG_MODULE
 import com.github.hubvd.odootools.workspace.WORKSPACE_MODULE
 import com.github.hubvd.odootools.workspace.WorkspaceProvider
 import com.github.hubvd.odootools.worktree.commands.COMMAND_MODULE
@@ -40,6 +41,7 @@ fun main(args: Array<String>) {
         bind { singleton { DataDir } }
         import(COMMAND_MODULE)
         import(WORKSPACE_MODULE)
+        import(CONFIG_MODULE)
     }
 
     val subcommands by di.instance<Set<CliktCommand>>()

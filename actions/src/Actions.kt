@@ -5,6 +5,7 @@ import com.github.ajalt.mordant.terminal.Terminal
 import com.github.hubvd.odootools.actions.commands.COMMANDS_MODULE
 import com.github.hubvd.odootools.actions.commands.MainCommand
 import com.github.hubvd.odootools.actions.utils.*
+import com.github.hubvd.odootools.config.CONFIG_MODULE
 import com.github.hubvd.odootools.workspace.WORKSPACE_MODULE
 import com.github.hubvd.odootools.workspace.WorkspaceProvider
 import org.http4k.client.JavaHttpClient
@@ -12,43 +13,50 @@ import org.http4k.core.HttpHandler
 import org.kodein.di.*
 import kotlin.system.exitProcess
 
+internal val ACTION_MODULE by DI.Module {
+    import(WORKSPACE_MODULE)
+    bind { singleton { WorkspaceProvider(instance()).cached() } }
+
+    import(ACTIONS_CONFIG_MODULE)
+    import(COMMANDS_MODULE)
+    import(RUNBOT_MODULE)
+    import(CONFIG_MODULE)
+
+    bind { singleton { new(::Odooctl) } }
+    bind { singleton { Terminal() } }
+    bind<HttpHandler> { singleton { JavaHttpClient() } }
+
+    bind<NotificationService> {
+        singleton {
+            instance<Terminal>().takeIf { it.info.outputInteractive }
+                ?.let { TerminalNotificationService(it) }
+                ?: SystemNotificationService()
+        }
+    }
+
+    bind {
+        singleton {
+            GithubClient(
+                instance(tag = "github_api_key"),
+                instance(),
+            )
+        }
+    }
+
+    bindSet {
+        add { singleton { new(::GithubBranchLookup) } }
+        add { instance(CommitRefBranchLookup) }
+    }
+
+    bind { singleton { CompositeBranchLookup(instance<Set<BranchLookup>>()) } }
+
+    bind<BrowserService> { singleton { BrowserServiceImpl(instance<ActionsConfig>().browsers) } }
+    bind<Git> { singleton { new(::GitShellImplementation) } }
+}
+
 fun main(args: Array<String>) {
     val di = DI {
-        import(WORKSPACE_MODULE)
-        bind { singleton { WorkspaceProvider(instance()).cached() } }
-
-        import(ACTIONS_CONFIG_MODULE)
-        import(COMMANDS_MODULE)
-
-        bind { singleton { new(::Odooctl) } }
-        bind { singleton { Terminal() } }
-        bind<HttpHandler> { singleton { JavaHttpClient() } }
-
-        bind<NotificationService> {
-            singleton {
-                instance<Terminal>().takeIf { it.info.outputInteractive }
-                    ?.let { TerminalNotificationService(it) }
-                    ?: SystemNotificationService()
-            }
-        }
-
-        bind {
-            singleton {
-                GithubClient(
-                    instance(tag = "github_api_key"),
-                    instance(),
-                )
-            }
-        }
-
-        bindSet {
-            add { singleton { new(::GithubBranchLookup) } }
-            add { instance(CommitRefBranchLookup) }
-        }
-
-        bind { singleton { CompositeBranchLookup(instance<Set<BranchLookup>>()) } }
-
-        bind<BrowserService> { singleton { BrowserServiceImpl(instance<ActionsConfig>().browsers) } }
+        import(ACTION_MODULE)
     }
 
     val mainCommand by di.instance<MainCommand>()

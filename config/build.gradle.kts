@@ -6,4 +6,5 @@ plugins {
 dependencies {
     api(libs.serialization.core)
     implementation(libs.serialization.toml)
+    api(libs.kodein.di)
 }

@@ -59,10 +59,10 @@ class WorkspaceProvider(private val config: WorkspaceConfig) : BaseWorkspaceProv
     override val defaultName: String
         get() = config.default
 
-    override fun list() = listWorktrees(config.root / config.default / "odoo")
+    override fun list(): List<Workspace> = listWorktrees(config.root / config.default / "odoo")
         .filter { it.name == "odoo" }
         .map { it.parent }
-        .map { Workspace(it.name, it) }
+        .map { WorkspaceImpl(it.name, it) }
         .sortedWith(compareBy({ it.version }, { it.name }))
 
     fun cached(): Workspaces = CachedWorkspaces(config.default, this)

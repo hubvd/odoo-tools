@@ -2,6 +2,7 @@ package com.github.hubvd.odootools.odoo
 
 import com.github.ajalt.clikt.core.subcommands
 import com.github.ajalt.mordant.terminal.Terminal
+import com.github.hubvd.odootools.config.CONFIG_MODULE
 import com.github.hubvd.odootools.odoo.commands.CompleteCommand
 import com.github.hubvd.odootools.odoo.commands.LaunchCommand
 import com.github.hubvd.odootools.workspace.WORKSPACE_MODULE
@@ -130,6 +131,7 @@ fun main(args: Array<String>) {
         bind { singleton { LaunchCommand(instance(), instance()).subcommands(CompleteCommand(instance())) } }
         bind { singleton { Terminal() } }
         import(WORKSPACE_MODULE)
+        import(CONFIG_MODULE)
         bind { singleton { WorkspaceProvider(instance()).cached() } }
     }
 
