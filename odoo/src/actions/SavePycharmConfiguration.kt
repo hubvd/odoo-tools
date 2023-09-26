@@ -34,8 +34,9 @@ class SavePycharmConfiguration(
                 attributes(
                     "default" to "false",
                     "name" to name,
-                    "type" to "PythonConfigurationType",
-                    "factoryName" to "Python",
+                    "type" to "Odoo",
+                    "factoryName" to "Odoo",
+                    "nameIsGenerated" to "false",
                 )
                 "module" { attribute("name", workspace.name) }
                 "INTERPRETER_OPTIONS" eq ""
