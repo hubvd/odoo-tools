@@ -40,7 +40,7 @@ class NativeImageConvention : Plugin<Project>{
             named("main") {
                 buildArgs(
                     "--static",
-                    "--libc=musl",
+                    "--libc=glibc",
                     "--install-exit-handlers",
                     "-march=native",
                     "--initialize-at-build-time=$enums",
