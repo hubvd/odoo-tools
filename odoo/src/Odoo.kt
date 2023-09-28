@@ -17,6 +17,7 @@ import org.kodein.di.singleton
 import java.net.URLEncoder
 import kotlin.io.path.div
 import kotlin.io.path.isDirectory
+import kotlin.math.absoluteValue
 import kotlin.system.exitProcess
 
 fun LaunchCommand.computes() {
@@ -51,7 +52,26 @@ fun LaunchCommand.computes() {
 
     option("limit-time-cpu") { "99999" }
     option("limit-time-real") { "99999" }
-    option("http-port") { "0" }
+
+    depends("database") {
+        option("http-port") {
+            when {
+                workspace.name == workspace.base && database == workspace.name -> {
+                    (workspace.version * 10).toString()
+                }
+
+                workspace.name == workspace.base && database == "${workspace.name}-test" -> {
+                    (workspace.version * 10 + 5).toString()
+                }
+
+                else -> {
+                    val min = 2000
+                    val max = 65535
+                    (min + database.hashCode().absoluteValue % (max - min + 1)).toString()
+                }
+            }
+        }
+    }
 
     depends("test-tags", "test-qunit") {
         flag("test-enable") { testTags != null || testQunit != null }
