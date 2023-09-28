@@ -57,11 +57,11 @@ fun LaunchCommand.computes() {
         option("http-port") {
             when {
                 workspace.name == workspace.base && database == workspace.name -> {
-                    (workspace.version * 10).toString()
+                    (workspace.version * 100).toInt().toString()
                 }
 
                 workspace.name == workspace.base && database == "${workspace.name}-test" -> {
-                    (workspace.version * 10 + 5).toString()
+                    (workspace.version * 100 + 5).toInt().toString()
                 }
 
                 else -> {
