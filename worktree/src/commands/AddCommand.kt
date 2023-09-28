@@ -23,7 +23,7 @@ class AddCommand(
     private val stubs: OdooStubs,
     private val venvs: Virtualenvs,
 ) : CliktCommand() {
-    private val name by option().required()
+    private val name by option().defaultLazy { base }
         .check("name must be a valid path name") { "^[a-zA-Z0-9-_.]*$".toRegex().matches(it) }
     private val base by option(completionCandidates = fromStdout("worktree list base")).required()
     private val path by option().path(canBeFile = false).default(config.root)
