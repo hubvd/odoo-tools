@@ -2,7 +2,6 @@ import org.graalvm.buildtools.gradle.dsl.GraalVMExtension
 import org.gradle.api.DefaultTask
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.artifacts.ModuleDependency
 import org.gradle.api.artifacts.VersionCatalogsExtension
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
@@ -26,10 +25,7 @@ class CliApplicationPlugin : Plugin<Project> {
         val libs = project.extensions.getByType<VersionCatalogsExtension>().named("libs")
         project.dependencies {
             dependencies.add("implementation", libs.findLibrary("clikt").get())
-            dependencies.add("implementation", libs.findLibrary("mordant").get(), closureOf<ModuleDependency> {
-                exclude(group = "net.java.dev.jna")
-            })
-            dependencies.add("implementation", project(":mordant-native"))
+            dependencies.add("implementation", libs.findLibrary("mordant").get())
         }
 
         this.extension = project.extensions.create<CliApplicationPluginExtension>("cli")
@@ -54,12 +50,6 @@ class CliApplicationPlugin : Plugin<Project> {
                 named("main") {
                     imageName = extension.name.get()
                     mainClass = extension.mainClass.get()
-
-                    buildArgs(
-                        "--exclude-config",
-                        "/mordant-jvm\\.jar",
-                        "^/META-INF/native-image/.*",
-                    )
                 }
             }
         }
