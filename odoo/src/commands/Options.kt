@@ -87,6 +87,8 @@ class OdooOptionGroup : StoredOptionGroup("Odoo options") {
                 help = "Update one or more modules",
                 completionCandidates = odooCompletion(CompletionType.Addon),
             ),
+            option("--test-enable", help = "Enable unit tests").flag(),
+            option("--test-file", help = "Launch a python test file")
         ).forEach { registerOption(it) }
     }
 }

@@ -44,6 +44,7 @@ interface OdooOptions {
     val save: String?
     val debug: Boolean
     val testEnable: Boolean
+    val testFile: String?
 }
 
 class LaunchCommand(private val workspaces: Workspaces, private val terminal: Terminal) : CliktCommand(

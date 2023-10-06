@@ -73,8 +73,8 @@ fun LaunchCommand.computes() {
         }
     }
 
-    depends("test-tags", "test-qunit") {
-        flag("test-enable") { testTags != null || testQunit != null }
+    depends("test-tags", "test-qunit", "test-file") {
+        flag("test-enable") { testTags != null || testQunit != null || testFile != null }
     }
 
     depends("test-qunit", "test-tags", "addons-path") {
