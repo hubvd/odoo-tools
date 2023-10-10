@@ -1,3 +1,5 @@
+@file:Suppress("ktlint:standard:max-line-length")
+
 package com.github.hubvd.odootools.actions.commands
 
 import assertk.assertThat

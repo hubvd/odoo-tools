@@ -11,11 +11,12 @@ insert_final_newline = true
 
 [*.{kt,kts}]
 max_line_length = 120
+ktlint_code_style = intellij_idea
 ktlint_standard_no-wildcard-imports = disabled
 ktlint_standard_import-ordering = disabled
 ktlint_standard_function-naming = disabled
 ktlint_standard_no-empty-file = disabled
-ktlint_experimental = enabled
+ktlint_experimental = disabled
 
 [*.graphql]
 indent_size = 2

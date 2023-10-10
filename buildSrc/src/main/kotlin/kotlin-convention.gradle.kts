@@ -41,7 +41,7 @@ kotlin {
 
 spotless {
     kotlin {
-        ktlint("0.50.0")
+        ktlint("1.0.0")
             .setEditorConfigPath("${project.rootDir}/.editorconfig")
     }
 }

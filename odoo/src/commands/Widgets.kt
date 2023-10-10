@@ -27,12 +27,10 @@ fun runConfigurationWidget(runConfiguration: RunConfiguration) = verticalLayout 
 }
 
 class EnvWidget(private val runConfiguration: RunConfiguration) : Widget {
-    override fun measure(t: Terminal, width: Int): WidthRange {
-        return WidthRange(
-            "workspace=${runConfiguration.context.workspace.path}".length,
-            "workspace=${runConfiguration.context.workspace.path}".length,
-        )
-    }
+    override fun measure(t: Terminal, width: Int): WidthRange = WidthRange(
+        "workspace=${runConfiguration.context.workspace.path}".length,
+        "workspace=${runConfiguration.context.workspace.path}".length,
+    )
 
     override fun render(t: Terminal, width: Int) = Lines(
         buildList(2 + runConfiguration.env.size) {
