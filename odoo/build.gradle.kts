@@ -26,7 +26,7 @@ spotless {
         black("23.7.0")
     }
     json {
-        target("resources/odoo/META-INF/native-image/*.json")
+        target("resources/META-INF/native-image/**/*.json")
         gson()
             .indentWithSpaces(4)
             .sortByKeys()

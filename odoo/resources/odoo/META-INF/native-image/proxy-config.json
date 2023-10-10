@@ -1,7 +1,0 @@
-[
-    {
-        "interfaces": [
-            "com.github.hubvd.odootools.odoo.commands.OdooOptions"
-        ]
-    }
-]
