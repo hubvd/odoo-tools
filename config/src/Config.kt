@@ -12,7 +12,7 @@ import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import org.kodein.di.DI
 import org.kodein.di.bind
-import org.kodein.di.instance
+import org.kodein.di.singleton
 import java.nio.file.Path
 import kotlin.io.path.Path
 import kotlin.io.path.readText
@@ -54,5 +54,5 @@ private object TomlConfig : Config {
 }
 
 val CONFIG_MODULE by DI.Module {
-    bind<Config>() with instance(TomlConfig)
+    bind<Config>() with singleton { TomlConfig }
 }
