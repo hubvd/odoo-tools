@@ -2,6 +2,7 @@ package com.github.hubvd.odootools.odoo.actions
 
 import com.github.ajalt.mordant.terminal.Terminal
 import com.github.hubvd.odootools.odoo.RunConfiguration
+import com.github.hubvd.odootools.odoo.commands.runConfigurationWidget
 import com.github.pgreze.process.process
 import kotlinx.coroutines.runBlocking
 import java.io.File
@@ -15,13 +16,13 @@ import kotlin.io.path.div
 import kotlin.io.path.outputStream
 import kotlin.system.exitProcess
 
-interface Action {
-    fun run(configuration: RunConfiguration)
-}
-
 class LaunchAction(private val terminal: Terminal) : Action {
 
     override fun run(configuration: RunConfiguration) {
+        configuration.effects.forEach { it(configuration.context) }
+
+        terminal.println(runConfigurationWidget(configuration))
+
         val useCustomLauncher = !configuration.context.noPatch &&
             configuration.context.workspace.version > 14
 

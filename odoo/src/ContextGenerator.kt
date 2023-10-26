@@ -2,10 +2,7 @@ package com.github.hubvd.odootools.odoo
 
 import com.github.ajalt.clikt.parameters.options.Option
 import com.github.ajalt.clikt.parameters.options.OptionWithValues
-import com.github.hubvd.odootools.odoo.commands.DslContext
-import com.github.hubvd.odootools.odoo.commands.MutableDslContext
-import com.github.hubvd.odootools.odoo.commands.OdooOptions
-import com.github.hubvd.odootools.odoo.commands.id
+import com.github.hubvd.odootools.odoo.commands.*
 import com.github.hubvd.odootools.workspace.Workspace
 import java.lang.reflect.Proxy
 import java.nio.file.Path
@@ -21,19 +18,66 @@ data class RunConfiguration(
     val env: Map<String, String>,
     val cwd: Path,
     val context: DslContext,
+    val effects: List<(DslContext) -> Unit>,
 )
+
+@DslMarker
+annotation class CmdComputeDsl
 
 class ContextGenerator(
     private val options: List<Option>,
     private val arguments: List<String>,
     private val workspace: Workspace,
-    private val computes: Map<String, (MutableDslContext) -> Unit>,
-    private val graph: Map<String, List<String>>,
-    private val envs: Map<String, (MutableDslContext) -> String?>,
-    private val effects: List<(MutableDslContext) -> Unit>,
     private val ignores: Set<String>,
 ) {
-    fun generate(): RunConfiguration {
+
+    private val graph = HashMap<String, List<String>>()
+    private val computes = HashMap<String, (MutableDslContext) -> Unit>()
+
+    private val effects = ArrayList<(DslContext) -> Unit>()
+    private val envs = HashMap<String, (MutableDslContext) -> String?>()
+
+    data class Depends(val depends: List<String>)
+
+    @CmdComputeDsl
+    fun effect(block: DslContext.() -> Unit) {
+        effects += block
+    }
+
+    @CmdComputeDsl
+    fun depends(vararg tmpl: String, block: Depends.() -> Unit) {
+        block(Depends(tmpl.toList()))
+    }
+
+    @CmdComputeDsl
+    fun flag(name: String, block: DslContext.() -> Boolean) {
+        computes[name] = { if (block(it)) it.flags += name }
+    }
+
+    @CmdComputeDsl
+    fun option(name: String, block: DslContext.() -> String?) {
+        computes[name] = { cmd -> block(cmd)?.let { cmd.options[name] = it } }
+    }
+
+    @CmdComputeDsl
+    fun Depends.flag(name: String, block: DslContext.() -> Boolean) {
+        graph[name] = depends
+        computes[name] = { if (block(it)) it.flags += name }
+    }
+
+    @CmdComputeDsl
+    fun Depends.option(name: String, block: DslContext.() -> String?) {
+        graph[name] = depends
+        computes[name] = { cmd -> block(cmd)?.let { cmd.options[name] = it } }
+    }
+
+    @CmdComputeDsl
+    fun env(name: String, block: DslContext.() -> String?) {
+        envs[name] = block
+    }
+
+    fun generate(generator: ContextGenerator.() -> Unit): RunConfiguration {
+        generator()
         val flags = HashSet<String>()
         val options = HashMap<String, String>()
         val env = HashMap<String, String>()
@@ -104,10 +148,6 @@ class ContextGenerator(
 
         envs.forEach { (name, func) -> func(context)?.let { context.env[name] = it } }
 
-        if (!context.dryRun) {
-            effects.forEach { it(context) }
-        }
-
         val args = buildList(arguments.size + context.flags.size + context.options.size) {
             val args = arguments.toMutableList()
             if (args.remove("shell")) add("shell")
@@ -126,6 +166,6 @@ class ContextGenerator(
                 .forEach { add("--${it.key}=${it.value}") }
         }
 
-        return RunConfiguration(args, context.env, workspace.path, context)
+        return RunConfiguration(args, context.env, workspace.path, context, effects)
     }
 }

@@ -3,6 +3,8 @@ package com.github.hubvd.odootools.odoo
 import com.github.ajalt.clikt.core.subcommands
 import com.github.ajalt.mordant.terminal.Terminal
 import com.github.hubvd.odootools.config.CONFIG_MODULE
+import com.github.hubvd.odootools.odoo.actions.ActionProvider
+import com.github.hubvd.odootools.odoo.actions.ActionProviderImpl
 import com.github.hubvd.odootools.odoo.commands.CompleteCommand
 import com.github.hubvd.odootools.odoo.commands.LaunchCommand
 import com.github.hubvd.odootools.workspace.WORKSPACE_MODULE
@@ -10,17 +12,15 @@ import com.github.hubvd.odootools.workspace.WorkspaceProvider
 import com.github.pgreze.process.Redirect
 import com.github.pgreze.process.process
 import kotlinx.coroutines.runBlocking
-import org.kodein.di.DI
-import org.kodein.di.bind
-import org.kodein.di.instance
-import org.kodein.di.singleton
+import org.kodein.di.*
 import java.net.URLEncoder
 import kotlin.io.path.div
 import kotlin.io.path.isDirectory
 import kotlin.math.absoluteValue
+import kotlin.math.roundToInt
 import kotlin.system.exitProcess
 
-fun LaunchCommand.computes() {
+val computes: ContextGenerator.() -> Unit = {
     effect {
         if (drop && database != null) {
             val count = runBlocking {
@@ -57,11 +57,11 @@ fun LaunchCommand.computes() {
         option("http-port") {
             when {
                 workspace.name == workspace.base && database == workspace.name -> {
-                    (workspace.version * 100).toInt().toString()
+                    (workspace.version * 100).roundToInt().toString()
                 }
 
                 workspace.name == workspace.base && database == "${workspace.name}-test" -> {
-                    (workspace.version * 100 + 5).toInt().toString()
+                    (workspace.version * 100 + 5).roundToInt().toString()
                 }
 
                 else -> {
@@ -97,7 +97,7 @@ fun LaunchCommand.computes() {
                 if (!community && (workspace.path / "enterprise").isDirectory()) {
                     add("enterprise")
                 }
-                add("~/odoo-tools/addons")
+                add("~/odoo-tools/addons") // FIXME: should depends on the actual path
             }.joinToString(",")
         }
     }
@@ -146,15 +146,13 @@ fun LaunchCommand.computes() {
     }
 }
 
-fun main(args: Array<String>) {
-    val di = DI {
-        bind { singleton { LaunchCommand(instance(), instance()).subcommands(CompleteCommand(instance())) } }
-        bind { singleton { Terminal() } }
-        import(WORKSPACE_MODULE)
-        import(CONFIG_MODULE)
-        bind { singleton { WorkspaceProvider(instance()).cached() } }
-    }
-
-    val command by di.instance<LaunchCommand>()
-    command.main(args)
+internal val ODOO_MODULE by DI.Module {
+    bind { singleton { new(::LaunchCommand).subcommands(new(::CompleteCommand)) } }
+    bind { singleton { Terminal() } }
+    import(WORKSPACE_MODULE)
+    import(CONFIG_MODULE)
+    bind { singleton { new(::WorkspaceProvider).cached() } }
+    bind<ActionProvider> { singleton { ActionProviderImpl() } }
 }
+
+fun main(args: Array<String>) = DI { import(ODOO_MODULE) }.direct.instance<LaunchCommand>().main(args)

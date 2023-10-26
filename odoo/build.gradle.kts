@@ -18,6 +18,11 @@ dependencies {
     implementation(libs.kodein.di)
     implementation(libs.kotlin.reflect)
     implementation(libs.serialization.json)
+
+    testImplementation(testFixtures(project(":workspace")))
+    testImplementation(platform(libs.junit.bom))
+    testImplementation(libs.junit.jupiter)
+    testImplementation(libs.assertk)
 }
 
 spotless {
