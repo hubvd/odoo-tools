@@ -12,7 +12,7 @@
 // ==/UserScript==
 
 window.addEventListener('load', () => {
-  const login = document.querySelector('button[type="submit"]')
+  const login = document.querySelector('.oe_login_form button[type="submit"]')
   for (let text of ['admin', 'demo', 'portal']) {
     const el = document.createElement('button')
     el.innerText = text
