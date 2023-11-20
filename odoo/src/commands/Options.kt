@@ -17,7 +17,7 @@ abstract class StoredOptionGroup(name: String) : OptionGroup(name) {
     }
 }
 
-class PatchedLauncherOptionGroup : StoredOptionGroup("Custom options") {
+class CustomOptionGroup : StoredOptionGroup("Custom options") {
     private val noPatch by option("--no-patch", help = "Disable custom patches").flag()
 
     init {
@@ -29,6 +29,7 @@ class PatchedLauncherOptionGroup : StoredOptionGroup("Custom options") {
             option("--dry-run", help = "Print the generated config and exit").flag(),
             option("--drop", help = "Drop the database if it exists").flag(),
             option("--community", help = "Remove the enterprise repo from the addons path").flag(),
+            option("--themes", help = "Add the design-themes repo to the addons path").flag(),
             option(
                 "--test-qunit",
                 help = "Launch a QUnit test/module",

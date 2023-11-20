@@ -12,6 +12,7 @@ import com.github.hubvd.odootools.workspace.Workspace
 import com.github.hubvd.odootools.workspace.WorkspaceConfig
 import com.github.hubvd.odootools.workspace.Workspaces
 import com.github.hubvd.odootools.worktree.*
+import java.nio.file.Path
 import kotlin.io.path.createDirectory
 import kotlin.io.path.div
 import kotlin.io.path.exists
@@ -28,26 +29,32 @@ class AddCommand(
     private val base by option(completionCandidates = fromStdout("worktree list base")).required()
     private val path by option().path(canBeFile = false).default(config.root)
 
-    private val community by option().flag()
-
     override fun run() {
         if (workspaces.list().find { it.name == name } != null) throw CliktError("$name already exists")
         val path = path / name
         if (path.exists()) throw CliktError("$path already exists")
         path.createDirectory()
-        val repositories = Repository.entries.filter { if (community) it != Repository.Enterprise else true }
+        val targetWorkspace = object : Workspace {
+            override val name: String
+                get() = this@AddCommand.name
+            override val path: Path
+                get() = path
+            override val version: Float
+                get() = throw UnsupportedOperationException()
+            override val base: String
+                get() = this@AddCommand.base
+        }
         processSequence(terminal) {
             cd(path)
             createGitWorktrees(
-                root = config.root,
-                path = path,
+                root = workspaces.default(),
+                target = targetWorkspace,
                 base = base,
-                community = community,
             )
             val workspace = Workspace(name, path)
             venvs.create(workspace)
             stubs.create(workspace)
-            Pycharm(workspace, repositories).saveFiles()
+            Pycharm(workspace).saveFiles()
         }
         terminal.println((TextStyles.underline + TextStyles.bold + TextColors.green)("Worktree created"))
     }

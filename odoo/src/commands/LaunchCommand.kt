@@ -26,6 +26,7 @@ val Option.id: String get() = names.maxBy { it.length }.removePrefix("--")
 
 interface OdooOptions {
     val community: Boolean
+    val themes: Boolean
     val noPatch: Boolean
     val dryRun: Boolean
     val testQunit: String?
@@ -54,9 +55,9 @@ class LaunchCommand(private val workspaces: Workspaces, private val actionProvid
     private val arguments by argument().multiple()
 
     init {
-        val patchedLauncherOptionGroup = PatchedLauncherOptionGroup()
-        registerOptionGroup(patchedLauncherOptionGroup)
-        patchedLauncherOptionGroup.options.forEach { registerOption(it.custom()) }
+        val customOptionGroup = CustomOptionGroup()
+        registerOptionGroup(customOptionGroup)
+        customOptionGroup.options.forEach { registerOption(it.custom()) }
 
         val odooOptionGroup = OdooOptionGroup()
         registerOptionGroup(odooOptionGroup)

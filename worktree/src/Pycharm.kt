@@ -18,14 +18,14 @@ private infix fun String.eq(value: Any) {
     }
 }
 
-class Pycharm(private val workspace: Workspace, private val repositories: List<Repository>) {
+class Pycharm(private val workspace: Workspace) {
     private fun generateIml() = xml("module") {
         includeXmlProlog = true
         attribute("type", "PYTHON_MODULE")
         attribute("version", "4")
         "component"("name" to "NewModuleRootManager") {
             "content"("url" to "file://\$MODULE_DIR\$") {
-                repositories.forEach { repo ->
+                odooRepositories().forEach { repo ->
                     "sourceFolder"(
                         "url" to "file://\$MODULE_DIR\$/${repo.pathName}",
                         "isTestSource" to "false",
@@ -79,7 +79,7 @@ class Pycharm(private val workspace: Workspace, private val repositories: List<R
             }
         }
         "component"("name" to "VcsDirectoryMappings") {
-            repositories.forEach { repo ->
+            odooRepositories().forEach { repo ->
                 "mapping"("directory" to "\$PROJECT_DIR\$/${repo.pathName}", "vcs" to "Git")
             }
         }

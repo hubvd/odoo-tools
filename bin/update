@@ -5,7 +5,7 @@ argparse 'f/fetch' -- $argv
 set base (worktree base || exit 1)
 set root (worktree path)
 
-for repo in odoo enterprise
+for repo in odoo enterprise design-themes
   set repo_path $root/$repo
   test -d $repo_path || continue
   set -q _flag_fetch && git -C $repo_path fetch origin $base

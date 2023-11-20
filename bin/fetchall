@@ -2,6 +2,7 @@
 
 set branches (worktree list base | path sort -u)
 set root (worktree default path)
-git -C $root/odoo fetch origin $branches &
-git -C $root/enterprise fetch origin $branches &
+for repo in odoo enterprise design-themes
+    git -C $root/$repo fetch origin $branches &
+end
 wait

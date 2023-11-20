@@ -94,9 +94,8 @@ val computes: ContextGenerator.() -> Unit = {
         option("addons-path") {
             buildList {
                 add("odoo/addons")
-                if (!community && (workspace.path / "enterprise").isDirectory()) {
-                    add("enterprise")
-                }
+                if (!community) add("enterprise")
+                if (themes) add("design-themes")
                 add("~/odoo-tools/addons") // FIXME: should depends on the actual path
             }.joinToString(",")
         }

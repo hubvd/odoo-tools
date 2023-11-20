@@ -1,55 +1,51 @@
 package com.github.hubvd.odootools.worktree
 
-import com.github.ajalt.clikt.core.CliktError
-import java.nio.file.Path
+import com.github.hubvd.odootools.workspace.Workspace
 import kotlin.io.path.div
-import kotlin.io.path.exists
-import kotlin.io.path.name
 
 enum class Repository(val url: String, val pathName: String) {
     Odoo("git@github.com:odoo/odoo.git", "odoo"),
     Enterprise("git@github.com:odoo/enterprise.git", "enterprise"),
+    DesignThemes("git@github.com:odoo/design-themes.git", "design-themes"),
     Stubs("git@github.com:odoo-ide/odoo-stubs.git", "odoo-stubs"),
 }
 
-private fun repositories(root: Path, community: Boolean = false) = sequenceOf("odoo", "enterprise")
-    .filter { if (community) it != "enterprise" else true }
-    .map { root / "master" / it }
-    .filter { (it / ".git").exists() }
-    .map { it.name }
-    .toList()
-    .also { if ("odoo" !in it) throw CliktError("Odoo repository not found in ${root / "master"}") }
+fun odooRepositories() = listOf(
+    Repository.Odoo,
+    Repository.Enterprise,
+    Repository.DesignThemes,
+)
 
 context(ProcessSequenceDslContext)
-suspend fun createGitWorktrees(root: Path, path: Path, base: String, community: Boolean = false) =
-    repositories(root, community).forEach { repo ->
+suspend fun createGitWorktrees(root: Workspace, target: Workspace, base: String) {
+    odooRepositories().forEach { repository ->
         run(
             "git",
             "-C",
-            "${root / "master" / repo}",
+            "${root.path / repository.pathName}",
             "fetch",
             "origin",
             base,
         )
-
         run(
             "git",
             "-C",
-            "${root / "master" / repo}",
+            "${root.path / repository.pathName}",
             "worktree",
             "add",
             "-f",
-            "${path / repo}",
+            "${target.path / repository.pathName}",
             "origin/$base",
         )
     }
+}
 
 context(ProcessSequenceDslContext)
-suspend fun pruneGitWorktrees(root: Path) = repositories(root).forEach { repo ->
+suspend fun pruneGitWorktrees(root: Workspace) = odooRepositories().forEach { repository ->
     run(
         "git",
         "-C",
-        "${root / "master" / repo}",
+        "${root.path / repository.pathName}",
         "worktree",
         "prune",
     )
