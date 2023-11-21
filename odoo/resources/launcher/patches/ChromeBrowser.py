@@ -379,7 +379,7 @@ class ChromeBrowser:
         if log_type == "error":
             self.had_failure = True
             if not self.error_checker or self.error_checker(message):
-                self.take_screenshot()
+                # self.take_screenshot()
                 self._save_screencast()
                 try:
                     self._result.set_exception(ChromeBrowserException(message))

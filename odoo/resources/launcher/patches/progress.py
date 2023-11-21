@@ -1,5 +1,3 @@
-import logging
-
 from rich.progress import (
     Progress,
     SpinnerColumn,
@@ -14,7 +12,6 @@ import odoo
 class WrappedGraph:
     used = False
     id = 0
-    _logger = logging.getLogger("odoo.modules.loading")
 
     def __init__(self, graph):
         self.graph = list(graph)
@@ -54,10 +51,6 @@ class WrappedGraph:
         else:
             if self.has_progress:
                 self.progress.update(self.task, visible=False)
-                WrappedGraph._logger.info(
-                    "[bold green underline]All modules loaded ![/]",
-                    extra={"markup": True},
-                )
                 self.progress.remove_task(self.task)
                 old_line = self.progress.live.console.line
                 self.progress.live.console.line = lambda: ...

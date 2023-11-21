@@ -17,7 +17,7 @@ _logger = logging.getLogger("odoo.tests.runner")
 def startTest(super):
     def decorator(self, test):
         _logger.info(
-            f"Starting [bold steel_blue1 underline]{self.getDescription(test)}[/]",
+            f"Starting [test]{self.getDescription(test)}[/]",
             extra={"markup": True},
         )
         if version == 2:

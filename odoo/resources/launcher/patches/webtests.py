@@ -1,7 +1,4 @@
-import logging
 import os
-import re
-import subprocess
 import time
 
 import odoo.tests.common
@@ -23,87 +20,6 @@ version = float(f"{major_version}.{version_info[1]}")
 if version >= 16.4:
     from .ChromeBrowser import ChromeBrowser as ChromeBrowser16
     from .browser_js import browser_js_ge_16_4
-
-
-class LogReplacement:
-    def __init__(
-        self, regex: str, format: str, markup: bool = True, highlighter: bool = None
-    ):
-        self.regex = re.compile(regex)
-        self.format = format
-        self.markup = markup
-        self.highlighter = highlighter
-
-
-class CustomAdapter(logging.LoggerAdapter):
-    replacements = [
-        LogReplacement(
-            r"^\"(?P<name>.*)\" passed (?P<count>\d+) tests\.$",
-            "[bold steel_blue1 underline]{name}[/] passed [green]{count}[/] tests",
-        ),
-        LogReplacement(
-            r"^Tour (?P<tour>.*): step '(?:Click here to go to the next step\. )?\(trigger: (?P<step>.*)\)' succeeded",
-            "Step [underline][bold steel_blue1]{step}[/bold steel_blue1][/underline] succeeded",
-        ),
-        LogReplacement(
-            r"^Running tour (?P<tour>.*)",
-            "Running tour [underline rgb(249,38,114)]{tour}[/]",
-        ),
-        LogReplacement(
-            r"Tour (?P<tour>.*) failed at step (?P<step>.*)",
-            "Tour {tour} failed at step [bold reverse red]{step}[/]",
-        ),
-        LogReplacement(r"^Owl is running in 'dev' mode", None),
-        LogReplacement(r"^Views: using legacy view:", None),
-        LogReplacement(r"^<html><head>", None),
-        LogReplacement(
-            r"^\[rpc\] response(?P<args>.*)",
-            "[rpc] response {args}",
-            markup=False,
-            highlighter=True,
-        ),
-    ]
-
-    def runbot(self, message, *args, **kws):
-        self.log(25, message, *args, **kws)
-
-    def log(self, *args, **kwargs):
-        if len(args) < 3:
-            return self.logger.log(*args, **kwargs)
-        level, fmt, msg = args[:3]
-        msg = str(msg)
-
-        # TODO: match fmt in replacements
-        if fmt == "Screenshot in: %s" and os.environ.get("TERM") == "xterm-kitty":
-            subprocess.run(["kitty", "+kitten", "icat", msg])
-            return
-
-        for replacement in self.replacements:
-            if match := replacement.regex.match(msg):
-                if replacement.format is None:
-                    return
-                groups = match.groupdict()
-                msg = replacement.format.format(**groups)
-                extra = kwargs.get("extra", {})
-                extra["markup"] = replacement.markup
-                if not replacement.highlighter:
-                    extra["highlighter"] = None
-                kwargs["extra"] = extra
-                break
-
-        args = [level, fmt, msg] + list(args[3:])
-        return self.logger.log(*args, **kwargs)
-
-    def getChild(self, *args, **kwargs):
-        return CustomAdapter(self.logger.getChild(*args, **kwargs), {})
-
-
-def init_chrome(super):
-    def decorator(self, *args, **kwargs):
-        super(self, *args, **kwargs)
-        self._logger = CustomAdapter(self._logger, {})
-
-    return decorator
 
 
 def _spawn_chrome_lt_16_4(super):
@@ -216,9 +132,6 @@ def start_tour(super):
 
 class WebTests:
     def apply(self):
-        # Override the logger to highlight the output with rich
-        ChromeBrowser.__init__ = init_chrome(ChromeBrowser.__init__)
-
         # Add --remote-allow-origins to chrome
         if version < 16.4:
             ChromeBrowser._spawn_chrome = _spawn_chrome_lt_16_4(

@@ -1,29 +1,44 @@
 import logging
 import logging.handlers
+from logging import LogRecord
 import threading
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
 import werkzeug.serving
+
+from rich.console import Console
+from rich.highlighter import ReprHighlighter
 from rich.logging import RichHandler
 from rich.text import Span
 
 import odoo.netsvc
 from odoo.netsvc import DBFormatter, PerfFilter
 
+from .logging_filters import Result, filters, odoo_theme
 
-class MyRichHandler(RichHandler):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self._log_render.show_time = False
-        self._log_render.show_level = False
+
+class OdooRichHandler(RichHandler):
+    def emit(self, record):
+        for filter in filters:
+            res = filter(record)
+            if not res:
+                continue
+            elif res == Result.CANCELLED:
+                return
+            elif res == Result.HANDLED:
+                super().emit(record)
+                return
+        super().emit(record)
 
     def render(self, *, record, traceback, message_renderable):
         path = record.name
         if path.startswith("odoo.addons."):
             path = "@" + path[12:]
 
-        if len(path) > 36:
+        if path.endswith(".browser"):
+            path = "browser"
+        elif len(path) > 36:
             parts = path.split(".")
             if len(parts) > 1:
                 path = parts[-1][:33] + "..."
@@ -55,6 +70,12 @@ class MyRichHandler(RichHandler):
         return message_text
 
 
+class DurationHighlighter(ReprHighlighter):
+    highlights = ReprHighlighter.highlights + [
+        r"(?P<number>(?<!\w)\-?[0-9]+\.?[0-9]*s)",
+    ]
+
+
 class RichLogger:
     @staticmethod
     def post_init_logger():
@@ -66,7 +87,13 @@ class RichLogger:
             logger.removeFilter(filter)
 
         format = "%(dbname)s: %(message)s %(perf_info)s"
-        handler = MyRichHandler(rich_tracebacks=True)
+        handler = OdooRichHandler(
+            console=Console(theme=odoo_theme),
+            show_time=False,
+            show_level=False,
+            rich_tracebacks=True,
+            highlighter=DurationHighlighter(),
+        )
         formatter = DBFormatter(format, "%Y-%m-%d %H:%M:%S")
         handler.setFormatter(formatter)
         logger.addHandler(handler)
