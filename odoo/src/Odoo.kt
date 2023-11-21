@@ -15,7 +15,6 @@ import kotlinx.coroutines.runBlocking
 import org.kodein.di.*
 import java.net.URLEncoder
 import kotlin.io.path.div
-import kotlin.io.path.isDirectory
 import kotlin.math.absoluteValue
 import kotlin.math.roundToInt
 import kotlin.system.exitProcess

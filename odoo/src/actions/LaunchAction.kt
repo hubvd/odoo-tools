@@ -21,6 +21,16 @@ class LaunchAction(private val terminal: Terminal) : Action {
     override fun run(configuration: RunConfiguration) {
         configuration.effects.forEach { it(configuration.context) }
 
+        if (System.getenv("TERM") == "xterm-kitty") {
+            ProcessBuilder("kitty", "@", "set-window-title", "--temporary", "odoo:" + configuration.context.database)
+                .apply {
+                    redirectError(ProcessBuilder.Redirect.DISCARD)
+                    redirectOutput(ProcessBuilder.Redirect.DISCARD)
+                }
+                .start()
+                .waitFor()
+        }
+
         terminal.println(runConfigurationWidget(configuration))
 
         val useCustomLauncher = !configuration.context.noPatch &&
