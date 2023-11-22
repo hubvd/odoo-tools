@@ -6,6 +6,8 @@ from rich.progress import (
     TaskProgressColumn,
 )
 
+from .console import console
+
 import odoo
 
 
@@ -34,6 +36,7 @@ class WrappedGraph:
                 BarColumn(bar_width=None),
                 TaskProgressColumn(),
                 expand=True,
+                console=console,
             )
             new.progress.start()
             new.task = new.progress.add_task("Loading modules", total=len(new.graph))

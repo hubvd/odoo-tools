@@ -5,7 +5,6 @@ import subprocess
 from dataclasses import dataclass
 from enum import Enum
 from rich.markup import escape
-from rich.theme import Theme
 
 Result = Enum("Result", ["CANCELLED", "HANDLED"])
 
@@ -15,7 +14,7 @@ def loading(record):
         return
 
     if record.msg == "Modules loaded.":
-        record.msg = "[bold green underline]All modules loaded !"
+        record.msg = "[bold green underline]All modules loaded ![/]"
         record.markup = True
         record.highlighter = None
         return Result.HANDLED
@@ -44,8 +43,6 @@ class LogReplacement:
     def __post_init__(self):
         self.regex = re.compile(self.regex)
 
-
-odoo_theme = Theme({"trigger": "yellow", "test": "bold steel_blue1 underline"})
 
 replacements = [
     LogReplacement(

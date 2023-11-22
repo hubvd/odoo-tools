@@ -7,7 +7,6 @@ from zoneinfo import ZoneInfo
 
 import werkzeug.serving
 
-from rich.console import Console
 from rich.highlighter import ReprHighlighter
 from rich.logging import RichHandler
 from rich.text import Span
@@ -15,7 +14,8 @@ from rich.text import Span
 import odoo.netsvc
 from odoo.netsvc import DBFormatter, PerfFilter
 
-from .logging_filters import Result, filters, odoo_theme
+from .logging_filters import Result, filters
+from .console import console
 
 
 class OdooRichHandler(RichHandler):
@@ -88,7 +88,7 @@ class RichLogger:
 
         format = "%(dbname)s: %(message)s %(perf_info)s"
         handler = OdooRichHandler(
-            console=Console(theme=odoo_theme),
+            console=console,
             show_time=False,
             show_level=False,
             rich_tracebacks=True,
