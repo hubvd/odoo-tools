@@ -60,7 +60,7 @@ class OdooRichHandler(RichHandler):
         )
         return log_renderable
 
-    def render_message(self, record: "LogRecord", message: str) -> "ConsoleRenderable":
+    def render_message(self, record: "LogRecord", message: str):
         message_text = super().render_message(record, message)
         dbname = getattr(threading.current_thread(), "dbname", "?")
         level_name = record.levelname

@@ -2,7 +2,10 @@ package com.github.hubvd.odootools.actions.commands.pr
 
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.PrintMessage
+import com.github.ajalt.clikt.parameters.arguments.argument
+import com.github.ajalt.clikt.parameters.arguments.optional
 import com.github.ajalt.clikt.parameters.options.default
+import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.colormath.model.RGB
 import com.github.ajalt.mordant.rendering.TextAlign
@@ -22,18 +25,37 @@ import com.github.hubvd.odootools.actions.utils.state
 class ListCommand(private val github: GithubClient) : CliktCommand(
     help = "List pull requests involved with the selected username",
 ) {
+    private val closed by option().flag()
     private val githubUsername by option().default("hubvd")
     private val odooUsername by option().default("huvw")
+    private val title by argument().optional()
 
     override fun run() {
         val terminal = currentContext.terminal
         terminal.print(brightBlue("Fetching pull requests.."))
 
-        val prResult = github.findPullRequestsInvolving(githubUsername)
+        val prResult = github.findPullRequests(
+            username = if (title == null) githubUsername else null,
+            open = !closed,
+            title = title
+        )
+
         terminal.cursor.move {
             clearLine()
             startOfLine()
         }
+
+        if (title != null) {
+            val prs = prResult.fold(
+                { throw PrintMessage(it.toString(), statusCode = 1) },
+                { it },
+            )
+            with(terminal) {
+                println(pullRequestGroupWidget("Pull Requests", prs))
+            }
+            return
+        }
+
         val (ownPrs, involvedPrs) = prResult.fold(
             { throw PrintMessage(it.toString(), statusCode = 1) },
             { it.partition { odooUsername in it.headRefName } },

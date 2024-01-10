@@ -32,11 +32,6 @@ import odoo
 from odoo.tools.misc import find_in_path
 
 try:
-    from decorator import decoratorx as decorator
-except ImportError:
-    from decorator import decorator
-
-try:
     import websocket
 except ImportError:
     # chrome headless tests will be skipped
@@ -555,7 +550,7 @@ which leads to stray network requests and inconsistencies."""
                         "file '%s'\nduration %s\n" % (frame_file_path, duration)
                     )
                 concat_file.write("file '%s'" % frame_file_path)
-            r = subprocess.run(
+            subprocess.run(
                 [
                     ffmpeg_path,
                     "-intra",

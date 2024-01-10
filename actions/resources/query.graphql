@@ -1,7 +1,7 @@
 {
   results: search(
     type: ISSUE
-    query: "org:odoo involves:<INVOLVES> state:open type:pr"
+    query: "<QUERY>"
     last: 100
   ) {
     prs: nodes {

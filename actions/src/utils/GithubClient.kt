@@ -38,21 +38,43 @@ class GithubClient(githubApiKey: Secret, httpHandler: HttpHandler) {
         )
     }
 
-    fun findPullRequestsInvolving(username: String): Either<Response, List<PullRequest>> {
-        val query = this.javaClass.getResource("/query.graphql")!!.readText()
-            .replace("<INVOLVES>", username)
+    fun findPullRequests(
+        username: String?,
+        open: Boolean = true,
+        title: String? = null,
+    ): Either<Response, List<PullRequest>> {
+        val query = buildList {
+            add("org:odoo")
+            add("type:pr")
+            username?.let {
+                add("involves:$it")
+            }
+            if (open) {
+                add("state:open")
+            } else {
+                add("state:closed")
+            }
+            title?.let {
+                add(it)
+            }
+        }.joinToString(" ")
+
+        val body = this.javaClass.getResource("/query.graphql")!!.readText()
+            .replace("<QUERY>", query)
 
         val request = Request(Method.POST, "/graphql")
-            .body(Json.encodeToString(JsonObject.serializer(), buildJsonObject { put("query", query) }))
+            .body(Json.encodeToString(JsonObject.serializer(), buildJsonObject { put("query", body) }))
         val response = client(request)
 
         if (!response.status.successful) {
             return response.left()
         }
-        val jsonPrs = Json.decodeFromString(
+        val jsonBody = Json.decodeFromString(
             JsonObject.serializer(),
             response.bodyString(),
-        )["data"]!!.jsonObject["results"]!!.jsonObject["prs"]!!.jsonArray
+        )
+        val jsonPrs = jsonBody["data"]?.jsonObject?.get("results")?.jsonObject?.get("prs")?.jsonArray
+            ?: return response.left()
         return Json.decodeFromJsonElement(ListSerializer(PullRequest.serializer()), jsonPrs).right()
     }
 

@@ -20,6 +20,14 @@ def loading(record):
         return Result.HANDLED
 
 
+def warnings(record):
+    if record.name != "py.warnings":
+        return
+
+    if "PostgreSQL function 'unaccent' is present but not immutable" in record.msg:
+        return Result.CANCELLED
+
+
 def server(record):
     if (
         record.name == "odoo.service.server"
@@ -90,12 +98,12 @@ def http_case(record):
     ):
         end = record.args[0].find("'", 16)
         tour = record.args[0][16:end]
-        record.msg = f"Running tour [underline rgb(249,38,114)]%s[/]"
+        record.msg = "Running tour [underline rgb(249,38,114)]%s[/]"
         record.args = (tour,)
         record.markup = True
         record.highlighter = None
         return Result.HANDLED
-    elif 'code "%s"' in record.msg:
+    elif isinstance(record.msg, str) and 'code "%s"' in record.msg:
         record.msg = record.msg.replace('code "%s"', "code `%s`")
         return Result.HANDLED
 
@@ -123,4 +131,5 @@ filters = [
     loading,
     server,
     http_case,
+    warnings,
 ]
