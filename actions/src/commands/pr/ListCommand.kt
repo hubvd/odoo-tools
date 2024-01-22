@@ -37,7 +37,7 @@ class ListCommand(private val github: GithubClient) : CliktCommand(
         val prResult = github.findPullRequests(
             username = if (title == null) githubUsername else null,
             open = !closed,
-            title = title
+            title = title,
         )
 
         terminal.cursor.move {

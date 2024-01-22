@@ -44,9 +44,29 @@ from odoo.tests.common import (
     BROWSER_WAIT,
     get_db_name,
     _logger,
-    fchain,
     HOST,
 )
+
+
+def fchain(future, next_callback):
+    new_future = Future()
+
+    @future.add_done_callback
+    def _(f):
+        try:
+            n = next_callback(f.result())
+
+            @n.add_done_callback
+            def _(f):
+                try:
+                    new_future.set_result(f.result())
+                except Exception as e:
+                    new_future.set_exception(e)
+
+        except Exception as e:
+            new_future.set_exception(e)
+
+    return new_future
 
 
 class ChromeBrowser:

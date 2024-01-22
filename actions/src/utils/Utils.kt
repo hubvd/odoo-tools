@@ -55,3 +55,17 @@ fun <T> menu(choices: List<T>, lines: Int? = choices.size, transform: (T) -> Str
         )
         if (code == 0) output.firstOrNull()?.trim()?.let { map[it] } else null
     }
+
+fun selectInstance(instances: List<OdooInstance>): OdooInstance? = menu(instances) {
+    buildString {
+        append(it.workspace.name)
+        if (it.database != it.workspace.name) {
+            append(" (")
+            append(it.database)
+            append(')')
+        }
+        append(" [")
+        append(it.port)
+        append(']')
+    }
+}
