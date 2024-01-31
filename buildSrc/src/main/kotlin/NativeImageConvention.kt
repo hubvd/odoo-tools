@@ -23,17 +23,18 @@ class NativeImageConvention : Plugin<Project>{
         }
         testSupport = true
         binaries {
-            // FIXME: https://youtrack.jetbrains.com/issue/KT-60211/Kotlin-1.9.0-kotlin.annotation.AnnotationTarget-was-unintentionally-initialized-at-build-time-GraalVM-nativeTest
-            // https://github.com/oracle/graal/issues/6957
-            val enums = listOf(
-                "kotlin.annotation.AnnotationTarget",
-                "kotlin.annotation.AnnotationRetention",
-            ).joinToString(",")
+
+            val commonFlags = arrayOf(
+                "--strict-image-heap",
+
+                // FIXME: PR in mordant
+                "--initialize-at-build-time=com.github.ajalt.mordant.internal.nativeimage.NativeImagePosixMppImpls",
+            )
 
             named("test") {
                 quickBuild = true
                 buildArgs(
-                    "--initialize-at-build-time=$enums",
+                    *commonFlags,
                 )
             }
 
@@ -43,7 +44,7 @@ class NativeImageConvention : Plugin<Project>{
                     "--libc=glibc",
                     "--install-exit-handlers",
                     "-march=native",
-                    "--initialize-at-build-time=$enums",
+                    *commonFlags,
                 )
             }
 
