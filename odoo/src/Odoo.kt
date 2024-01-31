@@ -56,19 +56,24 @@ val computes: ContextGenerator.() -> Unit = {
         option("http-port") {
             when {
                 workspace.name == workspace.base && database == workspace.name -> {
-                    (workspace.version * 100).roundToInt().toString()
+                    (workspace.version * 100).roundToInt()
                 }
 
                 workspace.name == workspace.base && database == "${workspace.name}-test" -> {
-                    (workspace.version * 100 + 5).roundToInt().toString()
+                    (workspace.version * 100 + 5).roundToInt()
                 }
 
                 else -> {
                     val min = 2000
                     val max = 65535
-                    (min + database.hashCode().absoluteValue % (max - min + 1)).toString()
+                    (min + database.hashCode().absoluteValue % (max - min + 1))
                 }
-            }
+            }.let {
+                when (it) {
+                    1720 -> 1721 // reserved port..
+                    else -> it
+                }
+            }.toString()
         }
     }
 
