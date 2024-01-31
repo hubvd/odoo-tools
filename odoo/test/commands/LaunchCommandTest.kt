@@ -72,7 +72,7 @@ class LaunchCommandTest {
     fun `no args`() {
         val result = testCommand()
         assertThat(result.args).containsExactlyInAnyOrder(
-            "--addons-path=odoo/addons,~/odoo-tools/addons",
+            "--addons-path=odoo/addons,enterprise,~/odoo-tools/addons",
             "--database=saas-16.3",
             "--http-port=1630",
             "--limit-time-cpu=99999",
@@ -86,7 +86,7 @@ class LaunchCommandTest {
     fun `test tags`() {
         val result = testCommand("--test-tags", "/base")
         assertThat(result.args).containsExactlyInAnyOrder(
-            "--addons-path=odoo/addons,~/odoo-tools/addons",
+            "--addons-path=odoo/addons,enterprise,~/odoo-tools/addons",
             "--database=saas-16.3-test",
             "--http-port=1635",
             "--limit-time-cpu=99999",
@@ -107,7 +107,7 @@ class LaunchCommandTest {
     fun `custom flags`() {
         val result = testCommand("--test-tags", "/base", "--watch", "--step-delay", "150")
         assertThat(result.args).containsExactlyInAnyOrder(
-            "--addons-path=odoo/addons,~/odoo-tools/addons",
+            "--addons-path=odoo/addons,enterprise,~/odoo-tools/addons",
             "--database=saas-16.3-test",
             "--http-port=1635",
             "--limit-time-cpu=99999",
