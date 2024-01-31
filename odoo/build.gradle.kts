@@ -28,7 +28,7 @@ dependencies {
 spotless {
     python {
         target("resources/launcher/**/*.py")
-        black("23.10.1")
+        black("23.12.1")
     }
     json {
         target("resources/META-INF/native-image/**/*.json")
