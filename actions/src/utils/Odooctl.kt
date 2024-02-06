@@ -90,10 +90,8 @@ class Odooctl(private val workspaces: Workspaces) {
         return instances.sortedWith(compareBy({ it.workspace.version }, { it.database }))
     }
 
-    fun killAll() {
-        instances()
-            .mapNotNull { ProcessHandle.of(it.pid).getOrNull() }
-            .forEach { it.destroy() }
+    fun kill(instance: OdooInstance) {
+        ProcessHandle.of(instance.pid).getOrNull()?.destroy()
     }
 
     companion object {
