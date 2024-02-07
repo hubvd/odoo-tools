@@ -7,7 +7,6 @@ sys.path.append(os.environ.get("ODOO_WORKSPACE") + "/odoo")
 
 from patches import richlogger
 from patches import progress
-from patches import tests
 from patches import webtests
 from patches import minifier
 
@@ -25,7 +24,6 @@ if os.environ.get("ODOO_DEBUG") == "1":
 patches = [
     richlogger.RichLogger(),
     progress.ModuleInstallProgress(),
-    tests.ProgressTestResultPatch(),
     webtests.WebTests(),
     minifier.Minifier(),
 ]

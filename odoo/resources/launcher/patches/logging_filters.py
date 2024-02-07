@@ -20,6 +20,12 @@ def loading(record):
         return Result.HANDLED
 
 
+def tests(record):
+    if record.msg == "Starting %s ...":
+        record.msg = "Starting [test]%s[/]"
+        record.markup = True
+
+
 def warnings(record):
     if record.name != "py.warnings":
         return
@@ -132,4 +138,5 @@ filters = [
     server,
     http_case,
     warnings,
+    tests,
 ]
