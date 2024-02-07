@@ -315,6 +315,8 @@ class ChromeBrowser:
         while True:
             try:
                 msg = self.ws.recv()
+                if not msg:
+                    continue
                 self._logger.debug("\n<- %s", msg)
             except websocket.WebSocketTimeoutException:
                 continue
