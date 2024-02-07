@@ -1,10 +1,12 @@
 package com.github.hubvd.odootools.actions.commands.pr
 
 import com.github.ajalt.clikt.core.CliktCommand
+import com.github.ajalt.clikt.core.MissingOption
 import com.github.ajalt.clikt.core.PrintMessage
 import com.github.ajalt.clikt.parameters.arguments.argument
 import com.github.ajalt.clikt.parameters.arguments.optional
 import com.github.ajalt.clikt.parameters.options.default
+import com.github.ajalt.clikt.parameters.options.defaultLazy
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.colormath.model.RGB
@@ -17,16 +19,21 @@ import com.github.ajalt.mordant.table.verticalLayout
 import com.github.ajalt.mordant.widgets.EmptyWidget
 import com.github.ajalt.mordant.widgets.Panel
 import com.github.ajalt.mordant.widgets.Text
+import com.github.hubvd.odootools.actions.ActionsConfig
 import com.github.hubvd.odootools.actions.utils.CheckState
 import com.github.hubvd.odootools.actions.utils.GithubClient
 import com.github.hubvd.odootools.actions.utils.PullRequest
 import com.github.hubvd.odootools.actions.utils.state
 
-class ListCommand(private val github: GithubClient) : CliktCommand(
+class ListCommand(private val github: GithubClient, private val config: ActionsConfig) : CliktCommand(
     help = "List pull requests involved with the selected username",
 ) {
     private val closed by option().flag()
-    private val githubUsername by option().default("hubvd")
+    private val githubUsername by option().defaultLazy {
+        config.githubUsernames[odooUsername] ?: throw MissingOption(
+            registeredOptions().find { it.names.contains("--github-username") }!!,
+        )
+    }
     private val odooUsername by option().default("huvw")
     private val title by argument().optional()
 
