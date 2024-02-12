@@ -34,7 +34,7 @@ class ListCommand(private val github: GithubClient, private val config: ActionsC
             registeredOptions().find { it.names.contains("--github-username") }!!,
         )
     }
-    private val odooUsername by option().default("huvw")
+    private val odooUsername by option().default(config.trigram)
     private val title by argument().optional()
 
     override fun run() {

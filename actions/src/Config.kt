@@ -30,6 +30,7 @@ data class ActionsConfig(
     val githubApiKey: String,
     val browsers: BrowserConfig = BrowserConfig(),
     val githubUsernames: Map<String, String>,
+    val trigram: String,
 )
 
 val ACTIONS_CONFIG_MODULE = DI.Module("actions_config") {

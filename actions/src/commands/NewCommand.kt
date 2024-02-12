@@ -7,6 +7,7 @@ import com.github.ajalt.clikt.parameters.arguments.optional
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.int
+import com.github.hubvd.odootools.actions.ActionsConfig
 import com.github.hubvd.odootools.actions.utils.NotificationService
 import com.github.hubvd.odootools.workspace.Workspaces
 import com.github.pgreze.process.Redirect
@@ -16,6 +17,7 @@ import kotlinx.coroutines.runBlocking
 class NewCommand(
     private val workspaces: Workspaces,
     private val notificationService: NotificationService,
+    private val config: ActionsConfig,
 ) : CliktCommand(
     help = "Create or switch to a branch with the selected id",
 ) {
@@ -35,7 +37,8 @@ class NewCommand(
                 append('-')
                 append(it.replace(' ', '_').replace('-', '_'))
             }
-            append("-huvw")
+            append('-')
+            append(config.trigram)
         }
         runBlocking {
             val exists = process(
