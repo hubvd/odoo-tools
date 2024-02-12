@@ -113,15 +113,19 @@ def http_case(record):
         record.msg = record.msg.replace('code "%s"', "code `%s`")
         return Result.HANDLED
 
-    if not record.name.endswith("browser") or record.msg != "%s":
+    # https://github.com/odoo/odoo/pull/141180/files
+    if not record.name.endswith("browser") or (
+        record.msg != "%s" and record.msg != "%s%s"
+    ):
         return
 
     for replacement in replacements:
         if replacement.level and replacement.level != record.levelno:
             continue
-        if match := replacement.regex.match(record.args[0]):
+        if match := replacement.regex.match(record.args[0] or record.args[1]):
             if replacement.format is None:
                 return Result.CANCELLED
+            record.msg = "%s"
             groups = match.groupdict()
             record.args = (
                 replacement.format.format(**{k: escape(v) for k, v in groups.items()}),
