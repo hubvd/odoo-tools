@@ -17,6 +17,14 @@ dependencies {
     testImplementation(libs.assertk)
 }
 
+tasks.named("nativeCompile") {
+    enabled = false
+}
+
+tasks.named("nativeRun") {
+    enabled = false
+}
+
 tasks.withType<KotlinCompile> {
     compilerOptions {
         freeCompilerArgs.add("-opt-in=kotlinx.serialization.ExperimentalSerializationApi")

@@ -32,7 +32,6 @@ class NativeImageConvention : Plugin<Project>{
             )
 
             named("test") {
-                quickBuild = true
                 buildArgs(
                     *commonFlags,
                 )
