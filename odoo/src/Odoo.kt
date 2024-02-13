@@ -91,6 +91,7 @@ val computes: ContextGenerator.() -> Unit = {
                 .flatMap { TestTag(it).toAddons(workspace, addonsPath) }
                 .toHashSet()
                 .joinToString(",")
+                .takeUnless { it.isEmpty() }
         }
     }
 
