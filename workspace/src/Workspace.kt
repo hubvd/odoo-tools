@@ -10,12 +10,17 @@ import org.kodein.di.DI
 import org.kodein.di.bind
 import org.kodein.di.instance
 import org.kodein.di.singleton
+import kotlin.io.path.Path
 import kotlin.io.path.div
 import kotlin.io.path.readText
 import java.nio.file.Path as NioPath
 
 @Serializable
-data class WorkspaceConfig(val root: ShellPath, val default: String)
+data class WorkspaceConfig(
+    val root: ShellPath,
+    val default: String,
+    val odooToolsPath: ShellPath = Path(System.getProperty("user.home"), "odoo-tools"),
+)
 
 interface Workspace {
     val name: String

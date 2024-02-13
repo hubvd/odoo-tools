@@ -8,10 +8,12 @@ import com.github.hubvd.odootools.odoo.ContextGenerator
 import com.github.hubvd.odootools.odoo.actions.ActionProvider
 import com.github.hubvd.odootools.odoo.computes
 import com.github.hubvd.odootools.workspace.Workspace
+import com.github.hubvd.odootools.workspace.WorkspaceConfig
 import com.github.hubvd.odootools.workspace.Workspaces
 
 interface DslContext : OdooOptions {
     val workspace: Workspace
+    val config: WorkspaceConfig
 }
 
 class MutableDslContext(
@@ -20,6 +22,7 @@ class MutableDslContext(
     val flags: MutableSet<String>,
     val options: MutableMap<String, String>,
     val env: MutableMap<String, String>,
+    override val config: WorkspaceConfig,
 ) : DslContext, OdooOptions by odooOptions
 
 val Option.id: String get() = names.maxBy { it.length }.removePrefix("--")
@@ -43,7 +46,11 @@ interface OdooOptions {
     val testFile: String?
 }
 
-class LaunchCommand(private val workspaces: Workspaces, private val actionProvider: ActionProvider) : CliktCommand(
+class LaunchCommand(
+    private val workspaces: Workspaces,
+    private val actionProvider: ActionProvider,
+    private val config: WorkspaceConfig,
+) : CliktCommand(
     treatUnknownOptionsAsArgs = true,
     invokeWithoutSubcommand = true,
     name = "odoo",
@@ -73,6 +80,7 @@ class LaunchCommand(private val workspaces: Workspaces, private val actionProvid
             arguments,
             workspace,
             ignores,
+            config,
         ).generate(computes)
 
         actionProvider(runConfiguration.context, currentContext.terminal)?.run(runConfiguration)

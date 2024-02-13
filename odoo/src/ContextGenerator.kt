@@ -4,6 +4,7 @@ import com.github.ajalt.clikt.parameters.options.Option
 import com.github.ajalt.clikt.parameters.options.OptionWithValues
 import com.github.hubvd.odootools.odoo.commands.*
 import com.github.hubvd.odootools.workspace.Workspace
+import com.github.hubvd.odootools.workspace.WorkspaceConfig
 import java.lang.reflect.Proxy
 import java.nio.file.Path
 import kotlin.reflect.full.declaredMemberProperties
@@ -29,6 +30,7 @@ class ContextGenerator(
     private val arguments: List<String>,
     private val workspace: Workspace,
     private val ignores: Set<String>,
+    private val config: WorkspaceConfig,
 ) {
 
     private val graph = HashMap<String, List<String>>()
@@ -127,6 +129,7 @@ class ContextGenerator(
             flags = flags,
             options = options,
             env = env,
+            config = config,
         )
 
         val queue = computes.keys.toHashSet()

@@ -14,7 +14,7 @@ import com.github.pgreze.process.process
 import kotlinx.coroutines.runBlocking
 import org.kodein.di.*
 import java.net.URLEncoder
-import kotlin.io.path.div
+import kotlin.io.path.*
 import kotlin.math.absoluteValue
 import kotlin.math.roundToInt
 import kotlin.system.exitProcess
@@ -100,7 +100,13 @@ val computes: ContextGenerator.() -> Unit = {
                 add("odoo/addons")
                 if (!community) add("enterprise")
                 if (themes) add("design-themes")
-                add("~/odoo-tools/addons") // FIXME: should depends on the actual path
+                val customAddonsPath = config.odooToolsPath / "addons"
+                val home = Path(System.getProperty("user.home"))
+                if (customAddonsPath.startsWith(home)) {
+                    add("~/" + customAddonsPath.relativeTo(home))
+                } else {
+                    add(customAddonsPath)
+                }
             }.joinToString(",")
         }
     }
