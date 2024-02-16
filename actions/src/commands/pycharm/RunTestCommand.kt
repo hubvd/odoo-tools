@@ -1,7 +1,7 @@
 package com.github.hubvd.odootools.actions.commands.pycharm
 
 import com.github.ajalt.clikt.core.Abort
-import com.github.hubvd.odootools.actions.utils.Sway
+import com.github.hubvd.odootools.actions.utils.Kitty
 import com.github.hubvd.odootools.workspace.Workspaces
 import com.github.pgreze.process.process
 import kotlinx.coroutines.runBlocking
@@ -19,24 +19,14 @@ class RunTestCommand(override val workspaces: Workspaces) : BasePycharmAction() 
         val title = flags.last().take(20)
 
         runBlocking {
-            Sway.runScratchpadIfClosed()
-            process(
-                "kitty",
-                "@",
-                "--to",
-                "unix:/tmp/mykitty",
-                "launch",
-                "--hold",
-                "--title",
-                title,
-                "--type",
-                "tab",
-                "--cwd",
-                workspace.path.toString(),
+            Kitty.runIfClosed()
+            Kitty.launch(
                 "odoo",
                 *flags.toTypedArray(),
+                title = title,
+                cwd = workspace.path.toString(),
+                type = "tab",
             )
-            Sway.showScratchpad()
         }
     }
 }

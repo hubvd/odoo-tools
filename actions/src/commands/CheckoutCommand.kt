@@ -8,14 +8,12 @@ import com.github.ajalt.mordant.terminal.Terminal
 import com.github.hubvd.odootools.actions.utils.BranchLookup
 import com.github.hubvd.odootools.actions.utils.BranchRef
 import com.github.hubvd.odootools.actions.utils.NotificationService
-import com.github.hubvd.odootools.actions.utils.Sway
+import com.github.hubvd.odootools.actions.utils.Kitty
 import com.github.hubvd.odootools.workspace.Workspaces
 import com.github.pgreze.process.Redirect.CAPTURE
 import com.github.pgreze.process.Redirect.SILENT
 import com.github.pgreze.process.process
-import kotlinx.coroutines.joinAll
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
 import java.io.File
 
 class CheckoutCommand(
@@ -47,17 +45,17 @@ class CheckoutCommand(
         notificationService.info("Fetching ${ref.branch}", "from ${ref.remote}")
 
         runBlocking {
-            joinAll(
-                launch { fetchAndCheckout(ref, workspace.path.resolve("odoo").toFile()) },
-                launch { fetchAndCheckout(ref, workspace.path.resolve("enterprise").toFile()) },
+            val (odoo, enterprise) = awaitAll(
+                async { fetchAndCheckout(ref, workspace.path.resolve("odoo").toFile()) },
+                async { fetchAndCheckout(ref, workspace.path.resolve("enterprise").toFile()) },
             )
             if (!terminal.info.outputInteractive) {
-                Sway.openGit(workspace)
+                Kitty.openGit(workspace, odoo, enterprise)
             }
         }
     }
 
-    private suspend fun fetchAndCheckout(ref: BranchRef, workDir: File) {
+    private suspend fun fetchAndCheckout(ref: BranchRef, workDir: File): Boolean {
         val remoteRe = Regex("""(\w+)\s+(\S+)""")
 
         val remote = process("git", "remote", "-v", directory = workDir, stderr = SILENT, stdout = CAPTURE)
@@ -71,7 +69,7 @@ class CheckoutCommand(
 
         val fetchResult = process("git", "fetch", remote, ref.branch, directory = workDir, stderr = SILENT)
         if (fetchResult.resultCode == 128) {
-            return
+            return false
         } else if (fetchResult.resultCode != 0) {
             throw CliktError("git exited with ${fetchResult.resultCode} while fetching $remote:${ref.branch}")
         }
@@ -86,11 +84,11 @@ class CheckoutCommand(
         ).output.firstOrNull()
 
         when (currentBranch) {
-            ref.branch -> return
+            ref.branch -> return true
             ref.base -> {}
             else -> {
                 notificationService.warn("Checkout skipped", "$currentBranch is active")
-                return
+                return true
             }
         }
 
@@ -105,9 +103,10 @@ class CheckoutCommand(
 
         if (hasStagedFiles) {
             notificationService.warn("Checkout skipped", "$currentBranch is dirty")
-            return
+            return true
         }
 
         process("git", "checkout", ref.branch, directory = workDir)
+        return true
     }
 }
