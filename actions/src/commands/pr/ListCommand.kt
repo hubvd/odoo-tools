@@ -15,15 +15,13 @@ import com.github.ajalt.mordant.rendering.TextColors.*
 import com.github.ajalt.mordant.rendering.TextStyle
 import com.github.ajalt.mordant.rendering.TextStyles.Companion.hyperlink
 import com.github.ajalt.mordant.rendering.Widget
+import com.github.ajalt.mordant.table.horizontalLayout
 import com.github.ajalt.mordant.table.verticalLayout
 import com.github.ajalt.mordant.widgets.EmptyWidget
 import com.github.ajalt.mordant.widgets.Panel
 import com.github.ajalt.mordant.widgets.Text
 import com.github.hubvd.odootools.actions.ActionsConfig
-import com.github.hubvd.odootools.actions.utils.CheckState
-import com.github.hubvd.odootools.actions.utils.GithubClient
-import com.github.hubvd.odootools.actions.utils.PullRequest
-import com.github.hubvd.odootools.actions.utils.state
+import com.github.hubvd.odootools.actions.utils.*
 
 class ListCommand(private val github: GithubClient, private val config: ActionsConfig) : CliktCommand(
     help = "List pull requests involved with the selected username",
@@ -81,9 +79,11 @@ private fun pullRequestGroupWidget(title: String, pullRequests: List<PullRequest
         Panel(
             verticalLayout {
                 spacing = 1
-                pullRequests.forEach {
-                    cell(pullRequestWidget(it))
-                }
+                pullRequests
+                    .groupBy { it.parent() ?: it.id }
+                    .values
+                    .map { it.sortedBy { it.id } }
+                    .forEach { cell(pullRequestGroupWidget(it)) }
             },
             title = Text(title),
             titleAlign = TextAlign.LEFT,
@@ -92,7 +92,39 @@ private fun pullRequestGroupWidget(title: String, pullRequests: List<PullRequest
         )
     }
 
-fun pullRequestWidget(pullRequest: PullRequest): Widget {
+fun pullRequestGroupWidget(pullRequests: List<PullRequest>): Widget {
+    if (pullRequests.size == 1) {
+        return pullRequestWidget(pullRequests.first()).first
+    }
+
+    return verticalLayout {
+        spacing = 0
+        cell(pullRequestWidget(pullRequests.first()).first)
+        pullRequests.drop(1).forEachIndexed { index, request ->
+            cell(
+                horizontalLayout {
+                    val (content, lines) = pullRequestWidget(request)
+                    if (index == pullRequests.size - 2) {
+                        cell("└──")
+                    } else {
+                        cell(
+                            buildString {
+                                append("├──\n")
+                                repeat(lines - 1) {
+                                    append("│\n")
+                                }
+                                delete(length - 1, length)
+                            },
+                        )
+                    }
+                    cell(content)
+                },
+            )
+        }
+    }
+}
+
+fun pullRequestWidget(pullRequest: PullRequest): Pair<Text, Int> {
     val color = when (pullRequest.state()) {
         CheckState.FAILURE, CheckState.ERROR -> red
         CheckState.SUCCESS -> green
@@ -104,25 +136,24 @@ fun pullRequestWidget(pullRequest: PullRequest): Widget {
         tags += "[CONFLICT]"
     }
 
-    return Text(
-        buildString {
-            appendLine(hyperlink(pullRequest.url)(TAG_STYLE(tags) + color(title)) + ' ')
-            pullRequest.checks
-                .filterNot { it.context == "ci/codeowner" }
-                .filter { it.state == CheckState.FAILURE }
-                .forEach {
-                    append(TAG_STYLE('[' + it.context + ']'))
-                    appendLine(red(" " + it.targetUrl))
-                }
-            pullRequest.checks
-                .filter { it.state == CheckState.PENDING }
-                .forEach {
-                    append(TAG_STYLE('[' + it.context + ']'))
-                    appendLine(yellow(" " + it.targetUrl))
-                }
-            append(pullRequest.headRefName)
-        },
-    )
+    val text = buildString {
+        appendLine(hyperlink(pullRequest.url)(TAG_STYLE(tags) + color(title)) + ' ')
+        pullRequest.checks
+            .filterNot { it.context == "ci/codeowner" }
+            .filter { it.state == CheckState.FAILURE }
+            .forEach {
+                append(TAG_STYLE('[' + it.context + ']'))
+                appendLine(red(" " + it.targetUrl))
+            }
+        pullRequest.checks
+            .filter { it.state == CheckState.PENDING }
+            .forEach {
+                append(TAG_STYLE('[' + it.context + ']'))
+                appendLine(yellow(" " + it.targetUrl))
+            }
+        append(pullRequest.headRefName)
+    }
+    return Text(text) to text.count { it == '\n' } + 1
 }
 
 private val TAG_STYLE = TextStyle(RGB("#61afef"))

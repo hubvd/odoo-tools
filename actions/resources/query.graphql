@@ -6,26 +6,17 @@
   ) {
     prs: nodes {
       ... on PullRequest {
+        id: number
         title
         headRefName
+        baseRefName
         url
         isDraft
         mergeable
-        timelineItems(first: 100, itemTypes: [ISSUE_COMMENT, PULL_REQUEST_COMMIT]) {
+        body: bodyText
+        labels(first: 10) {
           nodes {
-            ... on IssueComment {
-              type: __typename
-              body
-              author {
-                login
-              }
-            }
-            ... on PullRequestCommit {
-              type: __typename
-              commit {
-                title: messageHeadline
-              }
-            }
+            name
           }
         }
         commits(last: 1) {
