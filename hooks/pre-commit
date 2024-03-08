@@ -5,9 +5,17 @@ function fail
   exit 1
 end
 
+set base (worktree base)
+
 function check_branch
-  if test "$(worktree base)" = "$(git rev-parse --abbrev-ref HEAD)"
+  if test "$base" = "$(git rev-parse --abbrev-ref HEAD)"
     fail "Can't commit to a base branch"
+  end
+end
+
+function check_sticky
+  if not contains $base 1{5,6,7}.0 saas-{16.{3,4},17.1} master
+    fail "Can't commit to a non sticky base branch"
   end
 end
 
@@ -32,8 +40,8 @@ function check_qunit
   fail_with_pattern "*/static/tests/*.js" "QUnit\s*\.\s*(debug|only)" -U
 end
 
-for check in qunit branch debugger
-  check_$check
+for check in (functions --names | string match 'check_*')
+  $check
 end
 
 true
