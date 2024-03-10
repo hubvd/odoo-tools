@@ -4,6 +4,7 @@ import com.github.ajalt.clikt.core.*
 import com.github.ajalt.mordant.terminal.Terminal
 import com.github.hubvd.odootools.actions.commands.COMMANDS_MODULE
 import com.github.hubvd.odootools.actions.commands.MainCommand
+import com.github.hubvd.odootools.actions.kitty.Kitty
 import com.github.hubvd.odootools.actions.utils.*
 import com.github.hubvd.odootools.config.CONFIG_MODULE
 import com.github.hubvd.odootools.workspace.WORKSPACE_MODULE
@@ -52,6 +53,10 @@ internal val ACTION_MODULE by DI.Module {
 
     bind<BrowserService> { singleton { BrowserServiceImpl(instance<ActionsConfig>().browsers) } }
     bind<Git> { singleton { new(::GitShellImplementation) } }
+
+    // TODO: wm detection
+    bind<WindowManager> { singleton { new(::Kwin) } }
+    bind<Kitty> { singleton { Kitty(instance()) } }
 }
 
 fun main(args: Array<String>) {

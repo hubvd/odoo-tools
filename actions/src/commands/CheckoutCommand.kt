@@ -5,10 +5,8 @@ import com.github.ajalt.clikt.core.CliktError
 import com.github.ajalt.clikt.parameters.arguments.argument
 import com.github.ajalt.clikt.parameters.arguments.defaultLazy
 import com.github.ajalt.mordant.terminal.Terminal
-import com.github.hubvd.odootools.actions.utils.BranchLookup
-import com.github.hubvd.odootools.actions.utils.BranchRef
-import com.github.hubvd.odootools.actions.utils.NotificationService
-import com.github.hubvd.odootools.actions.utils.Kitty
+import com.github.hubvd.odootools.actions.kitty.Kitty
+import com.github.hubvd.odootools.actions.utils.*
 import com.github.hubvd.odootools.workspace.Workspaces
 import com.github.pgreze.process.Redirect.CAPTURE
 import com.github.pgreze.process.Redirect.SILENT
@@ -21,6 +19,7 @@ class CheckoutCommand(
     private val terminal: Terminal,
     private val notificationService: NotificationService,
     private val branchLookup: BranchLookup,
+    private val kitty: Kitty,
 ) : CliktCommand(
     help = "Checkout a pull request from a github url or a commit ref (remote:branch)",
 ) {
@@ -50,7 +49,7 @@ class CheckoutCommand(
                 async { fetchAndCheckout(ref, workspace.path.resolve("enterprise").toFile()) },
             )
             if (!terminal.info.outputInteractive) {
-                Kitty.openGit(workspace, odoo, enterprise)
+                kitty.openGit(workspace, odoo, enterprise)
             }
         }
     }
