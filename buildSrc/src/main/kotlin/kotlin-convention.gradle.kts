@@ -19,7 +19,7 @@ tasks.withType<Test> {
 
 tasks.withType<KotlinCompile> {
     compilerOptions {
-        jvmTarget = JvmTarget.JVM_20
+        jvmTarget = JvmTarget.JVM_21
         javaParameters = true
         freeCompilerArgs =
             listOf(
@@ -41,7 +41,7 @@ kotlin {
 
 spotless {
     kotlin {
-        ktlint("1.0.0")
+        ktlint("1.2.1")
             .setEditorConfigPath("${project.rootDir}/.editorconfig")
     }
 }

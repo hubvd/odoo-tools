@@ -8,12 +8,13 @@ repositories {
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(20)
+        languageVersion = JavaLanguageVersion.of(21)
     }
 }
 
 tasks.withType<JavaCompile> {
     options.encoding = "UTF-8"
+    options.compilerArgs.add("--enable-preview")
 }
 
 sourceSets["main"].resources.setSrcDirs(listOf("resources"))

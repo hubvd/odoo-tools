@@ -95,6 +95,8 @@ class CompleteCommand(private val workspaces: Workspaces) : CliktCommand(hidden 
     }
 
     private fun completeQUnitTests() = runBlocking {
+        @Suppress("ktlint:standard:max-line-length")
+        val regex = """(?<=QUnit\.module\(|QUnit\.test\(|QUnit\.debug\(|QUnit\.only\()(?P<quote>["'`])(?P<name>.+)(?=(?P=quote))"""
         process(
             "rg",
             "--no-filename",
@@ -102,8 +104,7 @@ class CompleteCommand(private val workspaces: Workspaces) : CliktCommand(hidden 
             "--type=js",
             "--only-matching",
             "--replace=\$name",
-            @Suppress("ktlint:standard:max-line-length")
-            """(?<=QUnit\.module\(|QUnit\.test\(|QUnit\.debug\(|QUnit\.only\()(?P<quote>["'`])(?P<name>.+)(?=(?P=quote))""",
+            regex,
             "${workspace.path / "odoo/addons/web/static/tests"}",
             stdout = Redirect.CAPTURE,
             stderr = Redirect.SILENT,
