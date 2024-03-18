@@ -8,7 +8,7 @@ interface BrowserService {
     fun chrome(url: String)
 }
 
-class BrowserServiceImpl(private val config: BrowserConfig) : BrowserService {
+class BrowserServiceImpl(private val config: BrowserConfig, private val wm: WindowManager) : BrowserService {
     override fun open(url: String) {
         when (config.default) {
             "firefox" -> firefox(url)
@@ -29,5 +29,6 @@ class BrowserServiceImpl(private val config: BrowserConfig) : BrowserService {
             .redirectOutput(ProcessBuilder.Redirect.DISCARD)
             .redirectError(ProcessBuilder.Redirect.DISCARD)
             .start()
+        wm.raise("chromium") // TODO
     }
 }

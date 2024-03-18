@@ -1,34 +1,32 @@
 package com.github.hubvd.odootools.actions.commands
 
 import com.github.ajalt.clikt.core.CliktCommand
+import com.github.hubvd.odootools.actions.ActionsConfig
 import com.github.hubvd.odootools.actions.git.GitBranchType
 import com.github.hubvd.odootools.actions.git.GitStatusFlags
 import com.github.hubvd.odootools.actions.git.Repository
 import com.github.hubvd.odootools.workspace.Workspaces
+import kotlinx.coroutines.internal.resumeCancellableWith
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
+import java.lang.reflect.Proxy
+import kotlin.coroutines.Continuation
 import kotlin.io.path.div
 
 class TestCommand(override val di: DI) : CliktCommand(), DIAware {
     override fun run() {
-        println(GitStatusFlags.GIT_STATUS_OPT_INCLUDE_UNTRACKED.ordinal)
+        val conf by instance<ActionsConfig>()
 
-        val bits = arrayOf(
-            GitStatusFlags.GIT_STATUS_OPT_INCLUDE_UNTRACKED,
-            GitStatusFlags.GIT_STATUS_OPT_INCLUDE_IGNORED
-        ).map { 1 shl it.ordinal }.reduce { acc, gitStatusFlags ->
-            acc or gitStatusFlags
+        fun menu(line: Int): List<String> {
+            return conf.dmenu.map {
+                it.replace("{{lines}}", line.toString())
+            }
+
         }
+        println(menu(2))
 
-        println(bits)
-        return
 
-        val workspaces by instance<Workspaces>()
-        val repo = Repository.open(workspaces.list().find { it.name == "15.0" }!!.path / "odoo")
 
-        val babar = repo.findBranch("15.0-opw-3790144-huvw", GitBranchType.LOCAL)
-        repo.checkoutBranch(babar!!)
-        return
     }
 }

@@ -1,6 +1,8 @@
 package com.github.hubvd.odootools.actions.commands.pycharm
 
 import com.github.ajalt.clikt.core.Abort
+import com.github.ajalt.clikt.parameters.options.flag
+import com.github.ajalt.clikt.parameters.options.option
 import com.github.hubvd.odootools.actions.kitty.Kitty
 import com.github.hubvd.odootools.workspace.Workspaces
 import kotlinx.serialization.json.*
@@ -8,10 +10,12 @@ import kotlin.io.path.Path
 import kotlin.io.path.name
 
 class RunTestCommand(override val workspaces: Workspaces, private val kitty: Kitty) : BasePycharmAction() {
+    private val drop by option().flag()
+
     override fun run() {
         if (selection.isEmpty()) throw Abort()
 
-        val flags = when {
+        val testFlags = when {
             file.endsWith(".js") -> listOf("--test-qunit", selection)
             file.endsWith(".py") -> {
                 val prefix = Path(file).parent?.takeIf { it.name == "tests" }?.let { "/${it.parent.name}" } ?: ""
@@ -25,7 +29,14 @@ class RunTestCommand(override val workspaces: Workspaces, private val kitty: Kit
             else -> throw Abort()
         }
 
-        val title = flags.last().take(20)
+        val flags = buildList {
+            addAll(testFlags)
+            if (drop) {
+                add("--drop")
+            }
+        }
+
+        val title = testFlags.last().take(20)
         kitty.use {
             val previousWindowId = ls().jsonArray
                 .flatMap { it.jsonObject["tabs"]!!.jsonArray }

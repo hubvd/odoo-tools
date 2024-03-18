@@ -51,7 +51,7 @@ internal val ACTION_MODULE by DI.Module {
 
     bind { singleton { CompositeBranchLookup(instance<Set<BranchLookup>>()) } }
 
-    bind<BrowserService> { singleton { BrowserServiceImpl(instance<ActionsConfig>().browsers) } }
+    bind<BrowserService> { singleton { BrowserServiceImpl(instance<ActionsConfig>().browsers, instance()) } }
     bind<Git> { singleton { new(::GitShellImplementation) } }
 
     // TODO: wm detection
