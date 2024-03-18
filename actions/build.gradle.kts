@@ -30,6 +30,8 @@ dependencies {
     implementation(libs.http4k.core)
     implementation(libs.arrow.core)
 
+    compileOnly(libs.graalvm.svm)
+
     testImplementation(platform(libs.junit.bom))
     testImplementation(libs.junit.jupiter)
     testImplementation(libs.assertk)

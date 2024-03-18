@@ -33,8 +33,8 @@ class BisectCommand(
 ) : CliktCommand(
     help = "Bisect odoo across multiple repositories",
 ) {
-    private lateinit var odooRepository: Repository
-    private lateinit var enterpriseRepository: Repository
+    private lateinit var odooLegacyRepository: LegacyRepository
+    private lateinit var enterpriseLegacyRepository: LegacyRepository
     private lateinit var state: BisectState
 
     override fun run() {
@@ -44,8 +44,8 @@ class BisectCommand(
         this.state = BisectState(low = 0, high = steps.lastIndex, steps, workspace)
 
         with(git) {
-            odooRepository = workspace.odoo()
-            enterpriseRepository = workspace.enterprise()
+            odooLegacyRepository = workspace.odoo()
+            enterpriseLegacyRepository = workspace.enterprise()
         }
 
         draw()
@@ -105,7 +105,7 @@ class BisectCommand(
         terminal.print(
             buildString {
                 appendLine((bold + green)("Possibly bad odoo commits:"))
-                odooRepository.commitsBetween(firstGood.odoo, firstBad.odoo)
+                odooLegacyRepository.commitsBetween(firstGood.odoo, firstBad.odoo)
                     .forEach {
                         append(yellow(it.hash))
                         append(' ')
@@ -113,7 +113,7 @@ class BisectCommand(
                     }
                 appendLine()
                 appendLine((bold + green)("Possibly bad enterprise commits:"))
-                enterpriseRepository.commitsBetween(firstGood.enterprise, firstBad.enterprise)
+                enterpriseLegacyRepository.commitsBetween(firstGood.enterprise, firstBad.enterprise)
                     .forEach {
                         append(yellow(it.hash))
                         append(' ')
@@ -127,8 +127,8 @@ class BisectCommand(
     private val prompt by lazy { terminal.theme.style("prompt.default")("good | bad ? ") }
 
     private fun draw() {
-        val odooTitle = odooRepository.commitTitle(state.batch.odoo)
-        val enterpriseTitle = enterpriseRepository.commitTitle(state.batch.enterprise)
+        val odooTitle = odooLegacyRepository.commitTitle(state.batch.odoo)
+        val enterpriseTitle = enterpriseLegacyRepository.commitTitle(state.batch.enterprise)
 
         val width = terminal.info.width
         val total = state.batches.size
@@ -174,8 +174,8 @@ class BisectCommand(
             },
         )
 
-        odooRepository.switch(state.batch.odoo)
-        enterpriseRepository.switch(state.batch.enterprise)
+        odooLegacyRepository.switch(state.batch.odoo)
+        enterpriseLegacyRepository.switch(state.batch.enterprise)
 
         terminal.cursor.move {
             clearLineBeforeCursor()

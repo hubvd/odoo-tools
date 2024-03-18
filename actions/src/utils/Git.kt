@@ -9,7 +9,7 @@ import java.nio.file.Path
 import kotlin.io.path.div
 
 interface Git {
-    fun open(path: Path): Repository
+    fun open(path: Path): LegacyRepository
 }
 
 context(Git)
@@ -20,19 +20,19 @@ fun Workspace.enterprise() = open(path / "enterprise")
 
 data class Commit(val hash: String, val title: String)
 
-interface Repository {
+interface LegacyRepository {
     fun commitTitle(hash: String): String
     fun switch(hash: String)
     fun commitsBetween(oldHash: String, newHash: String): List<Commit>
 }
 
 internal class GitShellImplementation : Git {
-    override fun open(path: Path): Repository {
-        return RepositoryShellImplementation(path)
+    override fun open(path: Path): LegacyRepository {
+        return LegacyRepositoryShellImplementation(path)
     }
 }
 
-private class RepositoryShellImplementation(private val path: Path) : Repository {
+private class LegacyRepositoryShellImplementation(private val path: Path) : LegacyRepository {
     override fun commitTitle(hash: String) = runBlocking {
         process(
             "git",

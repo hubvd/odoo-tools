@@ -14,7 +14,14 @@ val COMMANDS_MODULE = DI.Module("Commands") {
         add { singleton { new(::PycharmCommand) } }
         add { singleton { new(::OpenCommand) } }
         add { singleton { new(::AttachCommand) } }
-        add { singleton { new(::OdooctlCommand).subcommands(instance<KillCommand>()) } }
+        add {
+            singleton {
+                new(::OdooctlCommand).subcommands(
+                    instance<KillCommand>(),
+                    instance<StatusCommand>(),
+                )
+            }
+        }
         add {
             singleton {
                 RestoreCommand(
@@ -28,9 +35,11 @@ val COMMANDS_MODULE = DI.Module("Commands") {
         add { singleton { new(::CheckoutCommand) } }
         add { singleton { new(::NewCommand) } }
         add { singleton { new(::BisectCommand) } }
+        add { singleton { TestCommand(di) } }
     }
 
     bind { singleton { new(::KillCommand) } }
+    bind { singleton { new(::StatusCommand) } }
 
     import(PR_COMMAND_MODULE)
     import(PYCHARM_ACTIONS_MODULE)
