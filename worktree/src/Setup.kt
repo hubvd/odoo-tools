@@ -33,7 +33,9 @@ suspend fun createGitWorktrees(root: Workspace, target: Workspace, base: String)
             "${root.path / repository.pathName}",
             "worktree",
             "add",
-            "-f",
+            "-B",
+            base,
+            "--track",
             "${target.path / repository.pathName}",
             "origin/$base",
         )
