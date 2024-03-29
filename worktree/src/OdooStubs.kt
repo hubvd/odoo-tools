@@ -16,7 +16,8 @@ class OdooStubs(dataDir: DataDir) {
         val stubsVersion = when (workspace.version) {
             in 14.0..<15.0 -> "14.0"
             in 15.0..<16.0 -> "15.0"
-            else -> "16.0"
+            in 16.0..<17.0 -> "16.0"
+            else -> "17.0"
         }
         val stubsPath = rootPath / stubsVersion
         if (stubsPath.notExists()) {
