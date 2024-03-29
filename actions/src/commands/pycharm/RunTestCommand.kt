@@ -27,14 +27,10 @@ class RunTestCommand(override val workspaces: Workspaces, private val kitty: Kit
 
         val title = flags.last().take(20)
         kitty.use {
-            val previousWindowId = ls().jsonArray
-                .flatMap { it.jsonObject["tabs"]!!.jsonArray }
-                .flatMap { it.jsonObject["windows"]!!.jsonArray.filterIsInstance<JsonObject>() }
-                .find {
-                    it["user_vars"]!!.jsonObject["test"]?.takeIf { it is JsonPrimitive }
-                        ?.jsonPrimitive?.content == workspace.name
-                }
-                ?.get("id")?.jsonPrimitive?.int
+            val previousWindowId = ls().flatMap { it.tabs }
+                .flatMap { it.windows }
+                .find { it.userVars["test"] == workspace.name }
+                ?.id
 
             val replace = previousWindowId != null
             if (replace) {

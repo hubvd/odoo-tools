@@ -1,7 +1,5 @@
 package com.github.hubvd.odootools.actions.kitty
 
-import kotlinx.serialization.json.JsonElement
-
 interface KittyCommands {
     fun launch(
         vararg args: String = emptyArray(),
@@ -18,5 +16,5 @@ interface KittyCommands {
 
     fun closeWindow(match: String?)
 
-    fun ls(): JsonElement
+    fun ls(): List<OsWindow>
 }

@@ -1,6 +1,7 @@
 package com.github.hubvd.odootools.actions.kitty
 
 import kotlinx.serialization.json.*
+import kotlinx.serialization.serializer
 import java.io.ByteArrayOutputStream
 import java.lang.reflect.InvocationHandler
 import java.lang.reflect.Method
@@ -15,6 +16,7 @@ class KittyInvocationHandler(private val socketAddress: String) : InvocationHand
         private const val PREFIX = "\u001BP@kitty-cmd"
         private const val SUFFIX = "\u001B\\"
         private val camelCaseRe = Regex("([a-z])([A-Z])")
+        private val format = Json { namingStrategy = JsonNamingStrategy.SnakeCase }
     }
 
     private fun camelToSnakeCase(name: String) = camelCaseRe.replace(name, "\$1_\$2").lowercase()
@@ -57,8 +59,9 @@ class KittyInvocationHandler(private val socketAddress: String) : InvocationHand
         val json = Json.decodeFromString(JsonObject.serializer(), response)
         val ok = json["ok"]?.takeIf { it is JsonPrimitive }?.jsonPrimitive?.booleanOrNull == true
         if (ok) {
-            val data = Json.decodeFromString(JsonElement.serializer(), json["data"]!!.jsonPrimitive.content)
-            return data
+            val rawData = json["data"]!!.jsonPrimitive.content
+            val serializer = format.serializersModule.serializer(method.genericReturnType)
+            return format.decodeFromString(serializer, rawData)
         } else {
             println(json["error"])
             println(json["tb"]?.jsonPrimitive?.content)
