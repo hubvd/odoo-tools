@@ -54,8 +54,7 @@ internal val ACTION_MODULE by DI.Module {
     bind<BrowserService> { singleton { BrowserServiceImpl(instance<ActionsConfig>().browsers) } }
     bind<Git> { singleton { new(::GitShellImplementation) } }
 
-    // TODO: wm detection
-    bind<WindowManager> { singleton { new(::Kwin) } }
+    bind<WindowManager> { singleton { new(WindowManager.Companion::invoke) } }
     bind<Kitty> { singleton { Kitty(instance()) } }
 }
 

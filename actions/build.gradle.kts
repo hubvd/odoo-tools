@@ -15,6 +15,7 @@ cli {
         "new",
         "pr",
         "bisect",
+        "opener",
     )
 }
 

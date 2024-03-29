@@ -8,11 +8,10 @@ import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.int
 import com.github.hubvd.odootools.actions.ActionsConfig
+import com.github.hubvd.odootools.actions.git.currentRepository
+import com.github.hubvd.odootools.actions.utils.Clipboard
 import com.github.hubvd.odootools.actions.utils.NotificationService
 import com.github.hubvd.odootools.workspace.Workspaces
-import com.github.pgreze.process.Redirect
-import com.github.pgreze.process.process
-import kotlinx.coroutines.runBlocking
 
 class NewCommand(
     private val workspaces: Workspaces,
@@ -22,7 +21,7 @@ class NewCommand(
     help = "Create or switch to a branch with the selected id",
 ) {
     private val isSentry by option("-s", "--sentry").flag()
-    private val id by argument().int()
+    private val id by argument().int().defaultLazy { Clipboard.read().toInt() }
     private val description by argument().optional()
 
     override fun run() {

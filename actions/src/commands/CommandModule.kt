@@ -28,6 +28,7 @@ val COMMANDS_MODULE = DI.Module("Commands") {
         add { singleton { new(::CheckoutCommand) } }
         add { singleton { new(::NewCommand) } }
         add { singleton { new(::BisectCommand) } }
+        add { singleton { new(::OpenerCommand) } }
     }
 
     bind { singleton { new(::KillCommand) } }
