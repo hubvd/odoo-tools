@@ -1,31 +1,43 @@
 package com.github.hubvd.odootools.actions.commands.pycharm
 
 import com.github.ajalt.clikt.core.Abort
+import com.github.ajalt.clikt.parameters.options.flag
+import com.github.ajalt.clikt.parameters.options.option
 import com.github.hubvd.odootools.actions.kitty.Kitty
 import com.github.hubvd.odootools.workspace.Workspaces
-import kotlinx.serialization.json.*
 import kotlin.io.path.Path
 import kotlin.io.path.name
 
 class RunTestCommand(override val workspaces: Workspaces, private val kitty: Kitty) : BasePycharmAction() {
+    private val drop by option().flag()
+
     override fun run() {
         if (selection.isEmpty()) throw Abort()
 
-        val flags = when {
-            file.endsWith(".js") -> listOf("--test-qunit", selection)
-            file.endsWith(".py") -> {
+        var test: String
+        val flags = buildList {
+            if (file.endsWith(".js")) {
+                add("--test-qunit")
+                test = selection
+                add(test)
+            } else if (file.endsWith(".py")) {
+                add("--test-tags")
                 val prefix = Path(file).parent?.takeIf { it.name == "tests" }?.let { "/${it.parent.name}" } ?: ""
-                if (selection.startsWith("test_")) {
-                    listOf("--test-tags", "$prefix.$selection")
+                test = if (selection.startsWith("test_")) {
+                    "$prefix.$selection"
                 } else {
-                    listOf("--test-tags", "$prefix:$selection")
+                    "$prefix:$selection"
                 }
+                add(test)
+            } else {
+                throw Abort()
             }
 
-            else -> throw Abort()
+            if (drop) {
+                add("--drop")
+            }
         }
 
-        val title = flags.last().take(20)
         kitty.use {
             val previousWindowId = ls().flatMap { it.tabs }
                 .flatMap { it.windows }
@@ -39,7 +51,7 @@ class RunTestCommand(override val workspaces: Workspaces, private val kitty: Kit
             launch(
                 "odoo",
                 *flags.toTypedArray(),
-                windowTitle = title,
+                windowTitle = test,
                 cwd = workspace.path.toString(),
                 type = if (replace) "overlay-main" else "tab",
                 hold = true,
