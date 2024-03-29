@@ -4,6 +4,7 @@ import com.github.hubvd.odootools.workspace.Workspace
 import com.github.hubvd.odootools.workspace.Workspaces
 import com.sun.security.auth.module.UnixSystem
 import java.nio.file.NoSuchFileException
+import java.util.concurrent.CompletableFuture
 import java.util.zip.CRC32
 import kotlin.io.path.*
 import kotlin.jvm.optionals.getOrElse
@@ -90,8 +91,12 @@ class Odooctl(private val workspaces: Workspaces) {
         return instances.sortedWith(compareBy({ it.workspace.version }, { it.database }))
     }
 
-    fun kill(instance: OdooInstance) {
-        ProcessHandle.of(instance.pid).getOrNull()?.destroy()
+    fun kill(instance: OdooInstance): CompletableFuture<ProcessHandle>? {
+        ProcessHandle.of(instance.pid).getOrNull()?.run {
+            destroy()
+            return onExit()
+        }
+        return null
     }
 
     companion object {

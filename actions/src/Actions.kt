@@ -44,6 +44,8 @@ internal val ACTION_MODULE by DI.Module {
         }
     }
 
+    bindSingleton { new(::DbManager) }
+
     bindSet {
         add { singleton { new(::GithubBranchLookup) } }
         add { instance(CommitRefBranchLookup) }

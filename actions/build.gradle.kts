@@ -16,6 +16,7 @@ cli {
         "pr",
         "bisect",
         "opener",
+        "db",
     )
 }
 
