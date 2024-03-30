@@ -5,6 +5,6 @@ plugins {
 spotless {
     python {
         target("**/*.py")
-        black("23.12.1")
+        black("24.3.0")
     }
 }

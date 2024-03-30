@@ -10,8 +10,13 @@ import com.github.ajalt.clikt.parameters.options.convert
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.validate
 import com.github.ajalt.clikt.parameters.types.file
-import com.github.ajalt.mordant.animation.progressAnimation
+import com.github.ajalt.mordant.animation.progress.animateOnThread
+import com.github.ajalt.mordant.animation.progress.execute
 import com.github.ajalt.mordant.terminal.Terminal
+import com.github.ajalt.mordant.widgets.progress.completed
+import com.github.ajalt.mordant.widgets.progress.progressBar
+import com.github.ajalt.mordant.widgets.progress.progressBarLayout
+import com.github.ajalt.mordant.widgets.progress.text
 import com.github.hubvd.odootools.actions.Secret
 import com.github.pgreze.process.InputSource
 import com.github.pgreze.process.Redirect
@@ -112,14 +117,14 @@ class RestoreCommand(
     private fun restore(inputStream: ZipInputStream, totalSizeInBytes: Long) = runBlocking {
         process("createdb", name)
 
-        val progress = terminal.progressAnimation {
+        val progress = progressBarLayout {
             text("Restoring $name")
             progressBar()
             completed("B", includeTotal = true)
-        }
+        }.animateOnThread(terminal)
 
-        progress.updateTotal(totalSizeInBytes)
-        progress.start()
+        progress.update { total = totalSizeInBytes }
+        progress.execute()
 
         process(
             "psql",
@@ -134,7 +139,7 @@ class RestoreCommand(
                 while (bytes >= 0) {
                     out.write(buffer, 0, bytes)
                     bytesCopied += bytes
-                    progress.update(bytesCopied)
+                    progress.update { completed = bytesCopied }
                     bytes = inputStream.read(buffer)
                 }
             },
