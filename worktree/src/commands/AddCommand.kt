@@ -50,6 +50,7 @@ class AddCommand(
                 root = workspaces.default(),
                 target = targetWorkspace,
                 base = base,
+                name = name,
             )
             val workspace = Workspace(name, path)
             venvs.create(workspace)

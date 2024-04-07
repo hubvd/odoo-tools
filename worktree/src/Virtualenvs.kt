@@ -16,23 +16,26 @@ class Virtualenvs(private val pythonProvider: PythonProvider, dataDir: DataDir) 
         if (venvPath.notExists()) {
             val pythonVersion = when {
                 workspace.version < 16 -> "3.9.18"
-                else -> "3.11.5"
+                else -> "3.11.8"
             }
             val pythonPath = pythonProvider.installOrGetVersion(pythonVersion)
             cd(rootPath)
-            run("virtualenv", workspace.base, "--python=$pythonPath")
+            run("virtualenv", workspace.base, "--python=$pythonPath", description = "Creating virtualenv")
             val pip = rootPath / workspace.base / "bin/pip"
-            run("$pip", "install", "--upgrade", "pip")
+            run("$pip", "install", "--upgrade", "pip", description = "Upgrading pip")
             run(
                 "$pip",
                 "install",
                 "-r",
                 "${generateRequirements(workspace.path / "odoo/requirements.txt", workspace.version)}",
+                description = "Installing packages",
             )
         }
-        val target = workspace.path / "venv"
-        target.deleteIfExists()
-        target.createSymbolicLinkPointingTo(venvPath)
+        step("Linking virtualenv") {
+            val target = workspace.path / "venv"
+            target.deleteIfExists()
+            target.createSymbolicLinkPointingTo(venvPath)
+        }
     }
 
     private fun generateRequirements(requirements: Path, odooVersion: Float): Path {

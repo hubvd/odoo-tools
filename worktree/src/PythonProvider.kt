@@ -39,7 +39,7 @@ class PyenvPythonProvider(private val path: Path) : PythonProvider {
 
     context(ProcessSequenceDslContext)
     private suspend fun installVersion(version: String) {
-        run("$path", "install", version)
+        run("$path", "install", version, description = "Installing python $version")
     }
 
     context(ProcessSequenceDslContext)

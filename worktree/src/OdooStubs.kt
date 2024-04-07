@@ -1,5 +1,6 @@
 package com.github.hubvd.odootools.worktree
 
+import com.github.ajalt.mordant.rendering.TextStyles.bold
 import com.github.hubvd.odootools.workspace.Workspace
 import kotlin.io.path.*
 
@@ -22,12 +23,24 @@ class OdooStubs(dataDir: DataDir) {
         val stubsPath = rootPath / stubsVersion
         if (stubsPath.notExists()) {
             cd(masterPath)
-            run("git", "worktree", "add", "$stubsPath", stubsVersion)
+            run(
+                "git",
+                "worktree",
+                "add",
+                "-B",
+                stubsVersion,
+                "--track",
+                "$stubsPath",
+                stubsVersion,
+                description = "${bold("odoo-stubs")}: Creating worktree",
+            )
         }
 
-        val target = workspace.path / "odoo-stubs"
-        target.deleteIfExists()
-        target.createSymbolicLinkPointingTo(stubsPath)
+        step("Linking odoo-stubs") {
+            val target = workspace.path / "odoo-stubs"
+            target.deleteIfExists()
+            target.createSymbolicLinkPointingTo(stubsPath)
+        }
     }
 
     context(ProcessSequenceDslContext)
@@ -39,6 +52,7 @@ class OdooStubs(dataDir: DataDir) {
             "clone",
             "git@github.com:odoo-ide/odoo-stubs.git",
             "master",
+            description = "Cloning odoo-ide/odoo-stubs",
         )
         cd(masterPath)
         run(

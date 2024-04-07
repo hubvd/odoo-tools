@@ -1,6 +1,10 @@
 package com.github.hubvd.odootools.worktree
 
+import com.github.ajalt.mordant.rendering.TextColors.green
+import com.github.ajalt.mordant.rendering.TextStyles.bold
 import com.github.hubvd.odootools.workspace.Workspace
+import com.github.pgreze.process.Redirect
+import com.github.pgreze.process.process
 import kotlin.io.path.div
 
 enum class Repository(val url: String, val pathName: String) {
@@ -17,16 +21,30 @@ fun odooRepositories() = listOf(
 )
 
 context(ProcessSequenceDslContext)
-suspend fun createGitWorktrees(root: Workspace, target: Workspace, base: String) {
+suspend fun createGitWorktrees(root: Workspace, target: Workspace, base: String, name: String) {
     odooRepositories().forEach { repository ->
-        run(
+        val branchExists = process(
             "git",
             "-C",
             "${root.path / repository.pathName}",
-            "fetch",
-            "origin",
-            base,
-        )
+            "show-branch",
+            "remotes/origin/$base",
+            stdout = Redirect.SILENT,
+            stderr = Redirect.SILENT,
+        ).resultCode == 0
+
+        if (!branchExists) {
+            run(
+                "git",
+                "-C",
+                "${root.path / repository.pathName}",
+                "fetch",
+                "origin",
+                base,
+                description = "${bold(repository.pathName)}: Fetching ${green(base)} ",
+            )
+        }
+
         run(
             "git",
             "-C",
@@ -34,10 +52,11 @@ suspend fun createGitWorktrees(root: Workspace, target: Workspace, base: String)
             "worktree",
             "add",
             "-B",
-            base,
-            "--track",
+            name,
+            if (name == base) "--track" else "--no-track",
             "${target.path / repository.pathName}",
             "origin/$base",
+            description = "${bold(repository.pathName)}: Creating worktree",
         )
     }
 }
@@ -50,5 +69,6 @@ suspend fun pruneGitWorktrees(root: Workspace) = odooRepositories().forEach { re
         "${root.path / repository.pathName}",
         "worktree",
         "prune",
+        description = "${bold(repository.pathName)}: Pruning worktrees",
     )
 }
