@@ -1,5 +1,6 @@
 package com.github.hubvd.odootools.odoo.commands
 
+import com.github.ajalt.clikt.completion.CompletionCandidates
 import com.github.ajalt.clikt.core.GroupableOption
 import com.github.ajalt.clikt.core.UsageError
 import com.github.ajalt.clikt.output.Localization
@@ -24,7 +25,20 @@ class CustomOptionGroup : StoredOptionGroup("Custom options") {
         arrayOf(
             option("--mobile", help = "Launch the mobile QUnit suite").flag().checkPatched(),
             option("--watch", help = "Open a chrome tab for js tests").flag().checkPatched(),
-            option("--step-delay", help = "Override the step delay for tours").checkPatched(),
+            option(
+                "--step-delay",
+                help = "Override the step delay for tours",
+                completionCandidates = CompletionCandidates.Fixed(
+                    hashSetOf(
+                        "100",
+                        "200",
+                        "300",
+                        "400",
+                        "500",
+                        "1000",
+                    ),
+                ),
+            ).checkPatched(),
             option("--debug", help = "Suspend the execution immediately by placing a breakpoint").flag().checkPatched(),
             option("--dry-run", help = "Print the generated config and exit").flag(),
             option("--drop", help = "Drop the database if it exists").flag(),
@@ -73,7 +87,12 @@ class OdooOptionGroup : StoredOptionGroup("Odoo options") {
                 """.trimIndent(),
             ),
             option("-p", "--http-port", help = "Listen port for the main HTTP service"),
-            option("-d", "--database", help = "Specify the database name"),
+            option(
+                "-d",
+                "--database",
+                help = "Specify the database name",
+                completionCandidates = CompletionCandidates.Custom.fromStdout("actions db list"),
+            ),
             option("--odoo-help", help = "Show the output of odoo-bin --help").flag(),
             option("--test-tags", help = "Filter tests", completionCandidates = odooCompletion(CompletionType.TestTag)),
             option(
@@ -89,7 +108,7 @@ class OdooOptionGroup : StoredOptionGroup("Odoo options") {
                 completionCandidates = odooCompletion(CompletionType.Addon),
             ),
             option("--test-enable", help = "Enable unit tests").flag(),
-            option("--test-file", help = "Launch a python test file"),
+            option("--test-file", help = "Launch a python test file", completionCandidates = CompletionCandidates.Path),
         ).forEach { registerOption(it) }
     }
 }
