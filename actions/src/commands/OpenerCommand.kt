@@ -41,7 +41,7 @@ class OpenerCommand(private val browserService: BrowserService) : CliktCommand(h
         }
 
         if (type == Type.Task || type == null) {
-            val ticketId = taskRe.find(input)?.groupValues?.get(1) ?: input.takeIf { taskIdRe.matches(input) }
+            val ticketId = taskRe.find(input)?.groups?.get("id")?.value ?: input.takeIf { taskIdRe.matches(input) }
             ticketId?.let {
                 return browserService.open("https://www.odoo.com/web#view_type=form&model=project.task&id=$it")
             }
