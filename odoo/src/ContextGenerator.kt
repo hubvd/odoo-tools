@@ -25,6 +25,8 @@ data class RunConfiguration(
 @DslMarker
 annotation class CmdComputeDsl
 
+typealias Effect = (DslContext) -> Unit
+
 class ContextGenerator(
     private val options: List<Option>,
     private val arguments: List<String>,
@@ -36,7 +38,7 @@ class ContextGenerator(
     private val graph = HashMap<String, List<String>>()
     private val computes = HashMap<String, (MutableDslContext) -> Unit>()
 
-    private val effects = ArrayList<(DslContext) -> Unit>()
+    private val effects = ArrayList<Effect>()
     private val envs = HashMap<String, (MutableDslContext) -> String?>()
 
     data class Depends(val depends: List<String>)
@@ -84,6 +86,8 @@ class ContextGenerator(
         val options = HashMap<String, String>()
         val env = HashMap<String, String>()
 
+        val ignoreIfRestart = hashSetOf("init", "update")
+
         for (option in this.options) {
             when {
                 option.nvalues == 0..0 -> {
@@ -123,6 +127,11 @@ class ContextGenerator(
             }
         } as OdooOptions
 
+        if (proxy.restart) {
+            options.keys.removeAll(ignoreIfRestart)
+            flags.removeAll(ignoreIfRestart)
+        }
+
         val context = MutableDslContext(
             workspace = workspace,
             odooOptions = proxy,
@@ -135,6 +144,16 @@ class ContextGenerator(
         val queue = computes.keys.toHashSet()
         queue.removeAll(flags)
         queue.removeAll(options.keys)
+
+        if (context.restart) {
+            queue.removeAll(ignoreIfRestart)
+        }
+
+        val filteredEffects: List<Effect> = if (context.dryRun || context.restart) {
+            emptyList()
+        } else {
+            effects
+        }
 
         // TODO: topological sort
         while (queue.isNotEmpty()) {
@@ -169,6 +188,6 @@ class ContextGenerator(
                 .forEach { add("--${it.key}=${it.value}") }
         }
 
-        return RunConfiguration(args, context.env, workspace.path, context, effects)
+        return RunConfiguration(args, context.env, workspace.path, context, filteredEffects)
     }
 }

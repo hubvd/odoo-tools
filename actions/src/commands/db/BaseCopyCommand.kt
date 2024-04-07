@@ -68,14 +68,10 @@ abstract class BaseCopyCommand(
 
     private fun restartOdoo(window: Window, instance: OdooInstance) {
         kitty.focusWindow("id:${window.id}")
+        val process = window.foregroundProcesses.first { it.cmdline?.firstOrNull() == "odoo" }
         kitty.launch(
-            "odoo",
-            "-d",
-            instance.database,
-            "-p",
-            instance.port.toString(),
-            // TODO: reuse arguments, but skip --drop, --init, etc
-            // TODO: pass env var to odoo, ODOO_NO_SIDE_EFFECTS
+            *process.cmdline!!.filter { it != "--restart" }.toTypedArray(),
+            "--restart",
             cwd = instance.workspace.path.toString(),
             type = "overlay-main",
             hold = true,

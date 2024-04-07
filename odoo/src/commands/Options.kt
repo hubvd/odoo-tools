@@ -50,6 +50,7 @@ class CustomOptionGroup : StoredOptionGroup("Custom options") {
                 completionCandidates = odooCompletion(CompletionType.Qunit),
             ),
             option("--save", help = "Save the current arguments to a pycharm run configuration"),
+            option("--restart").flag(),
         ).forEach { registerOption(it) }
     }
 

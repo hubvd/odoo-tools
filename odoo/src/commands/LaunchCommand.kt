@@ -44,6 +44,7 @@ interface OdooOptions {
     val debug: Boolean
     val testEnable: Boolean
     val testFile: String?
+    val restart: Boolean
 }
 
 class LaunchCommand(

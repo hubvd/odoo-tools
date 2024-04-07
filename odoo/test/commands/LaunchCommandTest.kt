@@ -3,6 +3,7 @@ package com.github.hubvd.odootools.odoo.commands
 import assertk.assertThat
 import assertk.assertions.containsExactlyInAnyOrder
 import assertk.assertions.containsOnly
+import assertk.assertions.isEmpty
 import assertk.assertions.isEqualTo
 import com.github.hubvd.odootools.odoo.ODOO_MODULE
 import com.github.hubvd.odootools.odoo.RunConfiguration
@@ -126,5 +127,18 @@ class LaunchCommandTest {
             "STEP_DELAY" to "150",
         )
         assertThat(result.cwd).isEqualTo(workspaceRoot)
+    }
+
+    @Test
+    fun restart() {
+        val result = testCommand("--drop", "-i", "web", "--restart")
+        assertThat(result.effects).isEmpty()
+        assertThat(result.args).containsExactlyInAnyOrder(
+            "--addons-path=odoo/addons,enterprise,~/odoo-tools/addons",
+            "--database=saas-16.3",
+            "--http-port=1630",
+            "--limit-time-cpu=99999",
+            "--limit-time-real=99999",
+        )
     }
 }
