@@ -8,6 +8,7 @@ import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.TaskAction
 import org.gradle.kotlin.dsl.*
+import java.nio.file.Files
 
 interface CliApplicationPluginExtension {
     val name: Property<String>
@@ -65,55 +66,17 @@ abstract class GenerateSubcommandBinariesTask : DefaultTask() {
     @get:Input
     abstract val generateSubcommandBinaries: ListProperty<String>
 
-    private fun generateCSource(subcommand: String) = buildString {
-        append("""
-            #include <unistd.h>
-            #include <stdio.h>
-            #include <errno.h>
-
-            int main(int argc, char *argv[]) {
-                char* binaryName = "
-        """.trimIndent())
-        append(binaryName.get())
-        appendLine("\";")
-        appendLine("    char* modifiedArgv[argc + 2];")
-        appendLine("    modifiedArgv[0] = binaryName;")
-        append("    modifiedArgv[1] = \"")
-        append(subcommand)
-        appendLine("\";")
-        appendLine("""
-            for (int i = 2; i <= argc; i++) {
-                modifiedArgv[i] = argv[i - 1];
-            }
-            modifiedArgv[argc + 1] = NULL;
-            if (execvp(binaryName, modifiedArgv) == -1) {
-                perror("Error executing binary");
-                return 1;
-            }
-            return 0;
-        }
-        """.trimIndent())
-    }
-
     @TaskAction
-    fun generatesubcommandBinaries() {
+    fun generateSubcommandBinaries() {
         val subcommands: List<String> = generateSubcommandBinaries.orNull?.takeIf { it.isNotEmpty() } ?: return
         val buildDir = project.layout.buildDirectory.asFile.get()
+        val targetBinary = buildDir.resolve("native").resolve("nativeCompile").resolve(binaryName.get()).toPath()
         val subcommandDir = buildDir.resolve("subcommands").also { it.mkdir() }
-        val generatedDir = subcommandDir.resolve("generated").also { it.mkdir() }
         val outDir = subcommandDir.resolve("out").also { it.mkdir() }
         subcommands.forEach { subcommand ->
-            val sourceFile = generatedDir.resolve(subcommand + ".c")
-            val outFile = outDir.resolve(subcommand)
-            sourceFile.writeText(generateCSource(subcommand))
-            ProcessBuilder(
-                "cc",
-                "-Os",
-                "-s",
-                sourceFile.toString(),
-                "-o",
-                outFile.toString()
-            ).start().waitFor()
+            val outFile = outDir.resolve(subcommand).toPath()
+            Files.deleteIfExists(outFile)
+            Files.createSymbolicLink(outFile, targetBinary)
         }
     }
 }

@@ -12,6 +12,8 @@ import com.github.hubvd.odootools.workspace.WorkspaceProvider
 import org.http4k.client.JavaHttpClient
 import org.http4k.core.HttpHandler
 import org.kodein.di.*
+import kotlin.io.path.Path
+import kotlin.io.path.name
 import kotlin.system.exitProcess
 
 internal val ACTION_MODULE by DI.Module {
@@ -69,6 +71,12 @@ fun main(args: Array<String>) {
     val notificationService by di.instance<NotificationService>()
     val terminal by di.instance<Terminal>()
 
+    val arg0 = LinuxProcessHandle(ProcessHandle.current()).info().arguments().get().first()
+    val exeName = Path(arg0).name
+    val subcommands = mainCommand.registeredSubcommandNames()
+    val symlinkedCommand = subcommands.find { it == exeName }
+    val argsWithSubcommand = if (symlinkedCommand != null) listOf(symlinkedCommand, *args) else args.toList()
+
     fun echo(message: String, error: Boolean = false) = if (error) {
         notificationService.warn(message)
     } else {
@@ -76,9 +84,9 @@ fun main(args: Array<String>) {
     }
 
     try {
-        mainCommand.parse(args)
+        mainCommand.parse(argsWithSubcommand)
     } catch (e: CliktError) {
-        getFormattedHelp(e, mainCommand)
+        getFormattedHelp(e, mainCommand, symlinkedCommand)
             ?.takeIf { it.isNotEmpty() }
             ?.let {
                 if (e is PrintCompletionMessage) {
@@ -91,12 +99,12 @@ fun main(args: Array<String>) {
     }
 }
 
-private fun getFormattedHelp(error: CliktError, rootCommand: CliktCommand): String? {
+private fun getFormattedHelp(error: CliktError, rootCommand: CliktCommand, symlinkedCommand: String?): String? {
     if (error !is ContextCliktError) return error.message
     val ctx = error.context ?: rootCommand.currentContext
     val command = ctx.command
     val programName = ctx.commandNameWithParents()
-        .let { if (it.size == 1) it else it.drop(1) }
+        .let { if (symlinkedCommand == null || it.getOrNull(1) != symlinkedCommand) it else it.drop(1) }
         .joinToString(" ")
     return ctx.helpFormatter(ctx).formatHelp(
         error as? UsageError,
