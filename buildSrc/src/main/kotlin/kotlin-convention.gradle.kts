@@ -19,7 +19,7 @@ tasks.withType<Test> {
 
 tasks.withType<KotlinCompile> {
     compilerOptions {
-        jvmTarget = JvmTarget.JVM_21
+        jvmTarget = JvmTarget.JVM_22
         javaParameters = true
         freeCompilerArgs =
             listOf(

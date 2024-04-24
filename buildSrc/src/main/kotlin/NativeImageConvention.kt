@@ -25,8 +25,6 @@ class NativeImageConvention : Plugin<Project>{
         binaries {
 
             val commonFlags = arrayOf(
-                "--strict-image-heap",
-
                 // FIXME: PR in mordant
                 "--initialize-at-build-time=com.github.ajalt.mordant.internal.nativeimage.NativeImagePosixMppImpls",
             )
