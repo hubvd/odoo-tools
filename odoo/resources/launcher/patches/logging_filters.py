@@ -72,6 +72,7 @@ replacements = [
         "- {description} [trigger]{trigger}",
     ),
     LogReplacement(r"^Running tour", None),
+    LogReplacement(r"^Asking for screenshot", None),
     LogReplacement(r"^Preparing tour", None),
     LogReplacement(r"^Tour .* failed at step .*", None, level=logging.ERROR),
     LogReplacement(r"^Owl is running in 'dev' mode", None),
@@ -83,6 +84,8 @@ replacements = [
         markup=False,
         highlighter=True,
     ),
+
+    # 16.3+
     LogReplacement(
         r"^Tour (?P<name>.*) on step: '?(?P<description>.*) \(trigger: (?P<trigger>.*?)\)'?$",
         "- {description} [trigger]{trigger}",
@@ -90,13 +93,29 @@ replacements = [
     LogReplacement(
         r"^Tour (?P<name>.*) on step: '?(?P<trigger>.*?)'?$", "- [trigger]{trigger}"
     ),
+
+    # 17.3
+    LogReplacement(
+        r"^\n\n╔═+╗\n║ TOUR (?P<name>.*) SUCCEEDED",
+        "[underline rgb(249,38,114)]{name}[/] SUCCEEDED"
+    ),
+
     LogReplacement("test successful", None),
+    LogReplacement("tour succeeded", None),
 ]
 
 
 def http_case(record):
-    if record.msg == "Screenshot in: %s" and os.environ.get("TERM") == "xterm-kitty":
-        subprocess.run(["kitty", "+kitten", "icat", record.args[0]])
+    if (
+        isinstance(record.msg, str)
+        and record.msg.startswith("Screenshot in:")
+        and os.environ.get("TERM") == "xterm-kitty"
+    ):
+        if len(record.args):
+            path = record.args[0]
+        else:
+            path = record.msg[15:]
+        subprocess.run(["kitty", "+kitten", "icat", path])
         return Result.CANCELLED
 
     if record.msg == 'Evaluate test code "%s"' and record.args[0].startswith(
