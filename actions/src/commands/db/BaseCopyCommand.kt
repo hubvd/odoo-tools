@@ -12,6 +12,8 @@ import com.github.hubvd.odootools.actions.kitty.Kitty
 import com.github.hubvd.odootools.actions.kitty.Window
 import com.github.hubvd.odootools.actions.utils.*
 import com.github.hubvd.odootools.workspace.Workspaces
+import kotlin.io.path.Path
+import kotlin.io.path.name
 
 abstract class BaseCopyCommand(
     private val dbManager: DbManager,
@@ -68,7 +70,7 @@ abstract class BaseCopyCommand(
 
     private fun restartOdoo(window: Window, instance: OdooInstance) {
         kitty.focusWindow("id:${window.id}")
-        val process = window.foregroundProcesses.first { it.cmdline?.firstOrNull() == "odoo" }
+        val process = window.foregroundProcesses.first { it.cmdline?.firstOrNull()?.let(::Path)?.name == "odoo" }
         kitty.launch(
             *process.cmdline!!.filter { it != "--restart" }.toTypedArray(),
             "--restart",
