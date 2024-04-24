@@ -39,8 +39,6 @@ class NativeImageConvention : Plugin<Project>{
 
             named("main") {
                 buildArgs(
-                    "--static",
-                    "--libc=glibc",
                     "--install-exit-handlers",
                     "-march=native",
                     *commonFlags,
