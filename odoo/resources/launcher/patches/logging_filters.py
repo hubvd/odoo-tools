@@ -84,7 +84,6 @@ replacements = [
         markup=False,
         highlighter=True,
     ),
-
     # 16.3+
     LogReplacement(
         r"^Tour (?P<name>.*) on step: '?(?P<description>.*) \(trigger: (?P<trigger>.*?)\)'?$",
@@ -93,13 +92,11 @@ replacements = [
     LogReplacement(
         r"^Tour (?P<name>.*) on step: '?(?P<trigger>.*?)'?$", "- [trigger]{trigger}"
     ),
-
     # 17.3
     LogReplacement(
         r"^\n\n╔═+╗\n║ TOUR (?P<name>.*) SUCCEEDED",
-        "[underline rgb(249,38,114)]{name}[/] SUCCEEDED"
+        "[underline rgb(249,38,114)]{name}[/] SUCCEEDED",
     ),
-
     LogReplacement("test successful", None),
     LogReplacement("tour succeeded", None),
 ]
