@@ -20,13 +20,18 @@ interface LibGit {
     fun repository_free(memorySegment: MemorySegment)
     fun repository_head(out: MemorySegment, repo: MemorySegment)
     fun repository_set_head(repo: MemorySegment, refName: MemorySegment)
+    fun repository_path(repo: MemorySegment): MemorySegment
+    fun repository_state(repo: MemorySegment): Int
 
+    fun reference_dwim(out: MemorySegment, repo: MemorySegment, shorthand: MemorySegment)
     fun reference_peel(out: MemorySegment, ref: MemorySegment, type: Int)
     fun reference_is_branch(ref: MemorySegment): Boolean
     fun reference_shorthand(ref: MemorySegment): MemorySegment
     fun reference_free(memorySegment: MemorySegment)
     fun reference_name(ref: MemorySegment): MemorySegment
     fun reference_target(ref: MemorySegment): MemorySegment
+
+    fun revparse_single(out: MemorySegment, repo: MemorySegment, spec: MemorySegment)
 
     fun branch_create(
         out: MemorySegment,
@@ -45,6 +50,8 @@ interface LibGit {
     fun commit_id(commit: MemorySegment): MemorySegment
 
     fun oid_equal(a: MemorySegment, b: MemorySegment): Boolean
+    fun object_id(obj: MemorySegment): MemorySegment
+    fun oid_tostr_s(oid: MemorySegment): MemorySegment
 
     fun graph_ahead_behind(
         ahead: MemorySegment,

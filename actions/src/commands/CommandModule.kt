@@ -6,6 +6,7 @@ import com.github.ajalt.clikt.core.subcommands
 import com.github.hubvd.odootools.actions.commands.db.DATABASE_COMMAND_MODULE
 import com.github.hubvd.odootools.actions.commands.pr.PR_COMMAND_MODULE
 import com.github.hubvd.odootools.actions.commands.pycharm.PYCHARM_ACTIONS_MODULE
+import com.github.hubvd.odootools.actions.commands.repo.REPO_COMMAND_MODULE
 import org.kodein.di.*
 
 class MainCommand : NoOpCliktCommand(name = "actions")
@@ -19,7 +20,6 @@ val COMMANDS_MODULE = DI.Module("Commands") {
             singleton {
                 new(::OdooctlCommand).subcommands(
                     instance<KillCommand>(),
-                    instance<StatusCommand>(),
                 )
             }
         }
@@ -40,11 +40,11 @@ val COMMANDS_MODULE = DI.Module("Commands") {
     }
 
     bind { singleton { new(::KillCommand) } }
-    bind { singleton { new(::StatusCommand) } }
 
     import(PR_COMMAND_MODULE)
     import(PYCHARM_ACTIONS_MODULE)
     import(DATABASE_COMMAND_MODULE)
+    import(REPO_COMMAND_MODULE)
 
     bind { singleton { MainCommand().subcommands(instance<Set<CliktCommand>>()) } }
 }

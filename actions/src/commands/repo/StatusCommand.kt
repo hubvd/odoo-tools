@@ -1,4 +1,4 @@
-package com.github.hubvd.odootools.actions.commands
+package com.github.hubvd.odootools.actions.commands.repo
 
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.terminal
@@ -65,32 +65,31 @@ class StatusCommand(private val workspaces: Workspaces) : CliktCommand() {
         )
     }
 
-    private fun line(path: Path, base: String) =
-        Repository.open(path).use {
-            buildList {
-                val head = it.head()
-                val headName = if (head.isBranch()) {
-                    head.branchName()
-                } else {
-                    it.shortId(head)
-                }
-                add(headName!!)
+    private fun line(path: Path, base: String) = Repository.open(path).use {
+        buildList {
+            val head = it.head()
+            val headName = if (head.isBranch()) {
+                head.branchName()
+            } else {
+                it.shortId(head)
+            }
+            add(headName!!)
 
-                val upstream = head.upstream()?.target()
-                if (upstream != null) {
-                    add(head.target()!!.aheadBehind(upstream).formatAheadBehind(green))
-                } else {
-                    add(red("??"))
-                }
+            val upstream = head.upstream()?.target()
+            if (upstream != null) {
+                add(head.target()!!.aheadBehind(upstream).formatAheadBehind(green))
+            } else {
+                add(red("??"))
+            }
 
-                val baseUpstream = it.findBranch("origin/$base", git_branch_t.GIT_BRANCH_REMOTE)?.target()
-                if (baseUpstream != null && (upstream == null || !upstream.isEqual(baseUpstream))) {
-                    add(head.target()!!.aheadBehind(baseUpstream).formatAheadBehind(yellow, name = base))
-                }
+            val baseUpstream = it.findBranch("origin/$base", git_branch_t.GIT_BRANCH_REMOTE)?.target()
+            if (baseUpstream != null && (upstream == null || !upstream.isEqual(baseUpstream))) {
+                add(head.target()!!.aheadBehind(baseUpstream).formatAheadBehind(yellow, name = base))
+            }
 
-                if (!fast && it.status().count() > 0) {
-                    add(red("•"))
-                }
-            }.joinToString(" ")
-        }
+            if (!fast && it.status().count() > 0) {
+                add(red("•"))
+            }
+        }.joinToString(" ")
+    }
 }

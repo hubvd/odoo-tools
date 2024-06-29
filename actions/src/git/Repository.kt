@@ -24,15 +24,30 @@ class Repository(
         this,
     )
 
-    // TODO: should accept git_object
+    // TODO: extract peel should accept git_object
     fun shortId(ref: GitReference): String {
         val obj = arena.allocate(ADDRESS)
-        proxy.reference_peel(obj, ref.address, -2)
+        proxy.reference_peel(obj, ref.address, git_object_t.GIT_OBJECT_ANY.value)
 
         val buff = arena.allocate(git_buff.layout)
         proxy.object_short_id(buff, obj.get(ADDRESS, 0))
 
-        return (git_buff.layout.varHandle(groupElement("ptr")).get(buff) as MemorySegment).reinterpret(Long.MAX_VALUE)
+        return (
+            git_buff.layout.varHandle(groupElement("ptr"))
+                .get(buff, 0) as MemorySegment
+            ).reinterpret(Long.MAX_VALUE)
+            .getString(0)!!
+    }
+
+    // TODO: merge with previous function
+    fun shortId(ref: GitObject): String {
+        val buff = arena.allocate(git_buff.layout)
+        proxy.object_short_id(buff, ref.address)
+
+        return (
+            git_buff.layout.varHandle(groupElement("ptr"))
+                .get(buff, 0) as MemorySegment
+            ).reinterpret(Long.MAX_VALUE)
             .getString(0)!!
     }
 
@@ -73,6 +88,42 @@ class Repository(
             }
         }
         return GitReference(ref.get(ADDRESS, 0), this)
+    }
+
+    fun findReference(name: String): GitReference? {
+        val ref = arena.allocate(ADDRESS)
+        try {
+            proxy.reference_dwim(
+                ref,
+                address,
+                arena.allocateFrom(name),
+            )
+        } catch (e: LibGitError) {
+            if (e.code == git_error_code.GIT_ENOTFOUND) {
+                return null
+            } else {
+                throw e
+            }
+        }
+        return GitReference(ref.get(ADDRESS, 0), this)
+    }
+
+    fun revParse(name: String): GitObject? {
+        val rev = arena.allocate(ADDRESS)
+        try {
+            proxy.revparse_single(
+                rev,
+                address,
+                arena.allocateFrom(name),
+            )
+        } catch (e: LibGitError) {
+            if (e.code == git_error_code.GIT_ENOTFOUND) {
+                return null
+            } else {
+                throw e
+            }
+        }
+        return GitObject(rev.get(ADDRESS, 0), this)
     }
 
     fun createBranch(name: String, commit: GitCommit): GitReference {
@@ -147,6 +198,12 @@ class GitStatusList(private val address: MemorySegment, private val repo: Reposi
     }
 }
 
+class GitObject(val address: MemorySegment, private val repo: Repository) {
+    fun oid(): GitOid {
+        return GitOid(repo.proxy.object_id(address), repo)
+    }
+}
+
 class GitReference(val address: MemorySegment, private val repo: Repository) {
     fun branchName(): String? {
         val res = repo.arena.allocate(ADDRESS).apply {
@@ -197,6 +254,11 @@ class GitOid(private val address: MemorySegment, private val repo: Repository) {
             repo,
         )
     }
+
+    fun hash(): String? = repo.proxy.oid_tostr_s(address)
+        .takeIf { it != MemorySegment.NULL }!!
+        .reinterpret(Long.MAX_VALUE)
+        ?.getString(0)
 
     fun isEqual(other: GitOid) = repo.proxy.oid_equal(this.address, other.address)
 

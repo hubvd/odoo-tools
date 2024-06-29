@@ -17,6 +17,7 @@ cli {
         "bisect",
         "opener",
         "db",
+        "repo",
     )
 }
 
