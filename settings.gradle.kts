@@ -7,6 +7,7 @@ include("addons")
 include("actions")
 include("reachability-metadata")
 include("odoo-client")
+include("ffi:libffi")
 
 pluginManagement {
     repositories {
