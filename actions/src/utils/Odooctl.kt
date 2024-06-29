@@ -113,13 +113,7 @@ data class OdooInstance(
 
     // Use unique host in order to avoid shared cookies
     val baseUrl: String by lazy(LazyThreadSafetyMode.PUBLICATION) {
-        val hash = CRC32().apply { update(database.toByteArray()) }.value
-
-        val secondOctet = ((hash and 0xFF) % 256).toInt()
-        val thirdOctet = ((hash shr 8 and 0xFF) % 256).toInt()
-        val fourthOctet = ((hash shr 16 and 0xFF) % 256).toInt()
-
         @Suppress("HttpUrlsUsage")
-        "http://127.$secondOctet.$thirdOctet.$fourthOctet:$port"
+        "http://$database.localhost:$port"
     }
 }
