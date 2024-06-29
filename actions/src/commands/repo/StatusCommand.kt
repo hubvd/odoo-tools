@@ -1,6 +1,7 @@
 package com.github.hubvd.odootools.actions.commands.repo
 
 import com.github.ajalt.clikt.core.CliktCommand
+import com.github.ajalt.clikt.core.requireObject
 import com.github.ajalt.clikt.core.terminal
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
@@ -13,13 +14,25 @@ import com.github.ajalt.mordant.table.table
 import com.github.hubvd.odootools.actions.git.Repository
 import com.github.hubvd.odootools.actions.git.git_branch_t
 import com.github.hubvd.odootools.workspace.Workspaces
-import java.nio.file.Path
-import kotlin.io.path.div
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.runBlocking
 
 class StatusCommand(private val workspaces: Workspaces) : CliktCommand() {
-    private val fast by option("-f", "--fast").flag()
+    private val showDirty by option("-d", "--dirty", "--show-dirty").flag()
+    private val workspaceRepositories by requireObject<List<WorkspaceRepositories>>()
 
-    override fun run() {
+    override fun run() = runBlocking {
+        val res = workspaceRepositories.map {
+            async(it.dispatcher) {
+                Triple(
+                    it.workspace,
+                    line(it.odoo.await(), it.workspace.base),
+                    line(it.enterprise.await(), it.workspace.base),
+                )
+            }
+        }.awaitAll()
+
         terminal.println(
             table {
                 header {
@@ -32,14 +45,6 @@ class StatusCommand(private val workspaces: Workspaces) : CliktCommand() {
                         cellBorders = ALL
                         style = brightBlue
                     }
-
-                    val res = workspaces.list().parallelStream().map {
-                        Triple(
-                            it,
-                            line(it.path / "odoo", it.base),
-                            line(it.path / "enterprise", it.base),
-                        )
-                    }.toList()
 
                     for ((workspace, o, e) in res) {
                         row {
@@ -65,7 +70,7 @@ class StatusCommand(private val workspaces: Workspaces) : CliktCommand() {
         )
     }
 
-    private fun line(path: Path, base: String) = Repository.open(path).use {
+    private fun line(repository: Repository, base: String) = repository.let {
         buildList {
             val head = it.head()
             val headName = if (head.isBranch()) {
@@ -87,7 +92,7 @@ class StatusCommand(private val workspaces: Workspaces) : CliktCommand() {
                 add(head.target()!!.aheadBehind(baseUpstream).formatAheadBehind(yellow, name = base))
             }
 
-            if (!fast && it.status().count() > 0) {
+            if (showDirty && it.status().count() > 0) {
                 add(red("•"))
             }
         }.joinToString(" ")
