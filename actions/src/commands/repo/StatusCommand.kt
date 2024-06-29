@@ -5,20 +5,21 @@ import com.github.ajalt.clikt.core.requireObject
 import com.github.ajalt.clikt.core.terminal
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
-import com.github.ajalt.mordant.rendering.TextAlign.LEFT
+import com.github.ajalt.colormath.model.RGB
 import com.github.ajalt.mordant.rendering.TextColors.*
 import com.github.ajalt.mordant.rendering.TextStyle
 import com.github.ajalt.mordant.rendering.TextStyles.bold
-import com.github.ajalt.mordant.table.Borders.ALL
-import com.github.ajalt.mordant.table.table
+import com.github.ajalt.mordant.rendering.Widget
+import com.github.ajalt.mordant.table.horizontalLayout
+import com.github.ajalt.mordant.table.verticalLayout
 import com.github.hubvd.odootools.actions.git.Repository
 import com.github.hubvd.odootools.actions.git.git_branch_t
-import com.github.hubvd.odootools.workspace.Workspaces
+import com.github.hubvd.odootools.workspace.Workspace
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.runBlocking
 
-class StatusCommand(private val workspaces: Workspaces) : CliktCommand() {
+class StatusCommand : CliktCommand() {
     private val showDirty by option("-d", "--dirty", "--show-dirty").flag()
     private val workspaceRepositories by requireObject<List<WorkspaceRepositories>>()
 
@@ -33,30 +34,31 @@ class StatusCommand(private val workspaces: Workspaces) : CliktCommand() {
             }
         }.awaitAll()
 
-        terminal.println(
-            table {
-                header {
-                    style = brightRed + bold
-                    row("", "odoo", "enterprise")
-                }
-                body {
-                    column(0) {
-                        align = LEFT
-                        cellBorders = ALL
-                        style = brightBlue
-                    }
+        val sectionStyle = bold + TextStyle(RGB("#61afef"))
 
-                    for ((workspace, o, e) in res) {
-                        row {
-                            cell(workspace.name)
-                            cell(o)
-                            cell(e)
-                        }
-                    }
+        terminal.println(
+            verticalLayout {
+                spacing = 1
+                res.forEach { (workspace, odoo, enterprise) ->
+                    cell(workspaceSection(sectionStyle, workspace, odoo, enterprise))
                 }
             },
         )
     }
+
+    private fun workspaceSection(sectionStyle: TextStyle, workspace: Workspace, odoo: Widget, enterprise: Widget) =
+        horizontalLayout {
+            cell(sectionStyle(Array(3) { "│" }.joinToString("\n")))
+            cell(
+                verticalLayout {
+                    cells(
+                        bold(workspace.name),
+                        odoo,
+                        enterprise,
+                    )
+                },
+            )
+        }
 
     private fun Pair<Long, Long>.formatAheadBehind(style: TextStyle, name: String? = null): String {
         return style(
@@ -71,30 +73,40 @@ class StatusCommand(private val workspaces: Workspaces) : CliktCommand() {
     }
 
     private fun line(repository: Repository, base: String) = repository.let {
-        buildList {
+        horizontalLayout {
             val head = it.head()
-            val headName = if (head.isBranch()) {
-                head.branchName()
-            } else {
-                it.shortId(head)
-            }
-            add(headName!!)
 
-            val upstream = head.upstream()?.target()
-            if (upstream != null) {
-                add(head.target()!!.aheadBehind(upstream).formatAheadBehind(green))
-            } else {
-                add(red("??"))
-            }
+            cell(
+                buildString {
+                    val headName = if (head.isBranch()) {
+                        head.branchName()
+                    } else {
+                        it.shortId(head)
+                    }
+                    append(gray(headName!!))
+                    if (showDirty && it.status().count() > 0) {
+                        append(' ')
+                        append(red("•"))
+                    }
+                },
+            )
 
-            val baseUpstream = it.findBranch("origin/$base", git_branch_t.GIT_BRANCH_REMOTE)?.target()
-            if (baseUpstream != null && (upstream == null || !upstream.isEqual(baseUpstream))) {
-                add(head.target()!!.aheadBehind(baseUpstream).formatAheadBehind(yellow, name = base))
-            }
+            cell(
+                buildString {
+                    val upstream = head.upstream()?.target()
+                    if (upstream != null) {
+                        append(head.target()!!.aheadBehind(upstream).formatAheadBehind(green))
+                    } else {
+                        append(red("??"))
+                    }
 
-            if (showDirty && it.status().count() > 0) {
-                add(red("•"))
-            }
-        }.joinToString(" ")
+                    val baseUpstream = it.findBranch("origin/$base", git_branch_t.GIT_BRANCH_REMOTE)?.target()
+                    if (baseUpstream != null && (upstream == null || !upstream.isEqual(baseUpstream))) {
+                        append(' ')
+                        append(head.target()!!.aheadBehind(baseUpstream).formatAheadBehind(yellow, name = base))
+                    }
+                },
+            )
+        }
     }
 }
