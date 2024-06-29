@@ -1,16 +1,29 @@
 #!/bin/fish
 
-argparse 'f/fetch' -- $argv
+argparse 'f/force' -- $argv
 
-set base (worktree base || exit 1)
-set root (worktree path)
+set data (worktree current fish) && eval $data
+set base $workspace_base
 
-for repo in odoo enterprise design-themes
-  set repo_path $root/$repo
-  test -d $repo_path || continue
-  set -q _flag_fetch && git -C $repo_path fetch origin $base
-  if test "$(git -C $repo_path branch --show-current)" != $base
-    echo skipped $repo because $base isn\'t checked out
+if not test $workspace_name = $workspace_base
+    exit 1
+end
+
+set repo_paths (path filter -d $workspace_path/{odoo,enterprise,design-themes})
+
+if not set -q _flag_force
+  for repo_path in $repo_paths
+    set branch (git -C $repo_path branch --show-current)
+    if test "$branch" != $base
+      echo (set_color yellow)"skipped $base because $(path basename $repo_path) is @ $branch"(set_color normal)
+      exit 1
+    end
+  end
+end
+
+
+for repo_path in $repo_paths
+  if test (git -C $repo_path rev-list --count --left-only @{upstream}...@) = 0
     continue
   end
 

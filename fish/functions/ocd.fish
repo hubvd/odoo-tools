@@ -15,6 +15,8 @@ function ocd
     set -l choice "$(string join0 $workspace_names | fzf --read0)"
     and set i (contains -i $choice $workspace_names)
     and cd $workspace_paths[$i]
+    and echo
+    and repo status
   end
 end
 

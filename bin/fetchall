@@ -1,8 +1,11 @@
 #!/bin/fish
 
+argparse 't/themes' -- $argv
 set branches (worktree list base | path sort -u)
 set root (worktree default path)
-for repo in odoo enterprise design-themes
+set repos odoo enterprise
+set -q _flag_themes && set -a repos design-themes
+for repo in $repos
     git -C $root/$repo fetch origin $branches &
 end
 wait

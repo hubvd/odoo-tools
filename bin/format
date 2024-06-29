@@ -14,6 +14,6 @@ switch $_flag_language
     set -ga pipe '|' black -q -
 end
 
-set -ga pipe '|' bat -p -l $_flag_language
+set -ga pipe '|' bat -pPl $_flag_language
 
 eval $pipe
