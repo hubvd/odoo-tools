@@ -1,6 +1,6 @@
 package com.github.hubvd.odootools.actions.utils
 
-class FakeRepository(log: String) : Repository {
+class FakeLegacyRepository(log: String) : LegacyRepository {
     private val commits = log
         .lineSequence()
         .map { Commit(it.substringBefore(' '), it.substringAfter(' ')) }
