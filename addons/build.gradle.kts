@@ -2,9 +2,11 @@ plugins {
     id("spotless")
 }
 
+val blackVersion = project.findProperty("black.version") as String
+
 spotless {
     python {
         target("**/*.py")
-        black("24.3.0")
+        black(blackVersion)
     }
 }

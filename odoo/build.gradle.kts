@@ -25,10 +25,12 @@ dependencies {
     testImplementation(libs.assertk)
 }
 
+val blackVersion = project.findProperty("black.version") as String
+
 spotless {
     python {
         target("resources/launcher/**/*.py")
-        black("24.3.0")
+        black(blackVersion)
     }
     json {
         target("resources/META-INF/native-image/**/*.json")
