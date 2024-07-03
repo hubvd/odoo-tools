@@ -24,12 +24,9 @@ class OpenerCommand(private val browserService: BrowserService) : CliktCommand(h
 
     override fun run() {
         if (all) {
-            @Suppress("ktlint:standard:max-line-length")
             return when (type) {
                 Type.PullRequest -> browserService.open("https://github.com/pulls")
-                Type.Task, null -> browserService.open(
-                    "https://www.odoo.com/web#action=333&active_id=49&model=project.task&view_type=kanban&cids=1&menu_id=4720",
-                )
+                Type.Task, null -> browserService.open("https://www.odoo.com/odoo/49/tasks")
             }
         }
 
@@ -43,7 +40,7 @@ class OpenerCommand(private val browserService: BrowserService) : CliktCommand(h
         if (type == Type.Task || type == null) {
             val ticketId = taskRe.find(input)?.groups?.get("id")?.value ?: input.takeIf { taskIdRe.matches(input) }
             ticketId?.let {
-                return browserService.open("https://www.odoo.com/web#view_type=form&model=project.task&id=$it")
+                return browserService.open("https://www.odoo.com/odoo/49/tasks/$it")
             }
         }
 
