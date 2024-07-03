@@ -18,7 +18,7 @@ import kotlin.io.path.exists
 import kotlin.io.path.listDirectoryEntries
 import kotlin.io.path.name
 
-enum class CompletionType { Addon, Qunit, TestTag }
+enum class CompletionType { Addon, Qunit, Hoot, TestTag }
 
 @Serializable
 private data class Ctag(val name: String, val scope: String? = null, val scopeKind: String? = null)
@@ -42,6 +42,7 @@ class CompleteCommand(private val workspaces: Workspaces) : CliktCommand(hidden 
         when (type) {
             CompletionType.Addon -> completeAddons()
             CompletionType.Qunit -> completeQUnitTests()
+            CompletionType.Hoot -> completeHootTests()
             CompletionType.TestTag -> completeTestTags()
         }.forEach { println(it) }
     }
@@ -106,6 +107,23 @@ class CompleteCommand(private val workspaces: Workspaces) : CliktCommand(hidden 
             "--replace=\$name",
             regex,
             "${workspace.path / "odoo/addons/web/static/tests"}",
+            stdout = Redirect.CAPTURE,
+            stderr = Redirect.SILENT,
+        ).output.asSequence()
+    }
+
+    private fun completeHootTests() = runBlocking {
+        @Suppress("ktlint:standard:max-line-length")
+        val regex = """test(?:\.(?:debug|skip|only|todo)|\.(?:tags|timeout)\(?["'`\w]+\)?)?\((?P<quote>["'`])(?P<name>.+)(?=(?P=quote))"""
+        process(
+            "rg",
+            "--no-filename",
+            "--pcre2",
+            "--glob=*.test.js",
+            "--only-matching",
+            "--replace=\$name",
+            regex,
+            "${workspace.path}",
             stdout = Redirect.CAPTURE,
             stderr = Redirect.SILENT,
         ).output.asSequence()

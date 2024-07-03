@@ -33,6 +33,7 @@ interface OdooOptions {
     val noPatch: Boolean
     val dryRun: Boolean
     val testQunit: String?
+    val testHoot: String?
     val addonsPath: String?
     val mobile: Boolean
     val watch: Boolean

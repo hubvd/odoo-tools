@@ -1,5 +1,6 @@
 package com.github.hubvd.odootools.odoo
 
+import com.github.ajalt.clikt.core.UsageError
 import com.github.ajalt.clikt.core.subcommands
 import com.github.ajalt.mordant.terminal.Terminal
 import com.github.hubvd.odootools.config.CONFIG_MODULE
@@ -77,13 +78,12 @@ val computes: ContextGenerator.() -> Unit = {
         }
     }
 
-    depends("test-tags", "test-qunit", "test-file") {
-        flag("test-enable") { testTags != null || testQunit != null || testFile != null }
+    depends("test-tags", "test-file") {
+        flag("test-enable") { testTags != null || testFile != null }
     }
 
-    depends("test-qunit", "test-tags", "addons-path") {
+    depends("test-tags", "addons-path") {
         option("init") {
-            if (testQunit != null) return@option "qunit"
             val testTags = testTags ?: return@option null
             testTags
                 .splitToSequence(',')
@@ -112,13 +112,14 @@ val computes: ContextGenerator.() -> Unit = {
         }
     }
 
+    env("HOOT_FILTER") {
+        val filter = testHoot ?: return@env null
+        URLEncoder.encode(filter, "utf-8")
+    }
+
     env("QUNIT_FILTER") {
         val testTags = testQunit ?: return@env null
         URLEncoder.encode(testTags, "utf-8")
-    }
-
-    env("QUNIT_MOBILE") {
-        if (mobile) "1" else null
     }
 
     env("QUNIT_WATCH") {
@@ -139,9 +140,14 @@ val computes: ContextGenerator.() -> Unit = {
 
     depends("test-qunit", "mobile") {
         option("test-tags") {
+            if (testHoot != null && workspace.version < 17.2f) {
+                throw UsageError("HOOT not available before 17.2")
+            }
             when {
-                testQunit != null && mobile -> "/qunit:WebSuiteMobile"
-                testQunit != null -> "/qunit:WebSuite"
+                testHoot != null && mobile -> "/qunit:WebSuiteMobile.test_hoot"
+                testHoot != null -> "/qunit:WebSuite.test_hoot"
+                testQunit != null && mobile -> "/qunit:WebSuiteMobile.test_qunit"
+                testQunit != null -> "/qunit:WebSuite.test_qunit"
                 else -> null
             }
         }

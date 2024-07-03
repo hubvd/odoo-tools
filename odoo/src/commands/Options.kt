@@ -49,6 +49,11 @@ class CustomOptionGroup : StoredOptionGroup("Custom options") {
                 help = "Launch a QUnit test/module",
                 completionCandidates = odooCompletion(CompletionType.Qunit),
             ),
+            option(
+                "--test-hoot",
+                help = "Launch a HOOT test/module",
+                completionCandidates = odooCompletion(CompletionType.Hoot),
+            ),
             option("--save", help = "Save the current arguments to a pycharm run configuration"),
             option("--restart").flag(),
         ).forEach { registerOption(it) }
