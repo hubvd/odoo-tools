@@ -100,6 +100,7 @@ class CompleteCommand(private val workspaces: Workspaces) : CliktCommand(hidden 
         val regex = """(?<=QUnit\.module\(|QUnit\.test\(|QUnit\.debug\(|QUnit\.only\()(?P<quote>["'`])(?P<name>.+)(?=(?P=quote))"""
         process(
             "rg",
+            "--no-ignore",
             "--no-filename",
             "--pcre2",
             "--type=js",
@@ -114,9 +115,11 @@ class CompleteCommand(private val workspaces: Workspaces) : CliktCommand(hidden 
 
     private fun completeHootTests() = runBlocking {
         @Suppress("ktlint:standard:max-line-length")
-        val regex = """test(?:\.(?:debug|skip|only|todo)|\.(?:tags|timeout)\(?["'`\w]+\)?)?\((?P<quote>["'`])(?P<name>.+)(?=(?P=quote))"""
+        val regex = """test(?:\.(?:debug|skip|only|todo)|\.(?:tags|timeout)\(?["'`\w]+\)?)?\(\s*(?P<quote>["'`])(?P<name>.+)(?=(?P=quote))"""
         process(
             "rg",
+            "--multiline",
+            "--no-ignore",
             "--no-filename",
             "--pcre2",
             "--glob=*.test.js",
