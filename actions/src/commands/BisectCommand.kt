@@ -3,25 +3,85 @@ package com.github.hubvd.odootools.actions.commands
 import com.github.ajalt.clikt.core.Abort
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.terminal
+import com.github.ajalt.clikt.parameters.options.default
+import com.github.ajalt.clikt.parameters.options.option
+import com.github.ajalt.mordant.input.interactiveSelectList
 import com.github.ajalt.mordant.rendering.TextColors.*
 import com.github.ajalt.mordant.rendering.TextStyles.bold
 import com.github.hubvd.odootools.actions.utils.*
-import com.github.hubvd.odootools.workspace.Workspace
 import com.github.hubvd.odootools.workspace.Workspaces
-import kotlin.math.roundToInt
+import kotlin.math.ceil
+import kotlin.math.log2
 
-private data class BisectState(
-    val low: Int,
-    val mid: Int,
-    val high: Int,
-    val batch: ResolvedBatch,
-    val batches: List<ResolvedBatch>,
-    val workspace: Workspace,
+enum class BisectPromptResult {
+    Good,
+    Bad,
+    Exit,
+}
+
+sealed class BisectResult {
+    data object Abort : BisectResult()
+    data object NoBadBatches : BisectResult()
+    data object NoGoodBatches : BisectResult()
+
+    /**
+     * Let's say the bug was visible witch batch 1 but not on batch 2
+     * It could have been introduced in commit A or B (they both came from batch 1)
+     *
+     * 9d184b7de626 A 1
+     * e6aba8d43449 B
+     * 71c2c5d52988 C 2
+     *
+     * In this case, we return Found(firstGood=2, firstBad=1)
+     */
+    data class Found(val firstGood: ResolvedBatch, val firstBad: ResolvedBatch) : BisectResult()
+}
+
+class Bisect(
+    private val batches: List<ResolvedBatch>,
+    private val prompt: () -> BisectPromptResult,
+    private val printState: (batch: ResolvedBatch, remainingSteps: Int) -> Unit,
+    private val commitState: (batch: ResolvedBatch) -> Unit,
 ) {
-    companion object {
-        operator fun invoke(low: Int, high: Int, batches: List<ResolvedBatch>, workspace: Workspace): BisectState {
-            val mid = (low + high).ushr(1)
-            return BisectState(low, mid, high, batches[mid], batches, workspace)
+
+    private val totalSteps = ceil(log2(batches.size.toDouble())).toInt()
+    private var steps = 0
+
+    private fun advance(batch: ResolvedBatch) {
+        printState(batch, totalSteps - steps)
+        commitState(batch)
+        steps++
+    }
+
+    operator fun invoke(): BisectResult {
+        var aborted = false
+        val index = batches.binarySearch {
+            advance(it)
+            when (prompt()) {
+                BisectPromptResult.Good -> -1
+                BisectPromptResult.Bad -> 1
+                BisectPromptResult.Exit -> {
+                    aborted = true
+                    0
+                }
+            }
+        }
+
+        if (aborted) {
+            return BisectResult.Abort
+        }
+
+        assert(index < 0)
+
+        // Since we never return 0, the index will always be negative
+        // Revert it to get the insertion point
+        return when (val insertionPoint = (index + 1) * -1) {
+            0 -> BisectResult.NoGoodBatches
+            batches.size -> BisectResult.NoBadBatches
+            else -> BisectResult.Found(
+                firstGood = batches[insertionPoint + 1],
+                firstBad = batches[insertionPoint],
+            )
         }
     }
 }
@@ -33,156 +93,132 @@ class BisectCommand(
 ) : CliktCommand(
     help = "Bisect odoo across multiple repositories",
 ) {
+
     private lateinit var odooLegacyRepository: LegacyRepository
     private lateinit var enterpriseLegacyRepository: LegacyRepository
-    private lateinit var state: BisectState
+
+    private val goodTerm by option("--term-good").default("good")
+    private val badTerm by option("--term-bad").default("bad")
+
+    var first: Boolean = true
 
     override fun run() {
         val workspace = workspaces.current() ?: throw Abort()
-
-        val steps = runbot.batches(workspace.base)
-        this.state = BisectState(low = 0, high = steps.lastIndex, steps, workspace)
+        val batches = runbot.batches(workspace.base)
 
         with(git) {
             odooLegacyRepository = workspace.odoo()
             enterpriseLegacyRepository = workspace.enterprise()
         }
 
-        draw()
-
-        while (state.low <= state.high) {
-            var (low, mid, high) = state
-            while (true) {
-                when (terminal.readLineOrNull(hideInput = false)) {
-                    "good" -> {
-                        high = mid - 1
-                        break
-                    }
-
-                    "bad" -> {
-                        low = mid + 1
-                        break
-                    }
-
-                    null -> {
-                        terminal.println()
-                        throw Abort()
-                    }
-
-                    else -> {
-                        terminal.cursor.move {
-                            up(1)
-                            clearLineAfterCursor()
-                        }
-                        terminal.print(prompt)
-                    }
+        val result = Bisect(
+            batches,
+            prompt = {
+                when (
+                    terminal.interactiveSelectList(
+                        listOf(goodTerm, badTerm),
+                        title = terminal.theme.style("prompt.default")("$goodTerm | $badTerm ? "),
+                    )
+                ) {
+                    goodTerm -> BisectPromptResult.Good
+                    badTerm -> BisectPromptResult.Bad
+                    else -> BisectPromptResult.Exit
                 }
-            }
-
-            if (high == -1) {
-                TODO("Every commit is good")
-            }
-
-            if (low == high) {
-                break
-            }
-
-            state = BisectState(low = low, high = high, batches = steps, workspace = workspace)
-            draw()
-        }
-
-        terminal.cursor.move {
-            up(3)
-            startOfLine()
-            clearLineAfterCursor()
-            clearScreenAfterCursor()
-        }
-
-        val firstGood = steps[state.high + 1]
-        val firstBad = steps[state.high]
-
-        // TODO: bisect individual commits
-        terminal.print(
-            buildString {
-                appendLine((bold + green)("Possibly bad odoo commits:"))
-                odooLegacyRepository.commitsBetween(firstGood.odoo, firstBad.odoo)
-                    .forEach {
-                        append(yellow(it.hash))
-                        append(' ')
-                        appendLine(it.title)
-                    }
-                appendLine()
-                appendLine((bold + green)("Possibly bad enterprise commits:"))
-                enterpriseLegacyRepository.commitsBetween(firstGood.enterprise, firstBad.enterprise)
-                    .forEach {
-                        append(yellow(it.hash))
-                        append(' ')
-                        appendLine(it.title)
-                    }
             },
-        )
+            printState = { batch, rem ->
+                printState(batch, rem)
+                first = false
+            },
+            commitState = { batch ->
+                terminal.print(magenta("Switching branches.."))
+
+                // TODO: retries if switch fails
+                odooLegacyRepository.switch(batch.odoo)
+                enterpriseLegacyRepository.switch(batch.enterprise)
+
+                terminal.cursor.move {
+                    clearLineBeforeCursor()
+                    startOfLine()
+                }
+            },
+        )()
+
+        clearState()
+        when (result) {
+            BisectResult.Abort -> {
+                throw Abort()
+            }
+
+            BisectResult.NoBadBatches -> {
+                terminal.println(terminal.theme.style("success")("No bad batches found"))
+            }
+
+            BisectResult.NoGoodBatches -> {
+                terminal.println(terminal.theme.style("danger")("No good batches found"))
+            }
+
+            is BisectResult.Found -> {
+                // TODO: bisect individual commits
+                terminal.print(
+                    buildString {
+                        appendLine((bold + green)("odoo commits candidates:"))
+                        odooLegacyRepository.commitsBetween(result.firstGood.odoo, result.firstBad.odoo)
+                            .forEach {
+                                append(yellow(it.hash))
+                                append(' ')
+                                appendLine(it.title)
+                            }
+                        appendLine()
+                        appendLine((bold + green)("enterprise commits candidates:"))
+                        enterpriseLegacyRepository.commitsBetween(
+                            result.firstGood.enterprise,
+                            result.firstBad.enterprise,
+                        )
+                            .forEach {
+                                append(yellow(it.hash))
+                                append(' ')
+                                appendLine(it.title)
+                            }
+                    },
+                )
+            }
+        }
     }
 
-    var first = true
-    private val prompt by lazy { terminal.theme.style("prompt.default")("good | bad ? ") }
-
-    private fun draw() {
-        val odooTitle = odooLegacyRepository.commitTitle(state.batch.odoo)
-        val enterpriseTitle = enterpriseLegacyRepository.commitTitle(state.batch.enterprise)
-
-        val width = terminal.info.width
-        val total = state.batches.size
-
-        val ratio = (total.toDouble()) / width
-
-        // FIXME: rounding
-        val start = (state.low / ratio).roundToInt()
-        val middle = ((state.high - state.low) / ratio).roundToInt()
-        val end = (width - (start + middle))
-
-        assert(start + middle + end == width)
-
+    private fun clearState() {
         if (!first) {
             terminal.cursor.move {
-                up(4)
+                up(3)
                 clearScreenAfterCursor()
             }
         }
+    }
+
+    private fun printState(batch: ResolvedBatch, remainingSteps: Int) {
+        val odooTitle = odooLegacyRepository.commitTitle(batch.odoo)
+        val enterpriseTitle = enterpriseLegacyRepository.commitTitle(batch.enterprise)
+
+        clearState()
 
         terminal.print(
             buildString {
                 append((black on yellow)("odoo"))
                 append(' ')
-                append(yellow(state.batch.odoo))
+                append(yellow(batch.odoo))
                 append(' ')
                 append(odooTitle)
                 appendLine()
 
                 append((black on yellow)("enterprise"))
                 append(' ')
-                append(yellow(state.batch.enterprise))
+                append(yellow(batch.enterprise))
                 append(' ')
                 append(enterpriseTitle)
                 appendLine()
 
-                append(terminal.theme.style("danger")(String(CharArray(start) { '━' })))
-                append(terminal.theme.style("muted")(String(CharArray(middle) { '━' })))
-                append(terminal.theme.style("success")(String(CharArray(end) { '━' })))
+                append(terminal.theme.style("muted")("Remaining steps: $remainingSteps"))
                 appendLine()
-
-                append(magenta("Switching branches.."))
             },
         )
-
-        odooLegacyRepository.switch(state.batch.odoo)
-        enterpriseLegacyRepository.switch(state.batch.enterprise)
-
-        terminal.cursor.move {
-            clearLineBeforeCursor()
-            startOfLine()
-        }
-        terminal.print(prompt)
-
-        first = false
     }
 }
