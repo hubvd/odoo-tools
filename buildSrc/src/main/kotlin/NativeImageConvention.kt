@@ -28,6 +28,8 @@ class NativeImageConvention : Plugin<Project>{
                 // FIXME: PR in mordant
                 "--initialize-at-build-time=com.github.ajalt.mordant.internal.nativeimage.NativeImagePosixMppImpls",
                 "--initialize-at-build-time=com.github.ajalt.mordant.internal.syscalls.nativeimage.SyscallHandlerNativeImageLinux",
+                "--initialize-at-build-time=com.github.ajalt.mordant.internal.syscalls.SyscallHandlerPosix\$Companion",
+                "--initialize-at-build-time=com.github.ajalt.mordant.internal.syscalls.SyscallHandlerPosix\$TermiosConstants",
             )
 
             named("test") {
