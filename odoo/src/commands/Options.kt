@@ -115,6 +115,11 @@ class OdooOptionGroup : StoredOptionGroup("Odoo options") {
             ),
             option("--test-enable", help = "Enable unit tests").flag(),
             option("--test-file", help = "Launch a python test file", completionCandidates = CompletionCandidates.Path),
+            option(
+                "--load-language",
+                help = "specifies the languages for the translations you want to be loaded",
+                completionCandidates = odooCompletion(CompletionType.Lang),
+            ),
         ).forEach { registerOption(it) }
     }
 }

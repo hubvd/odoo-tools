@@ -12,13 +12,11 @@ import com.github.pgreze.process.process
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import java.io.IOException
 import java.nio.file.Path
-import kotlin.io.path.div
-import kotlin.io.path.exists
-import kotlin.io.path.listDirectoryEntries
-import kotlin.io.path.name
+import kotlin.io.path.*
 
-enum class CompletionType { Addon, Qunit, Hoot, TestTag }
+enum class CompletionType { Addon, Qunit, Hoot, TestTag, Lang }
 
 @Serializable
 private data class Ctag(val name: String, val scope: String? = null, val scopeKind: String? = null)
@@ -44,7 +42,26 @@ class CompleteCommand(private val workspaces: Workspaces) : CliktCommand(hidden 
             CompletionType.Qunit -> completeQUnitTests()
             CompletionType.Hoot -> completeHootTests()
             CompletionType.TestTag -> completeTestTags()
+            CompletionType.Lang -> completeLang()
         }.forEach { println(it) }
+    }
+
+    private fun completeLang(): Sequence<String> = sequence {
+        val langPath = workspace.path / "odoo/odoo/addons/base/data/res.lang.csv"
+        try {
+            langPath.forEachLine { line ->
+                if (line.startsWith(""""id","name","code"""")) return@forEachLine
+                val firstComma = line.indexOf(',')
+                if (firstComma == -1) return@forEachLine
+                val secondComma = line.indexOf(',', firstComma + 1)
+                if (secondComma == -1) return@forEachLine
+                val thirdComma = line.indexOf(',', secondComma + 1)
+                if (thirdComma == -1) return@forEachLine
+                val value = line.substring(secondComma + 2, thirdComma - 1)
+                val description = line.substring(firstComma + 2, secondComma - 1)
+                yield("$value\t$description")
+            }
+        } catch (_: IOException) { }
     }
 
     private fun completeTestTags() = sequence {
