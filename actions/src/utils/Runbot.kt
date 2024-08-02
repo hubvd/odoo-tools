@@ -62,10 +62,20 @@ class RunbotImpl(private val odoo: OdooClient) : Runbot {
             ("id" `in` batches.flatMap { it.commitIds }.toSet()) and ("repo_id" `in` arrayOf("odoo", "enterprise"))
         }
 
-        return batches.map { batch ->
+        // TODO: implement readGroup instead of grouping clientside..
+        val (odooCommitsById, enterpriseCommitsById) = commits.partition {
+            it.repoId.name == "odoo"
+        }.let { (odoo, enterprise) ->
+            odoo.associateByTo(HashMap()) { it.id } to enterprise.associateByTo(HashMap()) { it.id }
+        }
+        return batches.mapNotNull { batch ->
+            val odoo = batch.commitIds.firstNotNullOfOrNull { odooCommitsById[it] }
+                ?: return@mapNotNull null
+            val enterprise = batch.commitIds.firstNotNullOfOrNull { enterpriseCommitsById[it] }
+                ?: return@mapNotNull null
             ResolvedBatch(
-                odoo = commits.first { it.repoId.name == "odoo" && it.id in batch.commitIds }.name,
-                enterprise = commits.first { it.repoId.name == "enterprise" && it.id in batch.commitIds }.name,
+                odoo = odoo.name,
+                enterprise = enterprise.name,
             )
         }.toSet().toList()
     }
