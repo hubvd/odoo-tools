@@ -15,8 +15,9 @@ class Virtualenvs(private val pythonProvider: PythonProvider, dataDir: DataDir) 
         val venvPath = rootPath / workspace.base
         if (venvPath.notExists()) {
             val pythonVersion = when {
-                workspace.version < 16 -> "3.9.18"
-                else -> "3.11.8"
+                workspace.version < 16f -> "3.9.19"
+                workspace.version < 17f -> "3.11.9"
+                else -> "3.12.4"
             }
             val pythonPath = pythonProvider.installOrGetVersion(pythonVersion)
             cd(rootPath)
@@ -41,21 +42,20 @@ class Virtualenvs(private val pythonProvider: PythonProvider, dataDir: DataDir) 
     private fun generateRequirements(requirements: Path, odooVersion: Float): Path {
         val output = Files.createTempFile("requirements-", ".txt")
         output.bufferedWriter().use { writer ->
-            sequence {
-                requirements.forEachLine { if (it.contains("==")) yield(it) }
-                arrayOf(
-                    "pydevd-pycharm",
-                    "websocket-client",
-                    "mock",
-                    "pydevd-odoo",
-                    "rich",
-                    "ptpython",
-                    "dbfread",
-                ).forEach { yield(it) }
-                if (14 < odooVersion && odooVersion < 16.4) {
-                    yield("rjsmin")
-                }
-            }.forEach { writer.appendLine(it) }
+            requirements.bufferedReader().use { it.copyTo(writer) }
+            writer.appendLine()
+            arrayOf(
+                "pydevd-pycharm",
+                "websocket-client",
+                "mock",
+                "pydevd-odoo",
+                "rich",
+                "ptpython",
+                "dbfread",
+            ).forEach { writer.appendLine(it) }
+            if (14f < odooVersion && odooVersion < 16.4f) {
+                writer.appendLine("rjsmin")
+            }
         }
         output.toFile().deleteOnExit()
         return output
