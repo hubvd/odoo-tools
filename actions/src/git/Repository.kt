@@ -193,15 +193,11 @@ fun Workspace.currentRepository(): Repository? {
 }
 
 class GitStatusList(private val address: MemorySegment, private val repo: Repository) {
-    fun count(): Long {
-        return repo.proxy.status_list_entrycount(address)
-    }
+    fun count(): Long = repo.proxy.status_list_entrycount(address)
 }
 
 class GitObject(val address: MemorySegment, private val repo: Repository) {
-    fun oid(): GitOid {
-        return GitOid(repo.proxy.object_id(address), repo)
-    }
+    fun oid(): GitOid = GitOid(repo.proxy.object_id(address), repo)
 }
 
 class GitReference(val address: MemorySegment, private val repo: Repository) {
@@ -282,24 +278,16 @@ class GitOid(private val address: MemorySegment, private val repo: Repository) {
 
 class GitCommit(val address: MemorySegment, private val repo: Repository) {
 
-    fun id(): GitOid {
-        return GitOid(repo.proxy.commit_id(address), repo)
-    }
+    fun id(): GitOid = GitOid(repo.proxy.commit_id(address), repo)
 }
 
 class GitRemote(private val address: MemorySegment, private val repo: Repository) {
-    fun name(): String {
-        return repo.proxy.remote_name(address).reinterpret(Long.MAX_VALUE).getString(0)
-    }
+    fun name(): String = repo.proxy.remote_name(address).reinterpret(Long.MAX_VALUE).getString(0)
 
-    fun fetchUrl(): String {
-        return repo.proxy.remote_url(address).reinterpret(Long.MAX_VALUE).getString(0)
-    }
+    fun fetchUrl(): String = repo.proxy.remote_url(address).reinterpret(Long.MAX_VALUE).getString(0)
 
-    fun pushUrl(): String? {
-        return repo.proxy.remote_pushurl(address)
-            .takeIf { it != MemorySegment.NULL }
-            ?.reinterpret(Long.MAX_VALUE)
-            ?.getString(0)
-    }
+    fun pushUrl(): String? = repo.proxy.remote_pushurl(address)
+        .takeIf { it != MemorySegment.NULL }
+        ?.reinterpret(Long.MAX_VALUE)
+        ?.getString(0)
 }

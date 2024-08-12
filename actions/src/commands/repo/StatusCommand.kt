@@ -60,17 +60,15 @@ class StatusCommand : CliktCommand() {
             )
         }
 
-    private fun Pair<Long, Long>.formatAheadBehind(style: TextStyle, name: String? = null): String {
-        return style(
-            buildString {
-                append('(')
-                name?.let { append(name).append(": ") }
-                second.let { append("↓").append(it) }
-                first.let { append(" ↑").append(it) }
-                append(')')
-            },
-        )
-    }
+    private fun Pair<Long, Long>.formatAheadBehind(style: TextStyle, name: String? = null): String = style(
+        buildString {
+            append('(')
+            name?.let { append(name).append(": ") }
+            second.let { append("↓").append(it) }
+            first.let { append(" ↑").append(it) }
+            append(')')
+        },
+    )
 
     private fun line(repository: Repository, base: String) = repository.let {
         horizontalLayout {

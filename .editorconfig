@@ -16,6 +16,7 @@ ktlint_standard_no-wildcard-imports = disabled
 ktlint_standard_import-ordering = disabled
 ktlint_standard_function-naming = disabled
 ktlint_standard_no-empty-file = disabled
+ktlint_standard_class-signature = disabled
 ktlint_experimental = disabled
 
 [*.graphql]

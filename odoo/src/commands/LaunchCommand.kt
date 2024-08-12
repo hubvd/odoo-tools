@@ -23,7 +23,8 @@ class MutableDslContext(
     val options: MutableMap<String, String>,
     val env: MutableMap<String, String>,
     override val config: WorkspaceConfig,
-) : DslContext, OdooOptions by odooOptions
+) : DslContext,
+    OdooOptions by odooOptions
 
 val Option.id: String get() = names.maxBy { it.length }.removePrefix("--")
 

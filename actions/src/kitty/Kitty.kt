@@ -24,9 +24,7 @@ class Kitty(
     ),
 ) : KittyCommands by proxy {
 
-    fun isRunning(): Boolean {
-        return Path(SOCKET_ADDRESS).exists()
-    }
+    fun isRunning(): Boolean = Path(SOCKET_ADDRESS).exists()
 
     private fun runIfClosed(): Boolean {
         val socket = Path(SOCKET_ADDRESS)

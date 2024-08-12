@@ -30,9 +30,12 @@ class Odooctl(private val workspaces: Workspaces) {
             for (line in lines) {
                 val columns = line.trim().split(WHITESPACE_REGEX)
                 if (
-                    columns.size == 17 && // Check that we skipped the header
-                    columns[3] == "0A" && // Check if state is LISTEN
-                    columns[9] in sockets // Check that the inode matches an owned socket
+                    // Check that we skipped the header
+                    columns.size == 17 &&
+                    // Check if state is LISTEN
+                    columns[3] == "0A" &&
+                    // Check that the inode matches an owned socket
+                    columns[9] in sockets
                 ) {
                     val localAddress = columns[1]
                     val portHex = localAddress.split(":")[1]

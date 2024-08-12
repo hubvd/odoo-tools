@@ -20,10 +20,8 @@ abstract class BaseWorkspaceProvider : Workspaces {
     override fun default() = list().find { it.name == defaultName }!!
 }
 
-internal class CachedWorkspaces(
-    override val defaultName: String,
-    private val workspaces: Workspaces,
-) : BaseWorkspaceProvider() {
+internal class CachedWorkspaces(override val defaultName: String, private val workspaces: Workspaces) :
+    BaseWorkspaceProvider() {
     private val list: List<Workspace> by lazy { workspaces.list() }
     override fun list(): List<Workspace> = list
 }

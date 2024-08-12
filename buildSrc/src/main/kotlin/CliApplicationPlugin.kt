@@ -55,7 +55,6 @@ class CliApplicationPlugin : Plugin<Project> {
             }
         }
     }
-
 }
 
 abstract class GenerateSubcommandBinariesTask : DefaultTask() {

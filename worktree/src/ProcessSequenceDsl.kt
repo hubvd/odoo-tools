@@ -66,9 +66,8 @@ class ProcessSequenceDslContext(private val terminal: Terminal) : AutoCloseable 
         stepSuccess(description)
     }
 
-    suspend fun capture(vararg cmd: String): List<String> {
-        return process(*cmd, stdout = Redirect.CAPTURE, stderr = Redirect.CAPTURE).unwrap()
-    }
+    suspend fun capture(vararg cmd: String): List<String> =
+        process(*cmd, stdout = Redirect.CAPTURE, stderr = Redirect.CAPTURE).unwrap()
 
     suspend fun run(vararg cmd: String, description: String? = null) {
         val taskDescription = description ?: (blue + underline)(

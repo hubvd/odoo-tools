@@ -27,9 +27,7 @@ interface LegacyRepository {
 }
 
 internal class GitShellImplementation : Git {
-    override fun open(path: Path): LegacyRepository {
-        return LegacyRepositoryShellImplementation(path)
-    }
+    override fun open(path: Path): LegacyRepository = LegacyRepositoryShellImplementation(path)
 }
 
 private class LegacyRepositoryShellImplementation(private val path: Path) : LegacyRepository {

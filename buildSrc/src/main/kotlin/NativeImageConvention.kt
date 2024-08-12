@@ -5,7 +5,7 @@ import org.gradle.api.Project
 import org.gradle.api.plugins.ExtensionAware
 import org.gradle.kotlin.dsl.assign
 
-class NativeImageConvention : Plugin<Project>{
+class NativeImageConvention : Plugin<Project> {
     override fun apply(project: Project) {
         project.plugins.apply("org.graalvm.buildtools.native")
 
@@ -17,13 +17,14 @@ class NativeImageConvention : Plugin<Project>{
     }
 
     private fun GraalVMExtension.configure(project: Project) {
-        (this as ExtensionAware).extensions.configure<GraalVMReachabilityMetadataRepositoryExtension>("metadataRepository") {
+        (this as ExtensionAware).extensions.configure<GraalVMReachabilityMetadataRepositoryExtension>(
+            "metadataRepository",
+        ) {
             uri(project.rootDir.resolve("reachability-metadata"))
             enabled = true
         }
         testSupport = true
         binaries {
-
             val commonFlags = arrayOf(
                 // FIXME: PR in mordant
                 "--initialize-at-build-time=com.github.ajalt.mordant.internal.nativeimage.NativeImagePosixMppImpls",
@@ -45,8 +46,6 @@ class NativeImageConvention : Plugin<Project>{
                     *commonFlags,
                 )
             }
-
         }
     }
-
 }

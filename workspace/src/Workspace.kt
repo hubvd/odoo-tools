@@ -56,9 +56,7 @@ internal data class WorkspaceImpl(override val name: String, override val path: 
         return version to base
     }
 
-    override fun toString(): String {
-        return "Workspace(name=$name, path=$path, version=$version, base=$base)"
-    }
+    override fun toString(): String = "Workspace(name=$name, path=$path, version=$version, base=$base)"
 
     companion object {
         private val VERSION_RE =

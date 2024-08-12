@@ -43,14 +43,12 @@ interface Config {
 private object TomlConfig : Config {
     private val CONTENT = Path(System.getProperty("user.home"), ".config/odoo/config.toml").readText()
 
-    override fun <T> get(section: String, deserializer: DeserializationStrategy<T>): T {
-        return Toml.partiallyDecodeFromString(
-            deserializer,
-            CONTENT,
-            section,
-            TomlInputConfig(ignoreUnknownNames = true),
-        )
-    }
+    override fun <T> get(section: String, deserializer: DeserializationStrategy<T>): T = Toml.partiallyDecodeFromString(
+        deserializer,
+        CONTENT,
+        section,
+        TomlInputConfig(ignoreUnknownNames = true),
+    )
 }
 
 val CONFIG_MODULE by DI.Module {

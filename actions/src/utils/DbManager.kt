@@ -54,11 +54,9 @@ class DbManager {
         process.waitFor()
     }
 
-    fun delete(name: String): Boolean {
-        return ProcessBuilder("dropdb", name)
-            .redirectError(ProcessBuilder.Redirect.DISCARD)
-            .redirectOutput(ProcessBuilder.Redirect.DISCARD)
-            .start()
-            .waitFor() == 0
-    }
+    fun delete(name: String): Boolean = ProcessBuilder("dropdb", name)
+        .redirectError(ProcessBuilder.Redirect.DISCARD)
+        .redirectOutput(ProcessBuilder.Redirect.DISCARD)
+        .start()
+        .waitFor() == 0
 }

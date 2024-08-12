@@ -22,9 +22,8 @@ class ModelSerializerTest {
         namingStrategy = JsonNamingStrategy.SnakeCase
     }
 
-    private fun <T : Any> deserializeModel(@Language("json") body: String, serializer: KSerializer<T>): T {
-        return json.decodeFromString(ModelSerializer(serializer), body)
-    }
+    private fun <T : Any> deserializeModel(@Language("json") body: String, serializer: KSerializer<T>): T =
+        json.decodeFromString(ModelSerializer(serializer), body)
 
     @Test
     fun `deserializer simple model`() {
