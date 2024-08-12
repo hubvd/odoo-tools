@@ -16,7 +16,10 @@ class KittyInvocationHandler(private val socketAddress: String) : InvocationHand
         private const val PREFIX = "\u001BP@kitty-cmd"
         private const val SUFFIX = "\u001B\\"
         private val camelCaseRe = Regex("([a-z])([A-Z])")
-        private val format = Json { namingStrategy = JsonNamingStrategy.SnakeCase }
+        private val format = Json {
+            namingStrategy = JsonNamingStrategy.SnakeCase
+            ignoreUnknownKeys = true
+        }
     }
 
     private fun camelToSnakeCase(name: String) = camelCaseRe.replace(name, "\$1_\$2").lowercase()
