@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
     id("cli-application")
     alias(libs.plugins.kotlinx.plugin.serialization)
@@ -40,4 +42,10 @@ dependencies {
     testImplementation(libs.assertk)
 
     testImplementation(testFixtures(project(":workspace")))
+}
+
+tasks.withType<KotlinCompile> {
+    compilerOptions {
+        freeCompilerArgs.add("-opt-in=kotlinx.serialization.ExperimentalSerializationApi")
+    }
 }
