@@ -35,7 +35,7 @@ for repo_path in $repo_paths
   )
 
   if test (count $staged_files) -gt 0
-    echo skipped $repo because there are changes
+    echo skipped $repo_path because there are changes
     continue
   end
 

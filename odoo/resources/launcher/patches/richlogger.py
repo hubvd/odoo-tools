@@ -62,7 +62,7 @@ class OdooRichHandler(RichHandler):
 
     def render_message(self, record: "LogRecord", message: str):
         message_text = super().render_message(record, message)
-        dbname = getattr(threading.current_thread(), "dbname", "?")
+        dbname = getattr(threading.current_thread(), "dbname", "?") or "?"
         level_name = record.levelname
         message_text._spans.append(
             Span(0, len(dbname), f"logging.level.{level_name.lower()}")
