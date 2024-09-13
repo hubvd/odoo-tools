@@ -1,31 +1,13 @@
 package com.github.hubvd.odootools.actions.utils
 
-import com.github.hubvd.odootools.actions.Secret
 import com.github.hubvd.odootools.odoo.client.OdooClient
-import com.github.hubvd.odootools.odoo.client.OdooCredential
 import com.github.hubvd.odootools.odoo.client.core.ModelReference
 import com.github.hubvd.odootools.odoo.client.searchRead
 import kotlinx.serialization.Serializable
 import org.kodein.di.*
 
 val RUNBOT_MODULE by DI.Module {
-    bind<OdooCredential>(tag = "runbot") {
-        singleton {
-            OdooCredential.SessionCredential(instance<Secret>(tag = "runbot_session").value)
-        }
-    }
-
-    bind(tag = "runbot") {
-        singleton {
-            OdooClient(
-                credential = instance(tag = "runbot"),
-                host = "https://runbot.odoo.com",
-                client = instance(),
-            )
-        }
-    }
-
-    bind<Runbot> { singleton { RunbotImpl(instance(tag = "runbot")) } }
+    bind<Runbot> { singleton { RunbotImpl(instance(arg = "runbot")) } }
 }
 
 interface Runbot {

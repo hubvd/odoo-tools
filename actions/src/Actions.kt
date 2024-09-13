@@ -7,6 +7,7 @@ import com.github.hubvd.odootools.actions.commands.MainCommand
 import com.github.hubvd.odootools.actions.kitty.Kitty
 import com.github.hubvd.odootools.actions.utils.*
 import com.github.hubvd.odootools.config.CONFIG_MODULE
+import com.github.hubvd.odootools.odoo.client.ODOO_CLIENT_MODULE
 import com.github.hubvd.odootools.pycharmctl.api.PycharmCtl
 import com.github.hubvd.odootools.pycharmctl.client.PycharmCtlClient
 import com.github.hubvd.odootools.workspace.WORKSPACE_MODULE
@@ -26,6 +27,7 @@ internal val ACTION_MODULE by DI.Module {
     import(COMMANDS_MODULE)
     import(RUNBOT_MODULE)
     import(CONFIG_MODULE)
+    import(ODOO_CLIENT_MODULE)
 
     bind { singleton { new(::Odooctl) } }
     bind { singleton { Terminal() } }
@@ -72,7 +74,6 @@ fun main(args: Array<String>) {
 
     val mainCommand by di.instance<MainCommand>()
     val notificationService by di.instance<NotificationService>()
-    val terminal by di.instance<Terminal>()
 
     val arg0 = LinuxProcessHandle(ProcessHandle.current()).info().arguments().get().first()
     val exeName = Path(arg0).name

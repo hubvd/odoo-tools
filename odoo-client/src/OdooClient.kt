@@ -19,7 +19,6 @@ import kotlin.random.Random
 
 class OdooClient(
     private val credential: OdooCredential,
-    host: String,
     client: HttpHandler,
     private val random: Random = Random.Default,
 ) {
@@ -28,7 +27,7 @@ class OdooClient(
         namingStrategy = JsonNamingStrategy.SnakeCase
     }
 
-    private val client = ClientFilters.SetHostFrom(Uri.of(host))
+    private val client = ClientFilters.SetHostFrom(Uri.of(credential.host))
         .then(RequestFilters.SetHeader("Content-Type", "application/json"))
         .then(client)
 

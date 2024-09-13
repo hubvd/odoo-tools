@@ -9,6 +9,8 @@ plugins {
 dependencies {
     api(libs.serialization.json)
     api(libs.http4k.core)
+    api(libs.kodein.di)
+    implementation(project(":config"))
 
     compileOnly(libs.graalvm.svm)
 

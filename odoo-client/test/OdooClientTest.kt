@@ -27,8 +27,12 @@ class OdooClientTest {
         var request: Request? = null
 
         val odoo = OdooClient(
-            OdooCredential.JsonRpcCredential(database = "test", userId = 1L, apiKey = "dummy"),
-            host = "https://example.com",
+            OdooCredential.JsonRpcCredential(
+                host = "https://example.com",
+                database = "test",
+                userId = 1L,
+                apiKey = "dummy",
+            ),
             client = {
                 request = it
                 Response(Status.OK).body("""{"result": [{"id": 1, "display_name": "name"}]}""")
