@@ -62,8 +62,7 @@ internal val ACTION_MODULE by DI.Module {
     bind<BrowserService> { singleton { BrowserServiceImpl(instance<ActionsConfig>().browsers) } }
     bind<Git> { singleton { new(::GitShellImplementation) } }
 
-    bind<WindowManager> { singleton { new(WindowManager.Companion::invoke) } }
-    bind<Kitty> { singleton { Kitty(instance()) } }
+    bind<Kitty> { singleton { Kitty() } }
     bind<PycharmCtl> { singleton { new(::PycharmCtlClient) } }
 }
 

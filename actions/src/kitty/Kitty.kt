@@ -1,6 +1,5 @@
 package com.github.hubvd.odootools.actions.kitty
 
-import com.github.hubvd.odootools.actions.utils.WindowManager
 import com.github.hubvd.odootools.workspace.Workspace
 import java.lang.reflect.Proxy
 import java.util.concurrent.TimeoutException
@@ -18,7 +17,6 @@ fun generateProxy(socketAddress: String): KittyCommands {
 }
 
 class Kitty(
-    private val windowManager: WindowManager,
     private val proxy: KittyCommands = generateProxy(
         SOCKET_ADDRESS,
     ),
@@ -70,11 +68,7 @@ class Kitty(
         val new = runIfClosed()
         block(this@Kitty)
         if (new) closeWindow("id:1")
-        focus()
-    }
-
-    fun focus() {
-        windowManager.raise(CLASS)
+        focusWindow(null)
     }
 
     private fun openRepo(workspace: Workspace, name: String, type: String) {
