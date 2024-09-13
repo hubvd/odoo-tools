@@ -103,6 +103,7 @@ class WebTests:
         patch_arguments(odoo.tests.HttpCase, "start_tour", start_tour)
 
         if version >= 16.4:
+            return
             # Bring back Chrome remote view
             side_effect(ChromeBrowser, "_open_websocket", _open_websocket)
             patch_arguments(ChromeBrowser, "__init__", init_chrome)
