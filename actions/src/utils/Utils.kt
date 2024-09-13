@@ -31,30 +31,40 @@ class Pycharm {
     }
 }
 
-fun <T> menu(choices: List<T>, lines: Int? = choices.size, transform: (T) -> String = { it.toString() }): T? =
-    runBlocking {
-        if (choices.isEmpty()) return@runBlocking null
-        if (choices.size == 1) return@runBlocking choices.first()
+fun <T> menu(
+    choices: List<T>,
+    lines: Int? = choices.size,
+    prompt: String? = null,
+    transform: (T) -> String = { it.toString() },
+): T? = runBlocking {
+    if (choices.isEmpty()) return@runBlocking null
+    if (choices.size == 1) return@runBlocking choices.first()
 
-        val map = choices.associateBy(transform)
+    val map = choices.associateBy(transform)
 
-        val (code, output) = process(
-            "bemenu",
-            "-l",
-            lines.toString(),
-            stdin = InputSource.FromStream { out ->
-                out.bufferedWriter().use { buff ->
-                    map.keys.forEach {
-                        buff.write(it)
-                        buff.newLine()
-                    }
+    val (code, output) = process(
+        *buildList {
+            add("bemenu")
+            add("-l")
+            add(lines.toString())
+            prompt?.let {
+                add("-p")
+                add(it)
+            }
+        }.toTypedArray(),
+        stdin = InputSource.FromStream { out ->
+            out.bufferedWriter().use { buff ->
+                map.keys.forEach {
+                    buff.write(it)
+                    buff.newLine()
                 }
-            },
-            stdout = Redirect.CAPTURE,
-            stderr = Redirect.SILENT,
-        )
-        if (code == 0) output.firstOrNull()?.trim()?.let { map[it] } else null
-    }
+            }
+        },
+        stdout = Redirect.CAPTURE,
+        stderr = Redirect.SILENT,
+    )
+    if (code == 0) output.firstOrNull()?.trim()?.let { map[it] } else null
+}
 
 fun selectInstance(instances: List<OdooInstance>): OdooInstance? = menu(instances) {
     buildString {

@@ -27,6 +27,7 @@ dependencies {
     implementation(project(":config"))
     implementation(project(":workspace"))
     implementation(project(":odoo-client"))
+    implementation(project(":pycharmctl:client"))
 
     implementation(libs.serialization.json)
     implementation(libs.coroutines.core)
