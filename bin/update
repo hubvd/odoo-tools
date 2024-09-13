@@ -1,6 +1,6 @@
 #!/bin/fish
 
-argparse 'f/force' -- $argv
+argparse 'f/force' 'w/workspace' -- $argv
 
 set data (worktree current fish) && eval $data
 set base $workspace_base
@@ -10,6 +10,8 @@ if not test $workspace_name = $workspace_base
 end
 
 set repo_paths (path filter -d $workspace_path/{odoo,enterprise,design-themes})
+
+set -q _flag_workspace && set_color -o blue && echo $workspace_name && set_color normal
 
 if not set -q _flag_force
   for repo_path in $repo_paths

@@ -2,6 +2,6 @@
 
 worktree list path | while read path
     pushd $path
-    update
+    update -w
     popd
 end
