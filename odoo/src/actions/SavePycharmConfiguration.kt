@@ -14,10 +14,9 @@ import kotlin.io.path.exists
 import kotlin.io.path.writeText
 import kotlin.system.exitProcess
 
-context(Node)
-private infix fun String.eq(value: String) {
+private fun Node.option(name: String, value: String) {
     "option" {
-        attribute("name", this@eq)
+        attribute("name", name)
         attribute("value", value)
     }
 }
@@ -39,8 +38,8 @@ class SavePycharmConfiguration(
                     "nameIsGenerated" to "false",
                 )
                 "module" { attribute("name", workspace.name) }
-                "INTERPRETER_OPTIONS" eq ""
-                "PARENT_ENVS" eq "true"
+                option("INTERPRETER_OPTIONS", "")
+                option("PARENT_ENVS", "true")
                 "envs" {
                     "env" {
                         attribute("name", "PYTHONUNBUFFERED")
@@ -53,20 +52,20 @@ class SavePycharmConfiguration(
                         }
                     }
                 }
-                "SDK_HOME" eq ""
-                "WORKING_DIRECTORY" eq "\$PROJECT_DIR\$"
-                "IS_MODULE_SDK" eq "true"
-                "ADD_CONTENT_ROOTS" eq "false"
-                "ADD_SOURCE_ROOTS" eq "false"
+                option("SDK_HOME", "")
+                option("WORKING_DIRECTORY", "\$PROJECT_DIR\$")
+                option("IS_MODULE_SDK", "true")
+                option("ADD_CONTENT_ROOTS", "false")
+                option("ADD_SOURCE_ROOTS", "false")
                 "EXTENSION" {
                     attributes("ID" to "PythonCoverageRunConfigurationExtension", "runner" to "coverage.py")
                 }
-                "SCRIPT_NAME" eq "\$PROJECT_DIR\$/odoo/odoo-bin"
-                "PARAMETERS" eq configuration.args.joinToString(" ").replace("~", "\$USER_HOME\$")
-                "SHOW_COMMAND_LINE" eq "false"
-                "EMULATE_TERMINAL" eq "true"
-                "MODULE_MODE" eq "false"
-                "INPUT_FILE" eq "false"
+                option("SCRIPT_NAME", "\$PROJECT_DIR\$/odoo/odoo-bin")
+                option("PARAMETERS", configuration.args.joinToString(" ").replace("~", "\$USER_HOME\$"))
+                option("SHOW_COMMAND_LINE", "false")
+                option("EMULATE_TERMINAL", "true")
+                option("MODULE_MODE", "false")
+                option("INPUT_FILE", "false")
                 "method" { attribute("v", "2") }
             }
         }

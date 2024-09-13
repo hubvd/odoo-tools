@@ -10,10 +10,9 @@ import kotlin.io.path.createDirectories
 import kotlin.io.path.div
 import kotlin.io.path.writeText
 
-context(Node)
-private infix fun String.eq(value: Any) {
+private fun Node.option(name: String, value: Any) {
     "option" {
-        attribute("name", this@eq)
+        attribute("name", name)
         attribute("value", value)
     }
 }
@@ -45,15 +44,15 @@ class Pycharm(private val workspace: Workspace) {
             "factoryName" to "Python Remote Debug",
         ) {
             "module"("name" to workspace.name)
-            "PORT" eq 10000
-            "HOST" eq "localhost"
+            option("PORT", 10000)
+            option("HOST", "localhost")
             "PathMappingSettings" {
                 "option"("name" to "pathMappings") {
                     "list"()
                 }
             }
-            "REDIRECT_OUTPUT" eq false
-            "SUSPEND_AFTER_CONNECT" eq false
+            option("REDIRECT_OUTPUT", false)
+            option("SUSPEND_AFTER_CONNECT", false)
             "method"("v" to "2")
         }
     }
@@ -65,15 +64,15 @@ class Pycharm(private val workspace: Workspace) {
             "option"("name" to "links") {
                 "list" {
                     "IssueNavigationLink" {
-                        "option"("name" to "issueRegexp", "value" to "(?i)(opw|task)[\\W\\-]*(?:id)?[\\W-]*(\\d+)")
-                        "option"(
-                            "name" to "linkRegexp",
-                            "value" to "https://www.odoo.com/web#view_type=form&amp;model=project.task&amp;id=\$2",
+                        option("issueRegexp", """(?i)(opw|task)[\W\-]*(?:id)?[\W-]*(\d+)""")
+                        option(
+                            "linkRegexp",
+                            "https://www.odoo.com/web#view_type=form&amp;model=project.task&amp;id=\$2",
                         )
                     }
                     "IssueNavigationLink" {
-                        "option"("name" to "issueRegexp", "value" to "odoo/(.*)#(\\d+)")
-                        "option"("name" to "linkRegexp", "value" to "https://github.com/odoo/\$1/pull/\$2")
+                        option("issueRegexp", "odoo/(.*)#(\\d+)")
+                        option("linkRegexp", "https://github.com/odoo/\$1/pull/\$2")
                     }
                 }
             }
@@ -101,7 +100,7 @@ class Pycharm(private val workspace: Workspace) {
     private fun generateCodeStyleConfig() = xml("component") {
         attribute("name", "VcsDirectoryMappings")
         "state" {
-            "USE_PER_PROJECT_SETTINGS" eq true
+            option("USE_PER_PROJECT_SETTINGS", true)
         }
     }
 
@@ -109,9 +108,9 @@ class Pycharm(private val workspace: Workspace) {
         attribute("name", "ProjectCodeStyleConfiguration")
         "code_scheme"("name" to "Project", "version" to "173") {
             "JSCodeStyleSettings"("version" to "0") {
-                "FORCE_SEMICOLON_STYLE" eq true
-                "SPACES_WITHIN_OBJECT_LITERAL_BRACES" eq true
-                "SPACES_WITHIN_IMPORTS" eq true
+                option("FORCE_SEMICOLON_STYLE", true)
+                option("SPACES_WITHIN_OBJECT_LITERAL_BRACES", true)
+                option("SPACES_WITHIN_IMPORTS", true)
             }
         }
     }

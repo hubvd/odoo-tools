@@ -1,3 +1,5 @@
+@file:Suppress("CONTEXT_RECEIVERS_DEPRECATED")
+
 package com.github.hubvd.odootools.worktree
 
 import com.github.hubvd.odootools.workspace.Workspace

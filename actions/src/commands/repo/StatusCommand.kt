@@ -15,6 +15,7 @@ import com.github.ajalt.mordant.table.verticalLayout
 import com.github.hubvd.odootools.actions.git.Repository
 import com.github.hubvd.odootools.actions.git.git_branch_t
 import com.github.hubvd.odootools.workspace.Workspace
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.runBlocking
@@ -23,6 +24,7 @@ class StatusCommand : CliktCommand() {
     private val showDirty by option("-d", "--dirty", "--show-dirty").flag()
     private val workspaceRepositories by requireObject<List<WorkspaceRepositories>>()
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     override fun run() = runBlocking {
         val res = workspaceRepositories.map {
             async(it.dispatcher) {

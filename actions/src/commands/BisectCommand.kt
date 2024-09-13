@@ -10,6 +10,7 @@ import com.github.ajalt.mordant.rendering.TextColors.*
 import com.github.ajalt.mordant.rendering.TextStyles.bold
 import com.github.hubvd.odootools.actions.utils.*
 import com.github.hubvd.odootools.workspace.Workspaces
+import kotlin.io.path.div
 import kotlin.math.ceil
 import kotlin.math.log2
 
@@ -106,10 +107,8 @@ class BisectCommand(
         val workspace = workspaces.current() ?: throw Abort()
         val batches = runbot.batches(workspace.base)
 
-        with(git) {
-            odooLegacyRepository = workspace.odoo()
-            enterpriseLegacyRepository = workspace.enterprise()
-        }
+        odooLegacyRepository = git.open(workspace.path / "odoo")
+        enterpriseLegacyRepository = git.open(workspace.path / "enterprise")
 
         val result = Bisect(
             batches,

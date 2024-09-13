@@ -1,22 +1,14 @@
 package com.github.hubvd.odootools.actions.utils
 
-import com.github.hubvd.odootools.workspace.Workspace
 import com.github.pgreze.process.Redirect
 import com.github.pgreze.process.process
 import com.github.pgreze.process.unwrap
 import kotlinx.coroutines.runBlocking
 import java.nio.file.Path
-import kotlin.io.path.div
 
 interface Git {
     fun open(path: Path): LegacyRepository
 }
-
-context(Git)
-fun Workspace.odoo() = open(path / "odoo")
-
-context(Git)
-fun Workspace.enterprise() = open(path / "enterprise")
 
 data class Commit(val hash: String, val title: String)
 
