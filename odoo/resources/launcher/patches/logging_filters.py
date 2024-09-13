@@ -24,6 +24,8 @@ def tests(record):
     if record.msg == "Starting %s ...":
         record.msg = "Starting [test]%s[/]"
         record.markup = True
+    elif record.msg == "Simulating signal changes during tests":
+        return Result.CANCELLED
 
 
 def warnings(record):
@@ -99,6 +101,7 @@ replacements = [
     ),
     LogReplacement("test successful", None),
     LogReplacement("tour succeeded", None),
+    LogReplacement("console.groupEnd", None),
 ]
 
 
