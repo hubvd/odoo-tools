@@ -16,7 +16,6 @@ dependencies {
     implementation(libs.process)
     implementation(libs.xmlbuilder)
     implementation(libs.kodein.di)
-    implementation(libs.kotlin.reflect)
     implementation(libs.serialization.json)
 
     testImplementation(testFixtures(project(":workspace")))

@@ -19,10 +19,10 @@ import kotlin.system.exitProcess
 class LaunchAction(private val terminal: Terminal) : Action {
 
     override fun run(configuration: RunConfiguration) {
-        configuration.effects.forEach { it(configuration.context) }
+        configuration.effects.forEach { it() }
 
         if (System.getenv("TERM") == "xterm-kitty") {
-            ProcessBuilder("kitty", "@", "set-window-title", "--temporary", "odoo:" + configuration.context.database)
+            ProcessBuilder("kitty", "@", "set-window-title", "--temporary", "odoo:" + configuration.odoo.database)
                 .apply {
                     redirectError(ProcessBuilder.Redirect.DISCARD)
                     redirectOutput(ProcessBuilder.Redirect.DISCARD)
@@ -33,8 +33,8 @@ class LaunchAction(private val terminal: Terminal) : Action {
 
         terminal.println(runConfigurationWidget(configuration))
 
-        val useCustomLauncher = !configuration.context.noPatch &&
-            configuration.context.workspace.version > 14
+        val useCustomLauncher = !configuration.odoo.noPatch &&
+            configuration.odoo.workspace.version > 14
 
         val main = if (!useCustomLauncher) {
             "odoo/odoo-bin"
@@ -50,7 +50,7 @@ class LaunchAction(private val terminal: Terminal) : Action {
                 .command(cmd)
                 .inheritIO()
                 .apply { environment().putAll(configuration.env) }
-                .directory(configuration.context.workspace.path.toFile())
+                .directory(configuration.odoo.workspace.path.toFile())
                 .start()
 
         Runtime.getRuntime().addShutdownHook(
@@ -62,7 +62,7 @@ class LaunchAction(private val terminal: Terminal) : Action {
 
         val code = process.waitFor()
 
-        if (configuration.context.testEnable) {
+        if (configuration.odoo.testEnable) {
             runBlocking {
                 process(
                     "notify-send",

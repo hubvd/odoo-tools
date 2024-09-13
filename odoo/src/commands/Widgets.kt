@@ -28,8 +28,8 @@ fun runConfigurationWidget(runConfiguration: RunConfiguration) = verticalLayout 
 
 class EnvWidget(private val runConfiguration: RunConfiguration) : Widget {
     override fun measure(t: Terminal, width: Int): WidthRange = WidthRange(
-        "workspace=${runConfiguration.context.workspace.path}".length,
-        "workspace=${runConfiguration.context.workspace.path}".length,
+        "workspace=${runConfiguration.odoo.workspace.path}".length,
+        "workspace=${runConfiguration.odoo.workspace.path}".length,
     )
 
     override fun render(t: Terminal, width: Int) = Lines(
@@ -39,7 +39,7 @@ class EnvWidget(private val runConfiguration: RunConfiguration) : Widget {
                     listOf(
                         Span.word("workspace", TextColors.green),
                         Span.word("=", TextColors.gray),
-                        Span.word("${runConfiguration.context.workspace.path}"),
+                        Span.word("${runConfiguration.odoo.workspace.path}"),
                     ),
                 ),
             )
@@ -48,7 +48,7 @@ class EnvWidget(private val runConfiguration: RunConfiguration) : Widget {
                     listOf(
                         Span.word("version", TextColors.green),
                         Span.word("=", TextColors.gray),
-                        Span.word("${runConfiguration.context.workspace.version}"),
+                        Span.word("${runConfiguration.odoo.workspace.version}"),
                     ),
                 ),
             )

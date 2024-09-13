@@ -9,6 +9,8 @@ import com.github.hubvd.odootools.odoo.actions.ActionProviderImpl
 import com.github.hubvd.odootools.odoo.commands.CompleteCommand
 import com.github.hubvd.odootools.odoo.commands.LaunchCommand
 import com.github.hubvd.odootools.workspace.WORKSPACE_MODULE
+import com.github.hubvd.odootools.workspace.Workspace
+import com.github.hubvd.odootools.workspace.WorkspaceConfig
 import com.github.hubvd.odootools.workspace.WorkspaceProvider
 import com.github.pgreze.process.Redirect
 import com.github.pgreze.process.process
@@ -20,9 +22,117 @@ import kotlin.math.absoluteValue
 import kotlin.math.roundToInt
 import kotlin.system.exitProcess
 
-val computes: ContextGenerator.() -> Unit = {
-    effect {
-        if (drop && database != null) {
+@Suppress("unused")
+class Odoo(
+    val workspace: Workspace,
+    private val config: WorkspaceConfig,
+    options: Map<String, String>,
+    flags: Set<String>,
+) : CliGenerator(options, flags) {
+    val limitTimeCpu by option { "99999" }
+    val limitTimeReal by option { "99999" }
+
+    val testHoot by option()
+    val testQunit by option()
+    val mobile by flag()
+
+    val testFile by option()
+
+    val testTags by option {
+        if (testHoot != null && workspace.version < 17.2f) {
+            throw UsageError("HOOT not available before 17.2")
+        }
+        when {
+            testHoot != null && mobile -> "/qunit:WebSuiteMobile.test_hoot"
+            testHoot != null -> "/qunit:WebSuite.test_hoot"
+            testQunit != null && mobile -> "/qunit:WebSuiteMobile.test_qunit"
+            testQunit != null -> "/qunit:WebSuite.test_qunit"
+            else -> null
+        }
+    }
+
+    val testEnable by flag { testTags != null || testFile != null }
+
+    val httpPort by option {
+        when {
+            workspace.name == workspace.base && database == workspace.name -> {
+                (workspace.version * 100).roundToInt()
+            }
+
+            workspace.name == workspace.base && database == "${workspace.name}-test" -> {
+                (workspace.version * 100 + 5).roundToInt()
+            }
+
+            else -> {
+                val min = 2000
+                val max = 65535
+                (min + database.hashCode().absoluteValue % (max - min + 1))
+            }
+        }.let {
+            when (it) {
+                1720 -> 1721 // reserved port..
+                else -> it
+            }
+        }.toString()
+    }
+
+    val community by flag()
+    val themes by flag()
+    val drop by flag()
+    val watch by flag()
+    val stepDelay by option()
+    val debug by flag()
+    val dryRun by flag()
+    val restart by flag()
+    val save by option()
+    val noPatch by flag()
+
+    val database by option { if (testEnable) "${workspace.name}-test" else workspace.name }
+    val logHandler by option { if (testEnable) "werkzeug:ERROR" else null }
+    val logLevel by option { if (testEnable) "test" else null }
+    val maxCronThread by option { if (testEnable) "0" else null }
+    val stopAfterInit by flag { testEnable }
+
+    val addonsPath by option {
+        buildList {
+            add("odoo/addons")
+            if (!community) add("enterprise")
+            if (themes) add("design-themes")
+            val customAddonsPath = config.odooToolsPath / "addons"
+            val home = Path(System.getProperty("user.home"))
+            if (customAddonsPath.startsWith(home)) {
+                add("~/" + customAddonsPath.relativeTo(home))
+            } else {
+                add(customAddonsPath)
+            }
+        }.joinToString(",")
+    }
+
+    val init by option {
+        val testTags = testTags ?: return@option null
+        testTags.splitToSequence(',').filter { !it.startsWith('-') }
+            .flatMap { TestTag(it).toAddons(workspace, addonsPath) }.toHashSet().joinToString(",")
+            .takeUnless { it.isEmpty() }
+    }
+
+    val hootFilter by env {
+        val filter = testHoot ?: return@env null
+        URLEncoder.encode(filter, "utf-8")
+    }
+
+    val qunitFilter by env {
+        val testTags = testQunit ?: return@env null
+        URLEncoder.encode(testTags, "utf-8")
+    }
+
+    val qunitWatch by env { if (watch) "1" else null }
+    val stepDelayEnv by env("STEP_DELAY") { stepDelay?.toIntOrNull()?.toString() }
+    val odooWorkspace by env { workspace.path.toString() }
+    val odooDebug by env { if (debug) "1" else null }
+
+    init {
+        effect {
+            if (!drop || database == null) return@effect
             val count = runBlocking {
                 process(
                     "psql",
@@ -48,117 +158,6 @@ val computes: ContextGenerator.() -> Unit = {
                 exitProcess(1)
             }
         }
-    }
-
-    option("limit-time-cpu") { "99999" }
-    option("limit-time-real") { "99999" }
-
-    depends("database") {
-        option("http-port") {
-            when {
-                workspace.name == workspace.base && database == workspace.name -> {
-                    (workspace.version * 100).roundToInt()
-                }
-
-                workspace.name == workspace.base && database == "${workspace.name}-test" -> {
-                    (workspace.version * 100 + 5).roundToInt()
-                }
-
-                else -> {
-                    val min = 2000
-                    val max = 65535
-                    (min + database.hashCode().absoluteValue % (max - min + 1))
-                }
-            }.let {
-                when (it) {
-                    1720 -> 1721 // reserved port..
-                    else -> it
-                }
-            }.toString()
-        }
-    }
-
-    depends("test-tags", "test-file") {
-        flag("test-enable") { testTags != null || testFile != null }
-    }
-
-    depends("test-tags", "addons-path") {
-        option("init") {
-            val testTags = testTags ?: return@option null
-            testTags
-                .splitToSequence(',')
-                .filter { !it.startsWith('-') }
-                .flatMap { TestTag(it).toAddons(workspace, addonsPath) }
-                .toHashSet()
-                .joinToString(",")
-                .takeUnless { it.isEmpty() }
-        }
-    }
-
-    depends("community") {
-        option("addons-path") {
-            buildList {
-                add("odoo/addons")
-                if (!community) add("enterprise")
-                if (themes) add("design-themes")
-                val customAddonsPath = config.odooToolsPath / "addons"
-                val home = Path(System.getProperty("user.home"))
-                if (customAddonsPath.startsWith(home)) {
-                    add("~/" + customAddonsPath.relativeTo(home))
-                } else {
-                    add(customAddonsPath)
-                }
-            }.joinToString(",")
-        }
-    }
-
-    env("HOOT_FILTER") {
-        val filter = testHoot ?: return@env null
-        URLEncoder.encode(filter, "utf-8")
-    }
-
-    env("QUNIT_FILTER") {
-        val testTags = testQunit ?: return@env null
-        URLEncoder.encode(testTags, "utf-8")
-    }
-
-    env("QUNIT_WATCH") {
-        if (watch) "1" else null
-    }
-
-    env("STEP_DELAY") {
-        stepDelay?.toIntOrNull()?.toString()
-    }
-
-    env("ODOO_WORKSPACE") {
-        workspace.path.toString()
-    }
-
-    env("ODOO_DEBUG") {
-        if (debug) "1" else null
-    }
-
-    depends("test-qunit", "mobile") {
-        option("test-tags") {
-            if (testHoot != null && workspace.version < 17.2f) {
-                throw UsageError("HOOT not available before 17.2")
-            }
-            when {
-                testHoot != null && mobile -> "/qunit:WebSuiteMobile.test_hoot"
-                testHoot != null -> "/qunit:WebSuite.test_hoot"
-                testQunit != null && mobile -> "/qunit:WebSuiteMobile.test_qunit"
-                testQunit != null -> "/qunit:WebSuite.test_qunit"
-                else -> null
-            }
-        }
-    }
-
-    depends("test-enable") {
-        flag("stop-after-init") { testEnable }
-        option("log-level") { if (testEnable) "test" else null }
-        option("max-cron-thread") { if (testEnable) "0" else null }
-        option("database") { if (testEnable) "${workspace.name}-test" else workspace.name }
-        option("log-handler") { if (testEnable) "werkzeug:ERROR" else null }
     }
 }
 
