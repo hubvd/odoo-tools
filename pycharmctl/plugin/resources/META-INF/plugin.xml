@@ -1,0 +1,10 @@
+<idea-plugin>
+    <id>org.example.test-plugin</id>
+    <name>PycharmCtl</name>
+    <vendor email="hubvd@protonmail.com" url="https://simplenotes.be">TODO</vendor>
+    <description>TODO</description>
+    <depends>com.intellij.modules.platform</depends>
+    <extensions defaultExtensionNs="com.intellij">
+        <postStartupActivity implementation="com.github.hubvd.odootools.pycharmctl.plugin.PycharmCtlActivity"/>
+    </extensions>
+</idea-plugin>

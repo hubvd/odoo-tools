@@ -7,6 +7,9 @@ include("addons")
 include("actions")
 include("reachability-metadata")
 include("odoo-client")
+include("pycharmctl:api")
+include("pycharmctl:client")
+include("pycharmctl:plugin")
 
 pluginManagement {
     repositories {

@@ -1,5 +1,6 @@
 .fleet/
 .idea/
+.intellijPlatform/
 .gradle/
 build
 node_modules/
