@@ -38,6 +38,13 @@ val COMMANDS_MODULE = DI.Module("Commands") {
         add { singleton { new(::NewCommand) } }
         add { singleton { new(::BisectCommand) } }
         add { singleton { new(::OpenerCommand) } }
+        add {
+            singleton {
+                IsOff(
+                    instance(arg = "odoo"),
+                )
+            }
+        }
     }
 
     bind { singleton { new(::KillCommand) } }
