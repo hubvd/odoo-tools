@@ -17,7 +17,9 @@ import kotlin.io.path.Path
  * the following should be put in the Arguments input:
  * example "$ProjectFileDir$" "$FilePath$" "$LineNumber$" "$ColumnNumber$" $SelectedText$
  */
-abstract class BasePycharmAction(name: String? = null) : CliktCommand(name = name, hidden = true) {
+abstract class BasePycharmAction(name: String? = null) : CliktCommand(name = name) {
+    override val hiddenFromHelp = true
+
     protected abstract val workspaces: Workspaces
 
     protected val workspace by argument().convert { option -> workspaces.list().first { it.path == Path(option) } }

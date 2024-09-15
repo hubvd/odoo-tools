@@ -2,15 +2,16 @@ package com.github.hubvd.odootools.actions.commands
 
 import com.github.ajalt.clikt.core.Abort
 import com.github.ajalt.clikt.core.CliktCommand
+import com.github.ajalt.clikt.core.Context
 import com.github.ajalt.clikt.parameters.arguments.argument
 import com.github.ajalt.clikt.parameters.arguments.multiple
 import com.github.hubvd.odootools.actions.utils.Pycharm
 import com.github.hubvd.odootools.actions.utils.menu
 import com.github.hubvd.odootools.workspace.Workspaces
 
-class PycharmCommand(private val workspaces: Workspaces) : CliktCommand(
-    help = "Open selected files in Pycharm",
-) {
+class PycharmCommand(private val workspaces: Workspaces) : CliktCommand() {
+    override fun help(context: Context) = "Open selected files in Pycharm"
+
     private val paths by argument().multiple()
 
     private val pathRe = "^(?<path>.*?)(?:#(?<line>\\d+)(?::(?<column>\\d+))?)?\$".toRegex()

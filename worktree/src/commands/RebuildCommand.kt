@@ -2,9 +2,9 @@ package com.github.hubvd.odootools.worktree.commands
 
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.CliktError
+import com.github.ajalt.clikt.core.terminal
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
-import com.github.ajalt.mordant.terminal.Terminal
 import com.github.hubvd.odootools.workspace.Workspaces
 import com.github.hubvd.odootools.worktree.OdooStubs
 import com.github.hubvd.odootools.worktree.Pycharm
@@ -12,7 +12,6 @@ import com.github.hubvd.odootools.worktree.Virtualenvs
 import com.github.hubvd.odootools.worktree.processSequence
 
 class RebuildCommand(
-    private val terminal: Terminal,
     private val workspaces: Workspaces,
     private val stubs: OdooStubs,
     private val venvs: Virtualenvs,

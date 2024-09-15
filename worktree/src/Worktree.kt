@@ -2,6 +2,7 @@ package com.github.hubvd.odootools.worktree
 
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.NoOpCliktCommand
+import com.github.ajalt.clikt.core.main
 import com.github.ajalt.clikt.core.subcommands
 import com.github.ajalt.mordant.terminal.Terminal
 import com.github.hubvd.odootools.config.CONFIG_MODULE

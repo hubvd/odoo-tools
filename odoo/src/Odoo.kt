@@ -1,6 +1,7 @@
 package com.github.hubvd.odootools.odoo
 
 import com.github.ajalt.clikt.core.UsageError
+import com.github.ajalt.clikt.core.main
 import com.github.ajalt.clikt.core.subcommands
 import com.github.ajalt.mordant.terminal.Terminal
 import com.github.hubvd.odootools.config.CONFIG_MODULE

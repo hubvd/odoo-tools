@@ -2,6 +2,7 @@ import org.graalvm.buildtools.gradle.dsl.GraalVMExtension
 import org.gradle.api.DefaultTask
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.artifacts.ExternalModuleDependency
 import org.gradle.api.artifacts.VersionCatalogsExtension
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
@@ -25,8 +26,12 @@ class CliApplicationPlugin : Plugin<Project> {
 
         val libs = project.extensions.getByType<VersionCatalogsExtension>().named("libs")
         project.dependencies {
-            dependencies.add("implementation", libs.findLibrary("clikt").get())
-            dependencies.add("implementation", libs.findLibrary("mordant").get())
+            dependencies.add("implementation", libs.findLibrary("clikt").get(), closureOf<ExternalModuleDependency> {
+                exclude(module = "mordant-jvm-jna")
+            })
+            dependencies.add("implementation", libs.findLibrary("mordant").get(), closureOf<ExternalModuleDependency> {
+                exclude(module = "mordant-jvm-jna")
+            })
         }
 
         this.extension = project.extensions.create<CliApplicationPluginExtension>("cli")

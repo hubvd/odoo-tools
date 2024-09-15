@@ -1,11 +1,14 @@
 package com.github.hubvd.odootools.actions.commands.pr
 
 import com.github.ajalt.clikt.core.CliktCommand
+import com.github.ajalt.clikt.core.Context
 import com.github.ajalt.clikt.core.NoOpCliktCommand
 import com.github.ajalt.clikt.core.subcommands
 import org.kodein.di.*
 
-class PrCommand : NoOpCliktCommand(help = "Work with pull requests")
+class PrCommand : NoOpCliktCommand() {
+    override fun help(context: Context) = "Work with pull requests"
+}
 
 val PR_COMMAND_MODULE by DI.Module {
     bindSet<CliktCommand>(tag = "pr") {

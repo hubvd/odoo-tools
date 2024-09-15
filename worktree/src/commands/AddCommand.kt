@@ -3,11 +3,11 @@ package com.github.hubvd.odootools.worktree.commands
 import com.github.ajalt.clikt.completion.CompletionCandidates.Custom.Companion.fromStdout
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.CliktError
+import com.github.ajalt.clikt.core.terminal
 import com.github.ajalt.clikt.parameters.options.*
 import com.github.ajalt.clikt.parameters.types.path
 import com.github.ajalt.mordant.rendering.TextColors
 import com.github.ajalt.mordant.rendering.TextStyles
-import com.github.ajalt.mordant.terminal.Terminal
 import com.github.hubvd.odootools.workspace.Workspace
 import com.github.hubvd.odootools.workspace.WorkspaceConfig
 import com.github.hubvd.odootools.workspace.Workspaces
@@ -18,8 +18,7 @@ import kotlin.io.path.div
 import kotlin.io.path.exists
 
 class AddCommand(
-    private val config: WorkspaceConfig,
-    private val terminal: Terminal,
+    config: WorkspaceConfig,
     private val workspaces: Workspaces,
     private val stubs: OdooStubs,
     private val venvs: Virtualenvs,
@@ -44,6 +43,7 @@ class AddCommand(
             override val base: String
                 get() = this@AddCommand.base
         }
+        val terminal = terminal
         processSequence(terminal) {
             cd(path)
             createGitWorktrees(

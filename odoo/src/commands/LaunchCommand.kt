@@ -1,6 +1,7 @@
 package com.github.hubvd.odootools.odoo.commands
 
 import com.github.ajalt.clikt.core.CliktCommand
+import com.github.ajalt.clikt.core.terminal
 import com.github.ajalt.clikt.parameters.arguments.argument
 import com.github.ajalt.clikt.parameters.arguments.multiple
 import com.github.ajalt.clikt.parameters.options.Option
@@ -15,11 +16,9 @@ class LaunchCommand(
     private val workspaces: Workspaces,
     private val actionProvider: ActionProvider,
     private val config: WorkspaceConfig,
-) : CliktCommand(
-    treatUnknownOptionsAsArgs = true,
-    invokeWithoutSubcommand = true,
-    name = "odoo",
-) {
+) : CliktCommand(name = "odoo") {
+    override val invokeWithoutSubcommand = true
+    override val treatUnknownOptionsAsArgs = true
 
     private val ignores = HashSet<String>()
 

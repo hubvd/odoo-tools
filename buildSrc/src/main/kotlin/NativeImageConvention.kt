@@ -25,13 +25,7 @@ class NativeImageConvention : Plugin<Project> {
         }
         testSupport = true
         binaries {
-            val commonFlags = arrayOf(
-                // FIXME: PR in mordant
-                "--initialize-at-build-time=com.github.ajalt.mordant.internal.nativeimage.NativeImagePosixMppImpls",
-                "--initialize-at-build-time=com.github.ajalt.mordant.internal.syscalls.nativeimage.SyscallHandlerNativeImageLinux",
-                "--initialize-at-build-time=com.github.ajalt.mordant.internal.syscalls.SyscallHandlerPosix\$Companion",
-                "--initialize-at-build-time=com.github.ajalt.mordant.internal.syscalls.SyscallHandlerPosix\$TermiosConstants",
-            )
+            val commonFlags = arrayOf<String>()
 
             named("test") {
                 buildArgs(

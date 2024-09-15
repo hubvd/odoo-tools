@@ -2,6 +2,7 @@ package com.github.hubvd.odootools.actions.commands
 
 import com.github.ajalt.clikt.core.Abort
 import com.github.ajalt.clikt.core.CliktCommand
+import com.github.ajalt.clikt.core.Context
 import com.github.ajalt.clikt.core.terminal
 import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.option
@@ -91,9 +92,8 @@ class BisectCommand(
     private val runbot: Runbot,
     private val workspaces: Workspaces,
     private val git: Git,
-) : CliktCommand(
-    help = "Bisect odoo across multiple repositories",
-) {
+) : CliktCommand() {
+    override fun help(context: Context) = "Bisect odoo across multiple repositories"
 
     private lateinit var odooLegacyRepository: LegacyRepository
     private lateinit var enterpriseLegacyRepository: LegacyRepository

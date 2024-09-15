@@ -1,6 +1,8 @@
 package com.github.hubvd.odootools.actions.commands
 
 import com.github.ajalt.clikt.core.CliktCommand
+import com.github.ajalt.clikt.core.Context
+import com.github.ajalt.clikt.core.terminal
 import com.github.ajalt.mordant.rendering.*
 import com.github.ajalt.mordant.table.grid
 import com.github.ajalt.mordant.terminal.Terminal
@@ -15,12 +17,11 @@ import kotlin.streams.asSequence
 
 private data class Interface(val name: String, val address: Inet4Address)
 class QrCommand(
-    private val terminal: Terminal,
     private val odooctl: Odooctl,
     private val workspaces: Workspaces,
-) : CliktCommand(
-    help = "Show a QR code pointing to running odoo instances",
-) {
+) : CliktCommand() {
+    override fun help(context: Context) = "Show a QR code pointing to running odoo instances"
+
     override fun run() {
         val interfaces = NetworkInterface.networkInterfaces()
             .asSequence()

@@ -1,6 +1,8 @@
 package com.github.hubvd.odootools.actions.commands
 
 import com.github.ajalt.clikt.core.CliktCommand
+import com.github.ajalt.clikt.core.Context
+import com.github.ajalt.clikt.core.terminal
 import com.github.ajalt.clikt.parameters.arguments.argument
 import com.github.ajalt.clikt.parameters.arguments.defaultLazy
 import com.github.ajalt.clikt.parameters.groups.mutuallyExclusiveOptions
@@ -12,7 +14,6 @@ import com.github.ajalt.clikt.parameters.options.validate
 import com.github.ajalt.clikt.parameters.types.file
 import com.github.ajalt.mordant.animation.progress.animateOnThread
 import com.github.ajalt.mordant.animation.progress.execute
-import com.github.ajalt.mordant.terminal.Terminal
 import com.github.ajalt.mordant.widgets.progress.completed
 import com.github.ajalt.mordant.widgets.progress.progressBar
 import com.github.ajalt.mordant.widgets.progress.progressBarLayout
@@ -52,12 +53,11 @@ sealed class DumpSource {
 }
 
 class RestoreCommand(
-    private val terminal: Terminal,
     private val dumpPassword: Secret,
     private val httpHandler: HttpHandler,
-) : CliktCommand(
-    help = "Restore an odoo database dump, either from a runbot or a zip",
-) {
+) : CliktCommand() {
+    override fun help(context: Context) = "Restore an odoo database dump, either from a runbot or a zip"
+
     private val source by mutuallyExclusiveOptions(
         option("-z", "--zip").file(mustExist = true, canBeFile = true, canBeDir = false)
             .convert { DumpSource.ZipSource(it) }

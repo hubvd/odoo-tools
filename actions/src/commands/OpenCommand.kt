@@ -1,6 +1,7 @@
 package com.github.hubvd.odootools.actions.commands
 
 import com.github.ajalt.clikt.core.CliktCommand
+import com.github.ajalt.clikt.core.Context
 import com.github.ajalt.clikt.parameters.groups.mutuallyExclusiveOptions
 import com.github.ajalt.clikt.parameters.groups.single
 import com.github.ajalt.clikt.parameters.options.convert
@@ -10,9 +11,9 @@ import com.github.hubvd.odootools.actions.utils.BrowserService
 import com.github.hubvd.odootools.actions.utils.Odooctl
 import com.github.hubvd.odootools.actions.utils.selectInstance
 
-class OpenCommand(private val odooctl: Odooctl, private val browserService: BrowserService) : CliktCommand(
-    help = "Open the selected odoo instance in a web browser",
-) {
+class OpenCommand(private val odooctl: Odooctl, private val browserService: BrowserService) : CliktCommand() {
+    override fun help(context: Context) = "Open the selected odoo instance in a web browser"
+
     private val type by mutuallyExclusiveOptions(
         option("-q", "--qunit").flag().convert { Type.QUnit },
         option("-h", "--hoot", "-u", "--unit").flag().convert { Type.Hoot },

@@ -35,7 +35,7 @@ internal val ACTION_MODULE by DI.Module {
 
     bind<NotificationService> {
         singleton {
-            instance<Terminal>().takeIf { it.info.outputInteractive }
+            instance<Terminal>().takeIf { it.terminalInfo.outputInteractive }
                 ?.let { TerminalNotificationService(it) }
                 ?: SystemNotificationService()
         }
@@ -111,8 +111,8 @@ private fun getFormattedHelp(error: CliktError, rootCommand: CliktCommand, symli
         .joinToString(" ")
     return ctx.helpFormatter(ctx).formatHelp(
         error as? UsageError,
-        command.commandHelp(ctx),
-        command.commandHelpEpilog(ctx),
+        command.help(ctx),
+        command.helpEpilog(ctx),
         command.allHelpParams(),
         programName,
     )

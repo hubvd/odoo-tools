@@ -1,6 +1,7 @@
 package com.github.hubvd.odootools.odoo.commands
 
 import com.github.ajalt.clikt.core.CliktCommand
+import com.github.ajalt.clikt.core.terminal
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
 import com.github.ajalt.clikt.parameters.types.enum
@@ -21,15 +22,17 @@ enum class CompletionType { Addon, Qunit, Hoot, TestTag, Lang }
 @Serializable
 private data class Ctag(val name: String, val scope: String? = null, val scopeKind: String? = null)
 
-class CompleteCommand(private val workspaces: Workspaces) : CliktCommand(hidden = true) {
+class CompleteCommand(private val workspaces: Workspaces) : CliktCommand() {
     private val token by option(help = "current token").required()
     private val type by option().enum<CompletionType>().required()
+
+    override val hiddenFromHelp = true
 
     private lateinit var arguments: List<String>
     private lateinit var workspace: Workspace
 
     override fun run() {
-        arguments = if (currentContext.terminal.info.inputInteractive) {
+        arguments = if (currentContext.terminal.terminalInfo.inputInteractive) {
             emptyList()
         } else {
             System.`in`.bufferedReader().use { it.lineSequence().toList() }

@@ -55,7 +55,7 @@ abstract class BaseCopyCommand(
         if (instance != null && window != null) {
             restartOdoo(window, instance)
         }
-        if (!terminal.info.interactive) {
+        if (!terminal.terminalInfo.interactive) {
             notificationService.info(notificationMessage(database))
         }
     }

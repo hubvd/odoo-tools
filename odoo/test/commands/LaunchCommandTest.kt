@@ -5,6 +5,7 @@ import assertk.assertions.containsExactlyInAnyOrder
 import assertk.assertions.containsOnly
 import assertk.assertions.isEmpty
 import assertk.assertions.isEqualTo
+import com.github.ajalt.clikt.core.parse
 import com.github.hubvd.odootools.odoo.ODOO_MODULE
 import com.github.hubvd.odootools.odoo.RunConfiguration
 import com.github.hubvd.odootools.odoo.actions.Action

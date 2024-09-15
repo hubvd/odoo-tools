@@ -2,6 +2,7 @@ package com.github.hubvd.odootools.actions.commands
 
 import com.github.ajalt.clikt.core.Abort
 import com.github.ajalt.clikt.core.CliktCommand
+import com.github.ajalt.clikt.core.Context
 import com.github.ajalt.clikt.parameters.arguments.argument
 import com.github.ajalt.clikt.parameters.arguments.defaultLazy
 import com.github.ajalt.clikt.parameters.arguments.optional
@@ -18,9 +19,9 @@ class NewCommand(
     private val workspaces: Workspaces,
     private val notificationService: NotificationService,
     private val config: ActionsConfig,
-) : CliktCommand(
-    help = "Create or switch to a branch with the selected id",
-) {
+) : CliktCommand() {
+    override fun help(context: Context) = "Create or switch to a branch with the selected id"
+
     private val isSentry by option("-s", "--sentry").flag()
     private val id by argument().int().defaultLazy { Clipboard.read().toInt() }
     private val description by argument().optional()

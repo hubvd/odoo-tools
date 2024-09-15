@@ -2,30 +2,36 @@ package com.github.hubvd.odootools.actions.commands
 
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.CliktError
+import com.github.ajalt.clikt.core.Context
+import com.github.ajalt.clikt.core.terminal
 import com.github.ajalt.clikt.parameters.arguments.argument
 import com.github.ajalt.clikt.parameters.arguments.defaultLazy
-import com.github.ajalt.mordant.terminal.Terminal
 import com.github.hubvd.odootools.actions.kitty.Kitty
-import com.github.hubvd.odootools.actions.utils.*
+import com.github.hubvd.odootools.actions.utils.BranchLookup
+import com.github.hubvd.odootools.actions.utils.BranchRef
+import com.github.hubvd.odootools.actions.utils.Clipboard
+import com.github.hubvd.odootools.actions.utils.NotificationService
 import com.github.hubvd.odootools.workspace.Workspaces
 import com.github.pgreze.process.Redirect.CAPTURE
 import com.github.pgreze.process.Redirect.SILENT
 import com.github.pgreze.process.process
-import kotlinx.coroutines.*
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.runBlocking
 import java.io.File
 
 class CheckoutCommand(
     private val workspaces: Workspaces,
-    private val terminal: Terminal,
     private val notificationService: NotificationService,
     private val branchLookup: BranchLookup,
     private val kitty: Kitty,
-) : CliktCommand(
-    help = "Checkout a pull request from a github url or a commit ref (remote:branch)",
-) {
+) : CliktCommand() {
+    override fun help(context: Context) = "Checkout a pull request from a github url or a commit ref (remote:branch)"
+
     private val branch by argument().defaultLazy { Clipboard.read() }
 
     override fun run() {
+        val terminal = currentContext.terminal
         val ref = branchLookup(branch)
             ?: throw CliktError("Couldn't extract base branch")
 
@@ -47,7 +53,7 @@ class CheckoutCommand(
                 async { fetchAndCheckout(ref, workspace.path.resolve("odoo").toFile()) },
                 async { fetchAndCheckout(ref, workspace.path.resolve("enterprise").toFile()) },
             )
-            if (!terminal.info.outputInteractive) {
+            if (!terminal.terminalInfo.outputInteractive) {
                 kitty.openGit(workspace, odoo, enterprise)
             }
         }

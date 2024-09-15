@@ -1,8 +1,10 @@
 package com.github.hubvd.odootools.actions.commands.pr
 
 import com.github.ajalt.clikt.core.CliktCommand
+import com.github.ajalt.clikt.core.Context
 import com.github.ajalt.clikt.core.MissingOption
 import com.github.ajalt.clikt.core.PrintMessage
+import com.github.ajalt.clikt.core.terminal
 import com.github.ajalt.clikt.parameters.arguments.argument
 import com.github.ajalt.clikt.parameters.arguments.optional
 import com.github.ajalt.clikt.parameters.options.default
@@ -23,9 +25,9 @@ import com.github.ajalt.mordant.widgets.Text
 import com.github.hubvd.odootools.actions.ActionsConfig
 import com.github.hubvd.odootools.actions.utils.*
 
-class ListCommand(private val github: GithubClient, private val config: ActionsConfig) : CliktCommand(
-    help = "List pull requests involved with the selected username",
-) {
+class ListCommand(private val github: GithubClient, private val config: ActionsConfig) : CliktCommand() {
+    override fun help(context: Context) = "List pull requests involved with the selected username"
+
     private val closed by option().flag()
     private val githubUsername by option().defaultLazy {
         config.githubUsernames[odooUsername] ?: throw MissingOption(

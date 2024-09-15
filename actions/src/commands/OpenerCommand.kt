@@ -2,6 +2,7 @@ package com.github.hubvd.odootools.actions.commands
 
 import com.github.ajalt.clikt.core.Abort
 import com.github.ajalt.clikt.core.CliktCommand
+import com.github.ajalt.clikt.core.Context
 import com.github.ajalt.clikt.parameters.arguments.argument
 import com.github.ajalt.clikt.parameters.arguments.defaultLazy
 import com.github.ajalt.clikt.parameters.groups.mutuallyExclusiveOptions
@@ -12,7 +13,9 @@ import com.github.ajalt.clikt.parameters.options.option
 import com.github.hubvd.odootools.actions.utils.BrowserService
 import com.github.hubvd.odootools.actions.utils.Clipboard
 
-class OpenerCommand(private val browserService: BrowserService) : CliktCommand(help = "Opens a PR/Task") {
+class OpenerCommand(private val browserService: BrowserService) : CliktCommand() {
+    override fun help(context: Context) = "Opens a PR/Task"
+
     private val input by argument().defaultLazy { Clipboard.read(selection = true) }
 
     private val type by mutuallyExclusiveOptions(

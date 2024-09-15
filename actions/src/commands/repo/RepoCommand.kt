@@ -2,6 +2,7 @@
 package com.github.hubvd.odootools.actions.commands.repo
 
 import com.github.ajalt.clikt.core.CliktCommand
+import com.github.ajalt.clikt.core.obj
 import com.github.ajalt.clikt.core.registerCloseable
 import com.github.ajalt.clikt.core.subcommands
 import com.github.ajalt.clikt.parameters.options.flag
@@ -38,9 +39,9 @@ class WorkspaceRepositories(val workspace: Workspace) : AutoCloseable {
 
 class RepoCommand(
     private val workspaces: Workspaces,
-) : CliktCommand(
-    allowMultipleSubcommands = true,
-) {
+) : CliktCommand() {
+    override val allowMultipleSubcommands = true
+
     private val all by option("-a", "--all").flag()
 
     override fun run() = runBlocking {
