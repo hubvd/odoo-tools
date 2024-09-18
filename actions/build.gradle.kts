@@ -20,6 +20,8 @@ cli {
         "opener",
         "db",
         "repo",
+        "is-off",
+        "who-is",
     )
 }
 

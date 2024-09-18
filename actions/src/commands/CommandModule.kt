@@ -27,7 +27,6 @@ val COMMANDS_MODULE = DI.Module("Commands") {
         add {
             singleton {
                 RestoreCommand(
-                    terminal = instance(),
                     dumpPassword = instance(tag = "odoo_dump_password"),
                     httpHandler = instance(),
                 )
@@ -38,13 +37,8 @@ val COMMANDS_MODULE = DI.Module("Commands") {
         add { singleton { new(::NewCommand) } }
         add { singleton { new(::BisectCommand) } }
         add { singleton { new(::OpenerCommand) } }
-        add {
-            singleton {
-                IsOff(
-                    instance(arg = "odoo"),
-                )
-            }
-        }
+        add { singleton { IsOffCommand(instance(arg = "odoo")) } }
+        add { singleton { WhoIsCommand(instance(arg = "odoo")) } }
     }
 
     bind { singleton { new(::KillCommand) } }

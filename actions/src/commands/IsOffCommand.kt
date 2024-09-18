@@ -25,7 +25,7 @@ private data class Leave(
     val stopDatetime: String,
 )
 
-class IsOff(private val odooClient: OdooClient) : CliktCommand() {
+class IsOffCommand(private val odooClient: OdooClient) : CliktCommand() {
     private val username by argument().validate {
         require(it.length in 3..4) {
             "not a valid trigram"

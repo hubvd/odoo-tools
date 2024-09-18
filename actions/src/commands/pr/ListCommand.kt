@@ -29,12 +29,12 @@ class ListCommand(private val github: GithubClient, private val config: ActionsC
     override fun help(context: Context) = "List pull requests involved with the selected username"
 
     private val closed by option().flag()
-    private val githubUsername by option().defaultLazy {
+    private val githubUsername by option("-g", "--github-username").defaultLazy {
         config.githubUsernames[odooUsername] ?: throw MissingOption(
             registeredOptions().find { it.names.contains("--github-username") }!!,
         )
     }
-    private val odooUsername by option().default(config.trigram)
+    private val odooUsername by option("-o", "--odoo-username").default(config.trigram)
     private val title by argument().optional()
 
     override fun run() {
