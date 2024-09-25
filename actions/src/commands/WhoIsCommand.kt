@@ -6,7 +6,7 @@ import com.github.ajalt.clikt.core.terminal
 import com.github.ajalt.clikt.parameters.groups.required
 import com.github.ajalt.mordant.rendering.TextColors.cyan
 import com.github.ajalt.mordant.rendering.TextColors.magenta
-import com.github.hubvd.odootools.actions.utils.UserId
+import com.github.hubvd.odootools.actions.utils.User
 import com.github.hubvd.odootools.actions.utils.userIdOption
 import com.github.hubvd.odootools.odoo.client.OdooClient
 import com.github.hubvd.odootools.odoo.client.core.ModelReference
@@ -27,11 +27,11 @@ class WhoIsCommand(private val odooClient: OdooClient) : CliktCommand() {
     override fun run() {
         val user = odooClient.searchRead<Employee>("hr.employee.public", limit = 1) {
             when (val userId = userId) {
-                is UserId.GithubUserId -> {
+                is User.GithubUser -> {
                     "github_login" eq userId.username
                 }
 
-                is UserId.OdooUserId -> {
+                is User.OdooUser -> {
                     "name" like "(${userId.username})"
                 }
             }

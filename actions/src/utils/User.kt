@@ -7,12 +7,12 @@ import com.github.ajalt.clikt.parameters.groups.single
 import com.github.ajalt.clikt.parameters.options.convert
 import com.github.ajalt.clikt.parameters.options.option
 
-fun ParameterHolder.userIdOption(): MutuallyExclusiveOptions<UserId, UserId?> = mutuallyExclusiveOptions(
-    option("-o", "--odoo-username").convert { UserId.OdooUserId(it) },
-    option("-g", "--github-username").convert { UserId.GithubUserId(it) },
+fun ParameterHolder.userIdOption(): MutuallyExclusiveOptions<User, User?> = mutuallyExclusiveOptions(
+    option("-o", "--odoo-username").convert { User.OdooUser(it) },
+    option("-g", "--github-username").convert { User.GithubUser(it) },
 ).single()
 
-sealed class UserId {
-    data class OdooUserId(val username: String) : UserId()
-    data class GithubUserId(val username: String) : UserId()
+sealed class User {
+    data class OdooUser(val username: String) : User()
+    data class GithubUser(val username: String) : User()
 }

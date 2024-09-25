@@ -24,7 +24,6 @@ data class ActionsConfig(
     val dumpPassword: String,
     val githubApiKey: String,
     val browsers: BrowserConfig = BrowserConfig(),
-    val githubUsernames: Map<String, String>,
     val trigram: String,
 )
 

@@ -31,6 +31,8 @@ internal val ACTION_MODULE by DI.Module {
 
     bind { singleton { new(::Odooctl) } }
     bind { singleton { Terminal() } }
+    bindSingleton { new(::UserPersistence) }
+    bindSingleton { UserService(instance(), instance(arg = "odoo")) }
     bind<HttpHandler> { singleton { JavaHttpClient() } }
 
     bind<NotificationService> {

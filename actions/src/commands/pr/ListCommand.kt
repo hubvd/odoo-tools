@@ -1,14 +1,13 @@
 package com.github.hubvd.odootools.actions.commands.pr
 
+import com.github.ajalt.clikt.core.Abort
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.Context
-import com.github.ajalt.clikt.core.MissingOption
 import com.github.ajalt.clikt.core.PrintMessage
 import com.github.ajalt.clikt.core.terminal
 import com.github.ajalt.clikt.parameters.arguments.argument
 import com.github.ajalt.clikt.parameters.arguments.optional
-import com.github.ajalt.clikt.parameters.options.default
-import com.github.ajalt.clikt.parameters.options.defaultLazy
+import com.github.ajalt.clikt.parameters.groups.default
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.colormath.model.RGB
@@ -25,24 +24,37 @@ import com.github.ajalt.mordant.widgets.Text
 import com.github.hubvd.odootools.actions.ActionsConfig
 import com.github.hubvd.odootools.actions.utils.*
 
-class ListCommand(private val github: GithubClient, private val config: ActionsConfig) : CliktCommand() {
+class ListCommand(
+    private val github: GithubClient,
+    private val userService: UserService,
+    config: ActionsConfig,
+) : CliktCommand() {
     override fun help(context: Context) = "List pull requests involved with the selected username"
 
     private val closed by option().flag()
-    private val githubUsername by option("-g", "--github-username").defaultLazy {
-        config.githubUsernames[odooUsername] ?: throw MissingOption(
-            registeredOptions().find { it.names.contains("--github-username") }!!,
-        )
-    }
-    private val odooUsername by option("-o", "--odoo-username").default(config.trigram)
+    private val user by userIdOption().default(User.OdooUser(config.trigram))
     private val title by argument().optional()
 
     override fun run() {
         val terminal = currentContext.terminal
         terminal.print(brightBlue("Fetching pull requests.."))
 
+        val odooUser: User.OdooUser
+        val githubUser: User.GithubUser
+        when (val userId = user) {
+            is User.GithubUser -> {
+                githubUser = userId
+                odooUser = userService[userId] ?: throw Abort()
+            }
+
+            is User.OdooUser -> {
+                odooUser = userId
+                githubUser = userService[userId] ?: throw Abort()
+            }
+        }
+
         val prResult = github.findPullRequests(
-            username = if (title == null) githubUsername else null,
+            username = if (title == null) githubUser.username else null,
             open = !closed,
             title = title,
         )
@@ -65,7 +77,7 @@ class ListCommand(private val github: GithubClient, private val config: ActionsC
 
         val (ownPrs, involvedPrs) = prResult.fold(
             { throw PrintMessage(it.toString(), statusCode = 1) },
-            { it.partition { odooUsername in it.headRefName } },
+            { it.partition { odooUser.username in it.headRefName } },
         )
         with(terminal) {
             println(pullRequestGroupWidget("Pull Requests", ownPrs))
