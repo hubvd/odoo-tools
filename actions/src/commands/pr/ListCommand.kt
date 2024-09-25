@@ -11,15 +11,15 @@ import com.github.ajalt.clikt.parameters.groups.default
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.colormath.model.RGB
-import com.github.ajalt.mordant.rendering.TextAlign
 import com.github.ajalt.mordant.rendering.TextColors.*
 import com.github.ajalt.mordant.rendering.TextStyle
 import com.github.ajalt.mordant.rendering.TextStyles.Companion.hyperlink
+import com.github.ajalt.mordant.rendering.TextStyles.underline
 import com.github.ajalt.mordant.rendering.Widget
 import com.github.ajalt.mordant.table.horizontalLayout
 import com.github.ajalt.mordant.table.verticalLayout
 import com.github.ajalt.mordant.widgets.EmptyWidget
-import com.github.ajalt.mordant.widgets.Panel
+import com.github.ajalt.mordant.widgets.HorizontalRule
 import com.github.ajalt.mordant.widgets.Text
 import com.github.hubvd.odootools.actions.ActionsConfig
 import com.github.hubvd.odootools.actions.utils.*
@@ -31,7 +31,8 @@ class ListCommand(
 ) : CliktCommand() {
     override fun help(context: Context) = "List pull requests involved with the selected username"
 
-    private val closed by option().flag()
+    private val closed by option("-c", "--closed").flag()
+    private val involved by option("-i", "--involved", "-r", "--reviews").flag()
     private val user by userIdOption().default(User.OdooUser(config.trigram))
     private val title by argument().optional()
 
@@ -70,7 +71,7 @@ class ListCommand(
                 { it },
             )
             with(terminal) {
-                println(pullRequestGroupWidget("Pull Requests", prs))
+                println(pullRequestGroupSectionWidget(prs))
             }
             return
         }
@@ -80,31 +81,30 @@ class ListCommand(
             { it.partition { odooUser.username in it.headRefName } },
         )
         with(terminal) {
-            println(pullRequestGroupWidget("Pull Requests", ownPrs))
-            println(pullRequestGroupWidget("Reviews", involvedPrs))
+            if (involved) {
+                println(HorizontalRule("Pull Requests", ruleStyle = gray))
+            }
+            println(pullRequestGroupSectionWidget(ownPrs))
+            if (involved) {
+                println(HorizontalRule("Reviews", ruleStyle = gray))
+                println(pullRequestGroupSectionWidget(involvedPrs))
+            }
         }
     }
 }
 
-private fun pullRequestGroupWidget(title: String, pullRequests: List<PullRequest>): Widget =
-    if (pullRequests.isEmpty()) {
-        EmptyWidget
-    } else {
-        Panel(
-            verticalLayout {
-                spacing = 1
-                pullRequests
-                    .groupBy { it.parent() ?: it.id }
-                    .values
-                    .map { it.sortedBy { it.id } }
-                    .forEach { cell(pullRequestGroupWidget(it)) }
-            },
-            title = Text(title),
-            titleAlign = TextAlign.LEFT,
-            borderStyle = gray,
-            expand = true,
-        )
+private fun pullRequestGroupSectionWidget(pullRequests: List<PullRequest>): Widget = if (pullRequests.isEmpty()) {
+    EmptyWidget
+} else {
+    verticalLayout {
+        spacing = 1
+        pullRequests
+            .groupBy { it.parent() ?: it.id }
+            .values
+            .map { it.sortedBy { it.id } }
+            .forEach { cell(pullRequestGroupWidget(it)) }
     }
+}
 
 fun pullRequestGroupWidget(pullRequests: List<PullRequest>): Widget {
     if (pullRequests.size == 1) {
@@ -165,10 +165,36 @@ fun pullRequestWidget(pullRequest: PullRequest): Pair<Text, Int> {
                 append(TAG_STYLE('[' + it.context + ']'))
                 appendLine(yellow(" " + it.targetUrl))
             }
-        append(pullRequest.headRefName)
+
+        var branch = pullRequest.headRefName
+        TASK_RE.find(branch)?.let { match ->
+            branch = branch.replaceRange(match.range, magenta(match.value))
+        }
+
+        END_RE.find(branch)?.let { match ->
+            val idMatch = match.groups["id"]!!
+            val newId = underline(idMatch.value)
+            branch = branch.replaceRange(idMatch.range, newId)
+            match.groups["fw"]?.let { group ->
+                val offset = newId.length - idMatch.value.length
+                branch = branch.replaceRange(
+                    group.range.start + offset,
+                    group.range.endInclusive + 1 + offset,
+                    gray(group.value),
+                )
+            }
+        }
+
+        TARGET_RE.find(branch)?.let { match ->
+            branch = branch.replaceRange(match.range, cyan(match.value))
+        }
+        append(branch)
     }
     return Text(text) to text.count { it == '\n' } + 1
 }
 
+private val TASK_RE = Regex("""(?:task|opw|sentry)-\d+""")
+private val END_RE = Regex("""(?<id>[a-z]{2,4})-?(?<fw>[a-zA-Z0-9_-]{4}-fw)?$""")
+private val TARGET_RE = Regex("""(?:master|(?:saas-)?\d{2}\.\d)(?:-(?:saas-)?\d{2}\.\d)?""")
 private val TAG_STYLE = TextStyle(RGB("#61afef"))
 private val TAG_RE = Regex("""^(\[\S*])(.*)$""")
