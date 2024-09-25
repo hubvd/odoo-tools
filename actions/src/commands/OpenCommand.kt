@@ -8,8 +8,11 @@ import com.github.ajalt.clikt.parameters.options.convert
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.hubvd.odootools.actions.utils.BrowserService
+import com.github.hubvd.odootools.actions.utils.OdooInstance
 import com.github.hubvd.odootools.actions.utils.Odooctl
 import com.github.hubvd.odootools.actions.utils.selectInstance
+import kotlin.io.path.div
+import kotlin.io.path.forEachLine
 
 class OpenCommand(private val odooctl: Odooctl, private val browserService: BrowserService) : CliktCommand() {
     override fun help(context: Context) = "Open the selected odoo instance in a web browser"
@@ -29,12 +32,24 @@ class OpenCommand(private val odooctl: Odooctl, private val browserService: Brow
         }
         val choice = selectInstance(instances) ?: return
         val path = when (type) {
-            Type.Hoot -> "/web/tests/next"
-            Type.QUnit -> "/web/tests"
-            null -> "/web"
+            Type.Hoot -> urls(choice).second
+            Type.QUnit -> urls(choice).first
+            else -> "/web"
         }
         val url = "${choice.baseUrl}$path?debug=assets"
         if (firefox) browserService.firefox(url) else browserService.chrome(url)
+    }
+
+    private fun urls(odoo: OdooInstance): Pair<String, String> {
+        if (odoo.workspace.version < 17.2f) return "/web/tests" to "UNSUPPORTED"
+        (odoo.workspace.path / "odoo/addons/web/controllers/webclient.py").forEachLine { line ->
+            if (line.contains("/web/tests/legacy")) {
+                return "/web/tests/legacy" to "/web/tests"
+            } else if (line.contains("def test_suite(")) {
+                return@forEachLine
+            }
+        }
+        return "/web/tests" to "/web/tests/next"
     }
 
     private enum class Type { Hoot, QUnit }

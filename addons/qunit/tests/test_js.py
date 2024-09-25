@@ -1,6 +1,21 @@
 import os
 import odoo.tests
 
+qunit_url = "UNSUPPORTED"
+hoot_url = "UNSUPPORTED"
+
+try:
+    from odoo.addons.web.controllers.webclient import WebClient
+
+    qunit_url = WebClient.test_suite.original_routing.get("routes", [])[0]
+    try:
+        hoot_url = WebClient.unit_tests_suite.original_routing.get("routes", [])[0]
+    except:
+        pass
+except:
+    qunit_url = "/web/tests"
+    hoot_url = "/web/tests/next"
+
 
 def unit_test_error_checker(message):
     return (
@@ -25,7 +40,7 @@ def qunit_error_checker(message):
 
 @odoo.tests.tagged("post_install", "-at_install")
 class WebSuite(odoo.tests.HttpCase):
-    url = "/web/tests?mod=web"
+    url = f"{qunit_url}?mod=web"
     hoot_params = {"preset": "desktop"}
 
     def test_qunit(self):
@@ -41,7 +56,7 @@ class WebSuite(odoo.tests.HttpCase):
         )
 
     def test_hoot(self):
-        url = "/web/tests/next"
+        url = hoot_url
 
         params = {**self.hoot_params, "loglevel": "2"}
 
@@ -69,7 +84,7 @@ class WebSuite(odoo.tests.HttpCase):
 
 @odoo.tests.tagged("post_install", "-at_install")
 class WebSuiteMobile(WebSuite):
-    url = "/web/tests/mobile?mod=web"
+    url = "{qunit_url}/mobile?mod=web"
     browser_size = "375x667"
     touch_enabled = True
     hoot_params = {
