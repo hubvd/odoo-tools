@@ -1,15 +1,17 @@
 import os
 import time
+import logging
 
-import odoo.tests.common
-from odoo import api
 from odoo.release import version_info
-from odoo.service import security
-from odoo.tests.common import (
-    get_db_name,
-    HOST,
-    Opener,
-)
+
+test_logger = logging.getLogger("odoo.tests.common")
+initial_level = test_logger.getEffectiveLevel()
+test_logger.setLevel(logging.CRITICAL)
+
+from odoo.tests import HttpCase
+from odoo.tests.common import ChromeBrowser
+
+test_logger.setLevel(initial_level)
 
 from .patch_tools import patch_arguments, side_effect
 
@@ -29,9 +31,6 @@ def _spawn_chrome_lt_16_4(self, cmd):
 def _json_command(res, self, command, *args, **kwargs):
     if command == "":
         self.dev_tools_frontend_url = res.get("devtoolsFrontendUrl")
-
-
-ChromeBrowser = odoo.tests.common.ChromeBrowser
 
 
 def browser_js(*args, **kwargs):
@@ -93,14 +92,14 @@ class WebTests:
         if version < 16:
             side_effect(ChromeBrowser, "_json_command", _json_command)
             patch_arguments(ChromeBrowser, "_wait_code_ok", _wait_code_ok_lt_16)
-            odoo.tests.HttpCase.start_browser = start_browser_lt_16
+            HttpCase.start_browser = start_browser_lt_16
 
         # Override watch if QUNIT_WATCH is set
         if version >= 16:
-            patch_arguments(odoo.tests.HttpCase, "browser_js", browser_js)
+            patch_arguments(HttpCase, "browser_js", browser_js)
 
         # Override step_delay if STEP_DELAY is set
-        patch_arguments(odoo.tests.HttpCase, "start_tour", start_tour)
+        patch_arguments(HttpCase, "start_tour", start_tour)
 
         if version >= 16.4:
             return
