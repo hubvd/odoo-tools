@@ -33,7 +33,7 @@ for patch in patches:
 
 # set server timezone in UTC before time module imported
 __import__("os").environ["TZ"] = "UTC"
-import odoo
+import odoo.cli
 
 if __name__ == "__main__":
     odoo.cli.main()

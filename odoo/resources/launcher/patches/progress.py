@@ -8,7 +8,7 @@ from rich.progress import (
 
 from .console import console
 
-import odoo
+import odoo.modules.loading
 
 
 class WrappedGraph:
