@@ -15,6 +15,7 @@ import org.http4k.core.*
 import org.http4k.core.cookie.cookie
 import org.http4k.filter.ClientFilters
 import org.http4k.filter.RequestFilters
+import org.http4k.filter.ResponseFilters
 import kotlin.random.Random
 
 class OdooClient(
@@ -29,6 +30,7 @@ class OdooClient(
 
     private val client = ClientFilters.SetHostFrom(Uri.of(credential.host))
         .then(RequestFilters.SetHeader("Content-Type", "application/json"))
+        .then(ResponseFilters.GunZip())
         .then(client)
 
     fun <T> rpc(

@@ -12,11 +12,13 @@ import kotlinx.serialization.json.*
 import org.http4k.core.*
 import org.http4k.filter.ClientFilters
 import org.http4k.filter.RequestFilters
+import org.http4k.filter.ResponseFilters
 
 class GithubClient(githubApiKey: Secret, httpHandler: HttpHandler) {
     private val client = ClientFilters.SetHostFrom(Uri.of("https://api.github.com"))
         .then(RequestFilters.SetHeader("Content-Type", "application/vnd.github+json"))
         .then(ClientFilters.BearerAuth { githubApiKey.value })
+        .then(ResponseFilters.GunZip())
         .then(httpHandler)
 
     fun lookupBranch(value: String): BranchRef? {
