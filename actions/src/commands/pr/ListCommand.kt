@@ -26,7 +26,7 @@ import com.github.hubvd.odootools.actions.utils.*
 
 class ListCommand(
     private val github: GithubClient,
-    private val userService: UserService,
+    private val employeeService: EmployeeService,
     config: ActionsConfig,
 ) : CliktCommand() {
     override fun help(context: Context) = "List pull requests involved with the selected username"
@@ -45,12 +45,12 @@ class ListCommand(
         when (val userId = user) {
             is User.GithubUser -> {
                 githubUser = userId
-                odooUser = userService[userId] ?: throw Abort()
+                odooUser = employeeService[userId] ?: throw Abort()
             }
 
             is User.OdooUser -> {
                 odooUser = userId
-                githubUser = userService[userId] ?: throw Abort()
+                githubUser = employeeService[userId] ?: throw Abort()
             }
         }
 

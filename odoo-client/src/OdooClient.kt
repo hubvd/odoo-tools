@@ -75,7 +75,7 @@ class OdooClient(
         domain: JsonElement,
         offset: Int = 0,
         limit: Int = -1,
-        order: String?,
+        order: String? = null,
     ): List<T> = rpc(
         model,
         "search_read",

@@ -50,6 +50,8 @@ fun domain(block: DomainBuilder.() -> Condition): JsonElement {
         override fun String.le(value: Any) = jsonCondition(this, "<=", value)
         override fun String.ge(value: Any) = jsonCondition(this, ">=", value)
         override fun String.like(value: Any) = jsonCondition(this, "like", value)
+        override fun String.ilike(value: Any) = jsonCondition(this, "ilike", value)
+        override fun String.`=ilike`(value: Any) = jsonCondition(this, "=ilike", value)
     }
 
     val condition = block(builder)
@@ -79,6 +81,8 @@ interface DomainBuilder {
     infix fun String.le(value: Any): Condition
     infix fun String.ge(value: Any): Condition
     infix fun String.like(value: Any): Condition
+    infix fun String.ilike(value: Any): Condition
+    infix fun String.`=ilike`(value: Any): Condition
 }
 
 data class Condition(val jsonElement: JsonElement) {
