@@ -9,9 +9,15 @@ import com.github.ajalt.mordant.rendering.TextColors
 import com.github.ajalt.mordant.table.grid
 import com.github.hubvd.odootools.odoo.client.OdooClient
 import com.github.hubvd.odootools.odoo.client.searchRead
+import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.descriptors.PrimitiveKind
+import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
 import java.time.DayOfWeek
 import java.time.LocalDateTime
+import java.time.YearMonth
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
@@ -21,9 +27,27 @@ import java.util.Locale
 @Serializable
 private data class Leave(
     private val id: Long,
-    val startDatetime: String,
-    val stopDatetime: String,
+    @Serializable(UtcToSystemDefaultZonedDateTimeSerializer::class) val startDatetime: ZonedDateTime,
+    @Serializable(UtcToSystemDefaultZonedDateTimeSerializer::class) val stopDatetime: ZonedDateTime,
 )
+
+private val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+private val utc = ZoneId.of("UTC")
+
+private class UtcToSystemDefaultZonedDateTimeSerializer : KSerializer<ZonedDateTime> {
+    override val descriptor = PrimitiveSerialDescriptor(
+        "UtcToSystemDefaultZonedDateTimeSerializer",
+        PrimitiveKind.STRING,
+    )
+
+    override fun serialize(encoder: Encoder, value: ZonedDateTime) {
+        TODO("Not yet implemented")
+    }
+
+    override fun deserialize(decoder: Decoder): ZonedDateTime = LocalDateTime.parse(decoder.decodeString(), formatter)
+        .atZone(utc)
+        .withZoneSameInstant(ZoneId.systemDefault())
+}
 
 class IsOffCommand(private val odooClient: OdooClient) : CliktCommand() {
     private val username by argument().validate {
@@ -36,35 +60,30 @@ class IsOffCommand(private val odooClient: OdooClient) : CliktCommand() {
         val firstDay = DayOfWeek.MONDAY // WeekFields.of(Locale.getDefault()).firstDayOfWeek
         val now = LocalDateTime.now()
         val month = now.month
-        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+        val start = YearMonth.from(now)
+            .plusMonths(-1)
+            .atEndOfMonth()
+            .atTime(23, 59, 59)
+            .atZone(ZoneId.systemDefault())
+            .withZoneSameInstant(utc)
+        val end = YearMonth
+            .from(now)
+            .atEndOfMonth()
+            .atTime(23, 59, 59)
+            .atZone(ZoneId.systemDefault())
+            .withZoneSameInstant(utc)
 
-        val records = odooClient.searchRead<Leave>("hr.leave.report.calendar") {
-            ("employee_id.name" like "($username)") and ("start_datetime" le "2024-09-30 22:00:00") and
-                ("stop_datetime" ge "2024-08-31 22:00:00")
-        }
-
-        val slots = records.map {
-            val start = LocalDateTime.parse(it.startDatetime, formatter).atZone(ZoneId.of("UTC"))
-                .withZoneSameInstant(ZoneId.systemDefault())
-            val end = LocalDateTime.parse(it.stopDatetime, formatter).atZone(ZoneId.of("UTC"))
-                .withZoneSameInstant(ZoneId.systemDefault())
-            start to end
-        }
-
-        val dates = slots.flatMap {
-            val endDate = it.second
-            var currentDate = it.first
-
-            val dates = mutableListOf<ZonedDateTime>()
-            while (!currentDate.isAfter(endDate)) {
-                dates.add(currentDate)
-                currentDate = currentDate.plusDays(1)
+        val offDays = odooClient
+            .searchRead<Leave>("hr.leave.report.calendar") {
+                ("employee_id.name" like "($username)") and
+                    ("start_datetime" le formatter.format(end)) and
+                    ("stop_datetime" ge formatter.format(start))
             }
-
-            dates
-        }.sorted()
-
-        val offDays = dates
+            .asSequence()
+            .flatMap { record ->
+                generateSequence<ZonedDateTime>(record.startDatetime) { it.plusDays(1) }
+                    .takeWhile<ZonedDateTime> { !it.isAfter(record.stopDatetime) }
+            }
             .filter { it.month == month }
             .map { it.dayOfMonth }
             .toHashSet()
