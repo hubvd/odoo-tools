@@ -68,15 +68,19 @@ class Odooctl(private val workspaces: Workspaces) {
             if (info.command().getOrNull()?.contains("/python") != true) {
                 continue
             }
-            val arguments = info.arguments()
-            if (arguments.isEmpty || !arguments.get().any { it.contains("odoo") }) {
+            val arguments = info.arguments().getOrElse { emptyArray() }
+            if (!arguments.any { it.contains("odoo") }) {
                 continue
             }
-            if (arguments.get().contains("shell")) {
+            if (arguments.contains("shell")) {
                 continue
             }
 
-            val db = arguments.get().find { it.startsWith("--database=") }?.removePrefix("--database=") ?: continue
+            val db = arguments.find { it.startsWith("--database=") }
+                ?.removePrefix("--database=")
+                ?: arguments.getOrNull(arguments.indexOf("--database").takeIf { it != -1 }?.plus(1) ?: -1)
+                ?: continue
+
             val pid = handle.pid()
             val port = findHttpPort(pid)
             instances.add(
