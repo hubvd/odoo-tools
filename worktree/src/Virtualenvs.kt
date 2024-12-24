@@ -17,9 +17,9 @@ class Virtualenvs(private val pythonProvider: PythonProvider, dataDir: DataDir) 
         val venvPath = rootPath / workspace.base
         if (venvPath.notExists()) {
             val pythonVersion = when {
-                workspace.version < 16f -> "3.9"
-                workspace.version < 17f -> "3.11"
-                else -> "3.12"
+                workspace.version < 16f -> "3.9.20"
+                workspace.version < 17f -> "3.11.10"
+                else -> "3.12.7"
             }
             val pythonPath = pythonProvider.installOrGetVersion(pythonVersion)
             cd(rootPath)
