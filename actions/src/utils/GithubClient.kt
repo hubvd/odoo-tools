@@ -1,8 +1,5 @@
 package com.github.hubvd.odootools.actions.utils
 
-import arrow.core.Either
-import arrow.core.left
-import arrow.core.right
 import com.github.hubvd.odootools.actions.Secret
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -13,6 +10,8 @@ import org.http4k.core.*
 import org.http4k.filter.ClientFilters
 import org.http4k.filter.RequestFilters
 import org.http4k.filter.ResponseFilters
+
+class GithubClientException(val response: Response) : Exception()
 
 class GithubClient(githubApiKey: Secret, httpHandler: HttpHandler) {
     private val client = ClientFilters.SetHostFrom(Uri.of("https://api.github.com"))
@@ -35,11 +34,7 @@ class GithubClient(githubApiKey: Secret, httpHandler: HttpHandler) {
         )
     }
 
-    fun findPullRequests(
-        username: String?,
-        open: Boolean = true,
-        title: String? = null,
-    ): Either<Response, List<PullRequest>> {
+    fun findPullRequests(username: String?, open: Boolean = true, title: String? = null): List<PullRequest> {
         val query = buildList {
             add("org:odoo")
             add("type:pr")
@@ -64,15 +59,15 @@ class GithubClient(githubApiKey: Secret, httpHandler: HttpHandler) {
         val response = client(request)
 
         if (!response.status.successful) {
-            return response.left()
+            throw GithubClientException(response)
         }
         val jsonBody = Json.decodeFromString(
             JsonObject.serializer(),
             response.bodyString(),
         )
         val jsonPrs = jsonBody["data"]?.jsonObject?.get("results")?.jsonObject?.get("prs")?.jsonArray
-            ?: return response.left()
-        return Json.decodeFromJsonElement(ListSerializer(PullRequest.serializer()), jsonPrs).right()
+            ?: throw GithubClientException(response)
+        return Json.decodeFromJsonElement(ListSerializer(PullRequest.serializer()), jsonPrs)
     }
 
     companion object {

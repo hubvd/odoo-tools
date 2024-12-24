@@ -47,7 +47,7 @@ class OdooClientTest {
             prop("method") { it.method }.isEqualTo(Method.POST)
             prop("url") { it.uri.toString() }.isEqualTo("https://example.com/jsonrpc")
             prop("headers") { it.headers }.isEqualTo(
-                listOf("Host" to "example.com", "Content-Type" to "application/json"),
+                listOf("Host" to "example.com", "Content-Type" to "application/json", "accept-encoding" to "gzip"),
             )
             prop("body") {
                 Json.decodeFromString(JsonObject.serializer(), it.bodyString())

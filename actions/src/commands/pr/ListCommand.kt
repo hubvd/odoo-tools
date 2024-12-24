@@ -3,7 +3,6 @@ package com.github.hubvd.odootools.actions.commands.pr
 import com.github.ajalt.clikt.core.Abort
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.Context
-import com.github.ajalt.clikt.core.PrintMessage
 import com.github.ajalt.clikt.core.terminal
 import com.github.ajalt.clikt.parameters.arguments.argument
 import com.github.ajalt.clikt.parameters.arguments.optional
@@ -54,7 +53,7 @@ class ListCommand(
             }
         }
 
-        val prResult = github.findPullRequests(
+        val pullRequests = github.findPullRequests(
             username = if (title == null) githubUser.username else null,
             open = !closed,
             title = title,
@@ -66,20 +65,10 @@ class ListCommand(
         }
 
         if (title != null) {
-            val prs = prResult.fold(
-                { throw PrintMessage(it.toString(), statusCode = 1) },
-                { it },
-            )
-            with(terminal) {
-                println(pullRequestGroupSectionWidget(prs))
-            }
-            return
+            return terminal.println(pullRequestGroupSectionWidget(pullRequests))
         }
 
-        val (ownPrs, involvedPrs) = prResult.fold(
-            { throw PrintMessage(it.toString(), statusCode = 1) },
-            { it.partition { odooUser.username in it.headRefName } },
-        )
+        val (ownPrs, involvedPrs) = pullRequests.partition { odooUser.username in it.headRefName }
         with(terminal) {
             if (involved) {
                 println(HorizontalRule("Pull Requests", ruleStyle = gray))
