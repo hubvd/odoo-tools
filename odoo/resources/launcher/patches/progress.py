@@ -7,6 +7,7 @@ from rich.progress import (
 )
 
 from .console import console
+from .patch_tools import patch_arguments
 
 import odoo.modules.loading
 
@@ -16,6 +17,7 @@ class WrappedGraph:
     id = 0
 
     def __init__(self, graph):
+        self.parent = graph
         self.graph = list(graph)
         self.first = True
         self.idx = 0
@@ -64,30 +66,28 @@ class WrappedGraph:
     def __len__(self):
         return len(self.graph)
 
+    def __contains__(self, name: str) -> bool:
+        return name in self.parent
+
+    def __getitem__(self, name: str):
+        return self.parent[name]
+
+    def __str__(self) -> str:
+        return str(self.parent)
+
+    def __getattr__(self, name):
+        return getattr(self.parent, name)
+
 
 class ModuleInstallProgress:
     @staticmethod
-    def load_module_graph(
-        cr,
-        graph,
-        status=None,
-        perform_checks=True,
-        skip_modules=None,
-        report=None,
-        models_to_check=None,
-    ):
-        return ModuleInstallProgress.base_load_module_graph(
-            cr,
-            WrappedGraph(graph),
-            status,
-            perform_checks,
-            skip_modules,
-            report,
-            models_to_check,
-        )
+    def load_module_graph(*args, **kwargs):
+        original_graph = args[1]
+        graph = WrappedGraph(original_graph)
+        args = (args[0], graph, *args[2:])
+        return args, kwargs
 
     def apply(self):
-        ModuleInstallProgress.base_load_module_graph = (
-            odoo.modules.loading.load_module_graph
+        patch_arguments(
+            odoo.modules.loading, "load_module_graph", self.load_module_graph
         )
-        odoo.modules.loading.load_module_graph = ModuleInstallProgress.load_module_graph
