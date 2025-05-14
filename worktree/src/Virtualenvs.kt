@@ -7,7 +7,7 @@ import java.nio.file.Files
 import java.nio.file.Path
 import kotlin.io.path.*
 
-class Virtualenvs(private val pythonProvider: PythonProvider, dataDir: DataDir) {
+class Virtualenvs(dataDir: DataDir) {
 
     private val rootPath = dataDir["virtualenvs"]
 
@@ -17,21 +17,27 @@ class Virtualenvs(private val pythonProvider: PythonProvider, dataDir: DataDir) 
         val venvPath = rootPath / workspace.base
         if (venvPath.notExists()) {
             val pythonVersion = when {
-                workspace.version < 16f -> "3.9.20"
-                workspace.version < 17f -> "3.11.10"
-                else -> "3.12.7"
+                workspace.version < 16f -> "3.9"
+                workspace.version < 17f -> "3.11"
+                else -> "3.12"
             }
-            val pythonPath = pythonProvider.installOrGetVersion(pythonVersion)
             cd(rootPath)
-            run("virtualenv", workspace.base, "--python=$pythonPath", description = "Creating virtualenv")
-            val pip = rootPath / workspace.base / "bin/pip"
-            run("$pip", "install", "--upgrade", "pip", description = "Upgrading pip")
             run(
-                "$pip",
+                "uv",
+                "venv",
+                workspace.base,
+                "--python=$pythonVersion",
+                "--python-preference=only-managed",
+                description = "Creating virtualenv",
+            )
+            run(
+                "uv",
+                "pip",
                 "install",
                 "-r",
                 "${generateRequirements(workspace.path / "odoo/requirements.txt", workspace.version)}",
                 description = "Installing packages",
+                env = mapOf("VIRTUAL_ENV" to workspace.base),
             )
         }
         step("Linking virtualenv") {

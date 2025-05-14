@@ -35,7 +35,6 @@ object DataDir {
 fun main(args: Array<String>) {
     val di = DI {
         bind { singleton { WorkspaceProvider(instance()).cached() } }
-        bind { singleton { pythonProvider() } }
         bind { singleton { Terminal() } }
         bind { singleton { new(::OdooStubs) } }
         bind { singleton { new(::Virtualenvs) } }
