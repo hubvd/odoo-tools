@@ -43,7 +43,9 @@ class LaunchAction(private val terminal: Terminal) : Action {
             (launcherDir / "main.py").toString()
         }
 
-        val cmd = listOf("venv/bin/python", main, *configuration.args.toTypedArray())
+        val venv = Path(System.getenv("VIRTUAL_ENV") ?: "venv")
+        val python = venv / "bin/python"
+        val cmd = listOf(python.toString(), main, *configuration.args.toTypedArray())
 
         val process =
             ProcessBuilder()
