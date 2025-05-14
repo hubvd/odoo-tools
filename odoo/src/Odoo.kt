@@ -126,6 +126,10 @@ class Odoo(
         URLEncoder.encode(testTags, "utf-8")
     }
 
+    val withoutDemo by option {
+        if (workspace.version >= 18.3f && !testEnable) "False" else null
+    }
+
     val qunitWatch by env { if (watch) "1" else null }
     val stepDelayEnv by env("STEP_DELAY") { stepDelay?.toIntOrNull()?.toString() }
     val odooWorkspace by env { workspace.path.toString() }
