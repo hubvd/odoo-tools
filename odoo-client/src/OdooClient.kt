@@ -30,6 +30,13 @@ class OdooClient(
 
     private val client = ClientFilters.SetHostFrom(Uri.of(credential.host))
         .then(RequestFilters.SetHeader("Content-Type", "application/json"))
+        .run {
+            if (credential.userAgent != null) {
+                then(RequestFilters.SetHeader("User-Agent", credential.userAgent))
+            } else {
+                this
+            }
+        }
         .then(ResponseFilters.GunZip())
         .then(client)
 

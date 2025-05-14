@@ -13,15 +13,18 @@ import kotlinx.serialization.encoding.Encoder
 @Serializable(with = OdooCredentialSerializer::class)
 sealed class OdooCredential {
     abstract val host: String
+    abstract val userAgent: String?
 
     class JsonRpcCredential(
         override val host: String,
+        override val userAgent: String?,
         val database: String,
         val userId: Long,
         val apiKey: String,
     ) : OdooCredential()
 
-    class SessionCredential(override val host: String, val session: String) : OdooCredential()
+    class SessionCredential(override val host: String, override val userAgent: String?, val session: String) :
+        OdooCredential()
 }
 
 object OdooCredentialSerializer : KSerializer<OdooCredential> {
@@ -35,6 +38,7 @@ object OdooCredentialSerializer : KSerializer<OdooCredential> {
         var userId: Long? = null
         var apiKey: String? = null
         var session: String? = null
+        var userAgent: String? = null
 
         while (true) {
             when (val index = compositeDecoder.decodeElementIndex(descriptor)) {
@@ -43,6 +47,7 @@ object OdooCredentialSerializer : KSerializer<OdooCredential> {
                 2 -> database = compositeDecoder.decodeStringElement(descriptor, index)
                 3 -> userId = compositeDecoder.decodeLongElement(descriptor, index)
                 4 -> apiKey = compositeDecoder.decodeStringElement(descriptor, index)
+                5 -> userAgent = compositeDecoder.decodeStringElement(descriptor, index)
                 CompositeDecoder.DECODE_DONE -> break
                 else -> throw SerializationException("Unknown index $index")
             }
@@ -51,12 +56,12 @@ object OdooCredentialSerializer : KSerializer<OdooCredential> {
         requireNotNull(host)
 
         if (session != null) {
-            return OdooCredential.SessionCredential(host, session)
+            return OdooCredential.SessionCredential(host, userAgent, session)
         } else {
             requireNotNull(database)
             requireNotNull(userId)
             requireNotNull(apiKey)
-            return OdooCredential.JsonRpcCredential(host, database, userId, apiKey)
+            return OdooCredential.JsonRpcCredential(host, userAgent, database, userId, apiKey)
         }
     }
 
@@ -66,5 +71,6 @@ object OdooCredentialSerializer : KSerializer<OdooCredential> {
         element<String>("database", isOptional = true)
         element<Long>("userId", isOptional = true)
         element<String>("apiKey", isOptional = true)
+        element<String>("userAgent", isOptional = true)
     }
 }
