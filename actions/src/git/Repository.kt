@@ -59,7 +59,7 @@ class Repository(
             .set(options, 0, git_status_show_t.GIT_STATUS_SHOW_INDEX_AND_WORKDIR.value)
 
         MemorySegment.copy(
-            git_strarray.from(arena, arrayOf("*", "!*.po", "!*.pot")),
+            git_strarray.from(arena, emptyArray()),
             0L,
             options,
             16,
@@ -139,14 +139,18 @@ class Repository(
     }
 
     fun checkoutBranch(ref: GitReference) {
-        val options = arena.allocate(git_checkout_options.layout)
-        git_checkout_options.layout.varHandle(groupElement("version")).set(options, 0, 1)
-        git_checkout_options.layout.varHandle(groupElement("checkout_strategy")).set(options, 0, 1)
-        proxy.checkout_tree(address, ref.target()!!.commit().address, options)
+        checkoutTree(ref)
         proxy.repository_set_head(
             address,
             arena.allocateFrom(ref.name()),
         )
+    }
+
+    fun checkoutTree(ref: GitReference) {
+        val options = arena.allocate(git_checkout_options.layout)
+        git_checkout_options.layout.varHandle(groupElement("version")).set(options, 0, 1)
+        git_checkout_options.layout.varHandle(groupElement("checkout_strategy")).set(options, 0, 1)
+        proxy.checkout_tree(address, ref.target()!!.commit().address, options)
     }
 
     fun remoteList(): List<GitRemote> {
@@ -236,10 +240,17 @@ class GitReference(val address: MemorySegment, private val repo: Repository) {
         return GitOid(res, repo)
     }
 
+    fun setTarget(target: GitOid) {
+        val out = repo.arena.allocate(ADDRESS)
+        repo.proxy.reference_set_target(out, address, target.address, repo.arena.allocateFrom(""))
+
+        // TODO: return new GitReference and destroy this one
+    }
+
     fun isBranch(): Boolean = repo.proxy.reference_is_branch(address)
 }
 
-class GitOid(private val address: MemorySegment, private val repo: Repository) {
+class GitOid(val address: MemorySegment, private val repo: Repository) {
     fun commit(): GitCommit {
         val out = repo.arena.allocate(ADDRESS)
         repo.proxy.commit_lookup(out, repo.address, address)

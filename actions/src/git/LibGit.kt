@@ -30,6 +30,7 @@ interface LibGit {
     fun reference_free(memorySegment: MemorySegment)
     fun reference_name(ref: MemorySegment): MemorySegment
     fun reference_target(ref: MemorySegment): MemorySegment
+    fun reference_set_target(out: MemorySegment, ref: MemorySegment, id: MemorySegment, logMessage: MemorySegment)
 
     fun revparse_single(out: MemorySegment, repo: MemorySegment, spec: MemorySegment)
 
