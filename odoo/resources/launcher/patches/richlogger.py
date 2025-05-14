@@ -4,6 +4,7 @@ from logging import LogRecord
 import threading
 from datetime import datetime
 from zoneinfo import ZoneInfo
+import warnings
 
 import werkzeug.serving
 
@@ -85,6 +86,12 @@ def restore_WSGIRequestHandler(*args, **kwargs):
 class RichLogger:
     @staticmethod
     def post_init_logger():
+        warnings.filterwarnings(
+            "ignore",
+            category=DeprecationWarning,
+            module="_pydevd_bundle.pydevd_collect_try_except_info",
+        )
+
         logger = logging.getLogger()
 
         for handler in logger.handlers:
@@ -127,6 +134,6 @@ class RichLogger:
         werkzeug.serving.WSGIRequestHandler.log_request = log_request
 
         odoo.netsvc.init_logger = RichLogger.init_logger(odoo.netsvc.init_logger)
-        patch_arguments(
-            werkzeug.serving.BaseWSGIServer, "__init__", restore_WSGIRequestHandler
-        )
+        # patch_arguments(
+        #    werkzeug.serving.BaseWSGIServer, "__init__", restore_WSGIRequestHandler
+        # )
