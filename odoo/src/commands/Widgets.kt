@@ -81,7 +81,13 @@ class ArgWidget(private val runConfiguration: RunConfiguration) : Widget {
                 line += Span.word(parts[0], style = TextColors.magenta)
                 if (parts.size > 1) {
                     line += Span.word("=", style = TextColors.gray)
-                    line += Span.word(parts[1])
+                    val words = parts[1].split(" ")
+                    val first = words.dropLast(1)
+                    first.forEach {
+                        line += Span.word(it)
+                        line += Span.space()
+                    }
+                    line += Span.word(words.last())
                 }
                 add(Line(line))
             }

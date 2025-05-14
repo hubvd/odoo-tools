@@ -17,7 +17,6 @@ import com.github.pgreze.process.Redirect
 import com.github.pgreze.process.process
 import kotlinx.coroutines.runBlocking
 import org.kodein.di.*
-import java.net.URLEncoder
 import kotlin.io.path.*
 import kotlin.math.absoluteValue
 import kotlin.math.roundToInt
@@ -40,14 +39,23 @@ class Odoo(
     val testFile by option()
 
     val testTags by option {
-        if (testHoot != null && workspace.version < 17.2f) {
+        val hasHoot = workspace.version >= 17.2f
+
+        if (testHoot != null && !hasHoot) {
             throw UsageError("HOOT not available before 17.2")
         }
+
+        val (qunit, qunitMobile) = if (hasHoot) {
+            "test_qunit_desktop" to "test_qunit_mobile"
+        } else {
+            "test_js" to "test_mobile_js"
+        }
+
         when {
-            testHoot != null && mobile -> "/qunit:WebSuiteMobile.test_hoot"
-            testHoot != null -> "/qunit:WebSuite.test_hoot"
-            testQunit != null && mobile -> "/qunit:WebSuiteMobile.test_qunit"
-            testQunit != null -> "/qunit:WebSuite.test_qunit"
+            testHoot != null && mobile -> "/web:MobileWebSuite.test_unit_mobile[$testHoot]"
+            testHoot != null -> "/web:WebSuite.test_hoot$testHoot"
+            testQunit != null && mobile -> "/web:MobileWebSuite.$qunitMobile[$testQunit]"
+            testQunit != null -> "/web:WebSuite.$qunit[$testQunit]"
             else -> null
         }
     }
@@ -114,16 +122,6 @@ class Odoo(
         testTags.splitToSequence(',').filter { !it.startsWith('-') }
             .flatMap { TestTag(it).toAddons(workspace, addonsPath) }.toHashSet().joinToString(",")
             .takeUnless { it.isEmpty() }
-    }
-
-    val hootFilter by env {
-        val filter = testHoot ?: return@env null
-        URLEncoder.encode(filter, "utf-8")
-    }
-
-    val qunitFilter by env {
-        val testTags = testQunit ?: return@env null
-        URLEncoder.encode(testTags, "utf-8")
     }
 
     val withoutDemo by option {
