@@ -8,6 +8,8 @@ import com.github.ajalt.clikt.output.ParameterFormatter
 import com.github.ajalt.clikt.parameters.groups.OptionGroup
 import com.github.ajalt.clikt.parameters.options.*
 import com.github.hubvd.odootools.odoo.odooCompletion
+import kotlin.io.path.Path
+import kotlin.io.path.isDirectory
 
 abstract class StoredOptionGroup(name: String) : OptionGroup(name) {
     val options = mutableListOf<GroupableOption>()
@@ -56,6 +58,17 @@ class CustomOptionGroup : StoredOptionGroup("Custom options") {
             ),
             option("--save", help = "Save the current arguments to a pycharm run configuration"),
             option("--restart").flag(),
+            option(
+                "--chrome",
+                help = "Select a Chrome version",
+                completionCandidates = CompletionCandidates.Custom.fromStdout(
+                    "find /home/hubert/src/multichrome/ -maxdepth 1 -mindepth 1 -type d | xargs -n 1 basename",
+                ),
+            ).validate {
+                val extraPath = Path("/home/hubert/src/multichrome/$it")
+                require(extraPath.isDirectory()) { "$extraPath does not exist" }
+            },
+            option("--debug-chrome", help = "Add debug=True to start_tour+browser_js").flag(),
         ).forEach { registerOption(it) }
     }
 

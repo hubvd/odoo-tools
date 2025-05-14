@@ -95,6 +95,8 @@ class Odoo(
     val restart by flag()
     val save by option()
     val noPatch by flag()
+    val chrome by option()
+    val debugChrome by flag()
 
     val database by option { if (testEnable) "${workspace.name}-test" else workspace.name }
     val logHandler by option { if (testEnable) "werkzeug:ERROR" else null }
@@ -128,10 +130,18 @@ class Odoo(
         if (workspace.version >= 18.3f && !testEnable) "False" else null
     }
 
-    val qunitWatch by env { if (watch) "1" else null }
-    val stepDelayEnv by env("STEP_DELAY") { stepDelay?.toIntOrNull()?.toString() }
+    val odooWatchChrome by env { if (watch) "1" else null }
+    val odooDebugChrome by env { if (debugChrome) "1" else null }
+    val odooTourStepDelay by env { stepDelay?.toIntOrNull()?.toString() }
     val odooWorkspace by env { workspace.path.toString() }
     val odooDebug by env { if (debug) "1" else null }
+    val path by env {
+        if (chrome != null) {
+            "/home/hubert/src/multichrome/$chrome:${System.getenv("PATH")}"
+        } else {
+            null
+        }
+    }
 
     init {
         effect {
