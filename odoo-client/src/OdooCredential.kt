@@ -17,13 +17,13 @@ sealed class OdooCredential {
 
     class JsonRpcCredential(
         override val host: String,
-        override val userAgent: String?,
+        override val userAgent: String? = null,
         val database: String,
         val userId: Long,
         val apiKey: String,
     ) : OdooCredential()
 
-    class SessionCredential(override val host: String, override val userAgent: String?, val session: String) :
+    class SessionCredential(override val host: String, override val userAgent: String? = null, val session: String) :
         OdooCredential()
 }
 

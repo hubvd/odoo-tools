@@ -2,6 +2,9 @@
 
 package com.github.hubvd.odootools.libgit.legacy
 
+import com.github.hubvd.odootools.libgit.legacy.accessors.NativeLayout
+import com.github.hubvd.odootools.libgit.legacy.accessors.NativeStruct
+import com.github.hubvd.odootools.libgit.legacy.accessors.field
 import java.lang.foreign.Arena
 import java.lang.foreign.MemoryLayout
 import java.lang.foreign.MemoryLayout.PathElement.groupElement
@@ -9,6 +12,18 @@ import java.lang.foreign.MemorySegment
 import java.lang.foreign.StructLayout
 import java.lang.foreign.ValueLayout.ADDRESS
 import java.lang.foreign.ValueLayout.JAVA_LONG
+
+class GitStrarray(override val segment: MemorySegment) : NativeStruct {
+    val strings by layout.field<MemorySegment>()
+    val count by layout.field<Long>()
+
+    companion object : NativeLayout {
+        override val layout: MemoryLayout = MemoryLayout.structLayout(
+            ADDRESS.withName("strings"),
+            JAVA_LONG.withName("count"),
+        ).withName("git_strarray")
+    }
+}
 
 object git_strarray {
     val layout: StructLayout = MemoryLayout.structLayout(

@@ -53,6 +53,5 @@ class UpdateCommand : CliktCommand() {
                 }
             }
         }.joinAll()
-        println("yeah")
     }
 }

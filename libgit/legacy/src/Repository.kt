@@ -88,7 +88,7 @@ class Repository(
                 type.value,
             )
         } catch (e: LibGitError) {
-            if (e.code == git_error_code.GIT_ENOTFOUND) {
+            if (e.code == GitErrorCode.GIT_ENOTFOUND) {
                 return null
             } else {
                 throw e
@@ -106,7 +106,7 @@ class Repository(
                 arena.allocateFrom(name),
             )
         } catch (e: LibGitError) {
-            if (e.code == git_error_code.GIT_ENOTFOUND) {
+            if (e.code == GitErrorCode.GIT_ENOTFOUND) {
                 return null
             } else {
                 throw e
@@ -124,7 +124,7 @@ class Repository(
                 arena.allocateFrom(name),
             )
         } catch (e: LibGitError) {
-            if (e.code == git_error_code.GIT_ENOTFOUND) {
+            if (e.code == GitErrorCode.GIT_ENOTFOUND) {
                 return null
             } else {
                 throw e
@@ -221,7 +221,7 @@ class GitReference(val address: MemorySegment, private val repo: Repository) {
         try {
             repo.proxy.branch_upstream(out, address)
         } catch (e: LibGitError) {
-            if (e.code == git_error_code.GIT_ENOTFOUND) {
+            if (e.code == GitErrorCode.GIT_ENOTFOUND) {
                 return null
             } else {
                 throw e

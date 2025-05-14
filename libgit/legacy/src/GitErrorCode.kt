@@ -1,8 +1,6 @@
-@file:Suppress("ClassName", "ktlint:standard:filename")
-
 package com.github.hubvd.odootools.libgit.legacy
 
-enum class git_error_code(val value: Int) {
+enum class GitErrorCode(val value: Int) {
     GIT_OK(0),
     GIT_ERROR(-1),
     GIT_ENOTFOUND(-3),

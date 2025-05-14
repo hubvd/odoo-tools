@@ -5,8 +5,8 @@ package com.github.hubvd.odootools.libgit.legacy
 import java.lang.foreign.MemorySegment
 
 data class LibGitError(
-    val code: git_error_code,
-    val klazz: git_error_t,
+    val code: GitErrorCode,
+    val klazz: GitErrorT,
     override val message: String,
 ) : RuntimeException()
 
