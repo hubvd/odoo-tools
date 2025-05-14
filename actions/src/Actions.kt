@@ -8,8 +8,6 @@ import com.github.hubvd.odootools.actions.kitty.Kitty
 import com.github.hubvd.odootools.actions.utils.*
 import com.github.hubvd.odootools.config.CONFIG_MODULE
 import com.github.hubvd.odootools.odoo.client.ODOO_CLIENT_MODULE
-import com.github.hubvd.odootools.pycharmctl.api.PycharmCtl
-import com.github.hubvd.odootools.pycharmctl.client.PycharmCtlClient
 import com.github.hubvd.odootools.workspace.WORKSPACE_MODULE
 import com.github.hubvd.odootools.workspace.WorkspaceProvider
 import org.http4k.client.JavaHttpClient
@@ -65,7 +63,6 @@ internal val ACTION_MODULE by DI.Module {
     bind<Git> { singleton { new(::GitShellImplementation) } }
 
     bind<Kitty> { singleton { Kitty() } }
-    bind<PycharmCtl> { singleton { new(::PycharmCtlClient) } }
 }
 
 fun main(args: Array<String>) {

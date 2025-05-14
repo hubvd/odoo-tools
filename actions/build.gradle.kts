@@ -31,7 +31,6 @@ dependencies {
     implementation(project(":config"))
     implementation(project(":workspace"))
     implementation(project(":odoo-client"))
-    implementation(project(":pycharmctl:client"))
     implementation(project(":libgit:legacy"))
 
     implementation(libs.serialization.json)

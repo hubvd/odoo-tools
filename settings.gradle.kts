@@ -10,9 +10,6 @@ include("odoo-client")
 include("libgit:api")
 include("libgit:legacy")
 include("libgit:next")
-include("pycharmctl:api")
-include("pycharmctl:client")
-include("pycharmctl:plugin")
 
 pluginManagement {
     repositories {
