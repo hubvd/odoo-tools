@@ -3,11 +3,13 @@ package com.github.hubvd.odootools.actions.commands
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.terminal
 import com.github.ajalt.clikt.parameters.arguments.argument
+import com.github.ajalt.clikt.parameters.arguments.multiple
 import com.github.ajalt.clikt.parameters.arguments.validate
-import com.github.ajalt.mordant.rendering.TextAlign
 import com.github.ajalt.mordant.rendering.TextColors
-import com.github.ajalt.mordant.table.grid
+import com.github.ajalt.mordant.table.Borders
+import com.github.ajalt.mordant.table.table
 import com.github.hubvd.odootools.odoo.client.OdooClient
+import com.github.hubvd.odootools.odoo.client.core.ModelReference
 import com.github.hubvd.odootools.odoo.client.searchRead
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
@@ -17,21 +19,20 @@ import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import java.time.DayOfWeek
 import java.time.LocalDateTime
-import java.time.YearMonth
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
-import java.time.format.TextStyle
-import java.util.Locale
 
 @Serializable
 private data class Leave(
     private val id: Long,
+    val employeeId: ModelReference,
     @Serializable(UtcToSystemDefaultZonedDateTimeSerializer::class) val startDatetime: ZonedDateTime,
     @Serializable(UtcToSystemDefaultZonedDateTimeSerializer::class) val stopDatetime: ZonedDateTime,
 )
 
 private val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+private val formatter2 = DateTimeFormatter.ofPattern("dd")
 private val utc = ZoneId.of("UTC")
 
 private class UtcToSystemDefaultZonedDateTimeSerializer : KSerializer<ZonedDateTime> {
@@ -49,104 +50,101 @@ private class UtcToSystemDefaultZonedDateTimeSerializer : KSerializer<ZonedDateT
         .withZoneSameInstant(ZoneId.systemDefault())
 }
 
+private val trigramRe = Regex("""^(.*) \(([a-zA-Z]{2,4})\)$""")
+
 class IsOffCommand(private val odooClient: OdooClient) : CliktCommand() {
-    private val username by argument().validate {
-        require(it.length in 3..4) {
-            "not a valid trigram"
+    private val usernames by argument().multiple().validate {
+        it.forEach {
+            require(it.length in 3..4) {
+                "`$it` is not a valid trigram"
+            }
         }
     }
 
     override fun run() {
-        val firstDay = DayOfWeek.MONDAY // WeekFields.of(Locale.getDefault()).firstDayOfWeek
-        val now = LocalDateTime.now()
-        val month = now.month
-        val start = YearMonth.from(now)
-            .plusMonths(-1)
-            .atEndOfMonth()
-            .atTime(23, 59, 59)
+        val now = LocalDateTime.now().withHour(3).withMinute(0)
+
+        val start = now
             .atZone(ZoneId.systemDefault())
             .withZoneSameInstant(utc)
-        val end = YearMonth
-            .from(now)
-            .atEndOfMonth()
-            .atTime(23, 59, 59)
-            .atZone(ZoneId.systemDefault())
-            .withZoneSameInstant(utc)
+
+        val end = start.plusDays(15) // TODO
 
         val offDays = odooClient
             .searchRead<Leave>("hr.leave.report.calendar") {
-                ("employee_id.name" like "($username)") and
+                val employees = usernames.map { "employee_id.name" `=ilike` "%($it)" }.reduce { a, b -> a or b }
+                employees and
                     ("start_datetime" le formatter.format(end)) and
                     ("stop_datetime" ge formatter.format(start))
-            }
-            .asSequence()
-            .flatMap { record ->
-                generateSequence<ZonedDateTime>(record.startDatetime) { it.plusDays(1) }
-                    .takeWhile<ZonedDateTime> { !it.isAfter(record.stopDatetime) }
-            }
-            .filter { it.month == month }
-            .map { it.dayOfMonth }
-            .toHashSet()
+            }.groupBy { leave ->
+                trigramRe.find(leave.employeeId.name)?.groupValues?.get(2)?.lowercase()!!
+            }.mapValues { entry -> entry.value.map { it } }
 
-        val grid = grid {
-            row {
-                cell(
-                    month.getDisplayName(
-                        TextStyle.FULL,
-                        Locale.getDefault(),
-                    ),
-                ) {
-                    columnSpan = 7
-                    align = TextAlign.CENTER
-                }
-            }
-            row {
-                cellsFrom(
-                    generateSequence<DayOfWeek>(firstDay) { it.plus(1) }.take(7).map {
-                        it.getDisplayName(
-                            TextStyle.SHORT_STANDALONE,
-                            Locale.getDefault(),
-                        )
-                    }.asIterable(),
-                )
-            }
+        val days = generateSequence(now.atZone(ZoneId.systemDefault())) { it.plusDays(1) }
+            .takeWhile { !it.isAfter(end) }
+            .filter { it.dayOfWeek != DayOfWeek.SATURDAY && it.dayOfWeek != DayOfWeek.SUNDAY }
+            .toList()
 
-            val days = generateSequence(LocalDateTime.of(now.year, month, 1, 0, 0)) { it.plusDays(1) }
-                .takeWhile { it.month == month }
-                .toList()
-                .reversed()
-                .toMutableList()
-
-            // TODO: chuncked
-
-            var currentDay = firstDay
-            var cells = ArrayList<String>(7)
-            while (days.isNotEmpty()) {
-                if (days.last().dayOfWeek == currentDay) {
-                    val day = days.removeLast()
-                    if (day.dayOfMonth in offDays) {
-                        cells.add(TextColors.red(day.dayOfMonth.toString()))
-                    } else {
-                        cells.add(day.dayOfMonth.toString())
+        val table = table {
+            tableBorders = Borders.ALL
+            header {
+                row {
+                    style(TextColors.magenta, bold = true)
+                    cell("Employee")
+                    days.forEach {
+                        cell(it.format(formatter2)) {
+                            if (it.dayOfWeek == DayOfWeek.MONDAY) {
+                                style = TextColors.cyan
+                            }
+                        }
                     }
-                } else {
-                    cells.add("")
-                }
-                currentDay = currentDay.plus(1)
-                if (currentDay == firstDay) {
-                    rowFrom(cells) {
-                        align = TextAlign.RIGHT
-                    }
-                    cells.clear()
                 }
             }
-            if (cells.isNotEmpty()) {
-                rowFrom(cells) {
-                    align = TextAlign.RIGHT
+            body {
+                cellBorders = Borders.LEFT_RIGHT
+                rowStyles(TextColors.blue, TextColors.green)
+                offDays.entries.forEach { (employee, entries) ->
+                    row {
+                        cell(employee)
+                        for (day in days) {
+                            var presentMorning = true
+                            var presentAfternoon = true
+
+                            val morning = day.withHour(11).withMinute(0)!!
+                            val afternoon = day.withHour(14).withMinute(0)!!
+
+                            for (entry in entries) {
+                                if (presentMorning && entry.startDatetime <= morning && morning <= entry.stopDatetime) {
+                                    presentMorning = false
+                                }
+
+                                if (presentAfternoon &&
+                                    entry.startDatetime <= afternoon &&
+                                    afternoon <= entry.stopDatetime
+                                ) {
+                                    presentAfternoon = false
+                                }
+
+                                if (!presentAfternoon && !presentMorning) break
+                            }
+
+                            val content = when {
+                                !presentMorning && !presentAfternoon -> ENTIRE_DAY
+                                !presentMorning -> MORNING
+                                !presentAfternoon -> AFTERNOON
+                                else -> ""
+                            }
+                            cell(content)
+                        }
+                    }
                 }
             }
         }
 
-        terminal.println(grid)
+        terminal.println(table)
     }
 }
+
+val MORNING = "\uD83C\uDF05"
+val AFTERNOON = "\uD83C\uDF06"
+val ENTIRE_DAY = "\uD83E\uDDA5"
