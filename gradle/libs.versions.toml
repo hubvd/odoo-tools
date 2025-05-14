@@ -1,6 +1,6 @@
 [versions]
 kotlinx-serialization = "1.8.1"
-kotlin = "2.1.0"
+kotlin = "2.2.0-Beta2"
 
 [libraries]
 kotlin-bom = { module = "org.jetbrains.kotlin:kotlin-bom", version.ref = "kotlin" }
