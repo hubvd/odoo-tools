@@ -1,5 +1,9 @@
 # abbr -a --regex '^ra?[sfur]+' --function expand_repo -- expand_repo
 function expand_repo
+    if test $argv[1] = ruff
+        return 1
+    end
+
     set out repo
     set parts (string split '' $argv[1])[2..]
     for part in $parts
