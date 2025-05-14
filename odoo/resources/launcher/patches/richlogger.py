@@ -14,6 +14,7 @@ from rich.text import Span
 import odoo.netsvc
 from odoo.netsvc import DBFormatter, PerfFilter
 
+from .patch_tools import patch_arguments
 from .logging_filters import Result, filters
 from .console import console
 
@@ -76,6 +77,11 @@ class DurationHighlighter(ReprHighlighter):
     ]
 
 
+def restore_WSGIRequestHandler(*args, **kwargs):
+    kwargs.pop("handler")
+    return args, kwargs
+
+
 class RichLogger:
     @staticmethod
     def post_init_logger():
@@ -121,3 +127,6 @@ class RichLogger:
         werkzeug.serving.WSGIRequestHandler.log_request = log_request
 
         odoo.netsvc.init_logger = RichLogger.init_logger(odoo.netsvc.init_logger)
+        patch_arguments(
+            werkzeug.serving.BaseWSGIServer, "__init__", restore_WSGIRequestHandler
+        )
