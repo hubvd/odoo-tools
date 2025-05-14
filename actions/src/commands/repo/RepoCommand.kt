@@ -56,6 +56,7 @@ class RepoCommand(
 val REPO_COMMAND_MODULE by DI.Module {
     bindSet<CliktCommand>(tag = "repo") {
         add { singleton { new(::StatusCommand) } }
+        add { singleton { new(::FetchCommand) } }
         add { singleton { new(::SetConflictCommand) } }
     }
 
