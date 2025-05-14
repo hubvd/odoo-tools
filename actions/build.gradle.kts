@@ -22,6 +22,7 @@ cli {
         "repo",
         "is-off",
         "who-is",
+        "lint",
     )
 }
 
