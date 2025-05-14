@@ -28,10 +28,10 @@ class StatusCommand : CliktCommand() {
     override fun run() = runBlocking {
         val res = workspaceRepositories.map {
             async(it.dispatcher) {
-                Triple(
-                    it.workspace,
+                it.workspace to arrayOf(
                     line(it.odoo.await(), it.workspace.base),
                     line(it.enterprise.await(), it.workspace.base),
+                    line(it.designThemes.await(), it.workspace.base),
                 )
             }
         }.awaitAll()
@@ -41,26 +41,33 @@ class StatusCommand : CliktCommand() {
         terminal.println(
             verticalLayout {
                 spacing = 1
-                res.forEach { (workspace, odoo, enterprise) ->
-                    cell(workspaceSection(sectionStyle, workspace, odoo, enterprise))
+                res.forEach { (workspace, repos) ->
+                    val (odoo, enterprise, designThemes) = repos
+                    cell(workspaceSection(sectionStyle, workspace, odoo, enterprise, designThemes))
                 }
             },
         )
     }
 
-    private fun workspaceSection(sectionStyle: TextStyle, workspace: Workspace, odoo: Widget, enterprise: Widget) =
-        horizontalLayout {
-            cell(sectionStyle(Array(3) { "│" }.joinToString("\n")))
-            cell(
-                verticalLayout {
-                    cells(
-                        bold(workspace.name),
-                        odoo,
-                        enterprise,
-                    )
-                },
-            )
-        }
+    private fun workspaceSection(
+        sectionStyle: TextStyle,
+        workspace: Workspace,
+        odoo: Widget,
+        enterprise: Widget,
+        designThemes: Widget,
+    ) = horizontalLayout {
+        cell(sectionStyle(Array(4) { "│" }.joinToString("\n")))
+        cell(
+            verticalLayout {
+                cells(
+                    bold(workspace.name),
+                    odoo,
+                    enterprise,
+                    designThemes,
+                )
+            },
+        )
+    }
 
     private fun Pair<Long, Long>.formatAheadBehind(style: TextStyle, name: String? = null): String = style(
         buildString {
