@@ -32,9 +32,9 @@ object LibGitLoader {
 
             if (
                 major.get(ValueLayout.JAVA_INT, 0) != 1 ||
-                minor.get(ValueLayout.JAVA_INT, 0) != 8
+                minor.get(ValueLayout.JAVA_INT, 0) != 9
             ) {
-                throw UnsatisfiedLinkError("Expected libgit 1.8.*")
+                throw UnsatisfiedLinkError("Expected libgit 1.9.*")
             }
         }
 
