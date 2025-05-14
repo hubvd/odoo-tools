@@ -58,6 +58,7 @@ val REPO_COMMAND_MODULE by DI.Module {
         add { singleton { new(::StatusCommand) } }
         add { singleton { new(::FetchCommand) } }
         add { singleton { new(::UpdateCommand) } }
+        add { singleton { new(::RebaseCommand) } }
         add { singleton { new(::SetConflictCommand) } }
     }
 
