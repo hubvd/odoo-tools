@@ -1,7 +1,0 @@
-#!/bin/fish
-
-worktree list path | while read path
-    pushd $path
-    update -w
-    popd
-end
