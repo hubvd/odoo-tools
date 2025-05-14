@@ -182,15 +182,13 @@ class Repository(
     }
 }
 
-fun Workspace.currentRepository(): Repository? {
-    val repoPath = path.relativize(Path(System.getProperty("user.dir")))
-        .subpath(0, 1)
-        .takeIf { it.toString().isNotEmpty() }
-        ?.let { path / it }
-        ?.takeIf { (it / ".git").exists() }
-        ?: return null
-    return Repository.open(repoPath)
-}
+fun Workspace.currentRepositoryPath(): Path? = path.relativize(Path(System.getProperty("user.dir")))
+    .subpath(0, 1)
+    .takeIf { it.toString().isNotEmpty() }
+    ?.let { path / it }
+    ?.takeIf { (it / ".git").exists() }
+
+fun Workspace.currentRepository(): Repository? = currentRepositoryPath()?.let { Repository.open(it) }
 
 class GitStatusList(private val address: MemorySegment, private val repo: Repository) {
     fun count(): Long = repo.proxy.status_list_entrycount(address)

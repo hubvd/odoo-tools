@@ -23,6 +23,7 @@ cli {
         "is-off",
         "who-is",
         "lint",
+        "done",
     )
 }
 

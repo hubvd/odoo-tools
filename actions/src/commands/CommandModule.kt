@@ -41,6 +41,7 @@ val COMMANDS_MODULE = DI.Module("Commands") {
         add { singleton { IsOffCommand(instance(arg = "odoo")) } }
         add { singleton { ActivitiesCommand(instance(arg = "odoo"), instance()) } }
         add { singleton { new(::LintCommand) } }
+        add { singleton { new(::DoneCommand) } }
     }
 
     bind { singleton { new(::KillCommand) } }
