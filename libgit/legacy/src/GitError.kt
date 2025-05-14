@@ -4,7 +4,6 @@ import com.github.hubvd.odootools.libgit.legacy.accessors.NativeLayout
 import com.github.hubvd.odootools.libgit.legacy.accessors.NativeStruct
 import com.github.hubvd.odootools.libgit.legacy.accessors.ordinalEnum
 import com.github.hubvd.odootools.libgit.legacy.accessors.string
-import java.lang.foreign.Arena
 import java.lang.foreign.MemoryLayout
 import java.lang.foreign.MemorySegment
 import java.lang.foreign.ValueLayout.ADDRESS
@@ -20,6 +19,5 @@ class GitError(override val segment: MemorySegment) : NativeStruct {
             JAVA_INT.withName("klass"),
             MemoryLayout.paddingLayout(4),
         ).withName("git_error")
-
     }
 }
