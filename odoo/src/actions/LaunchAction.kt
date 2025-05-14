@@ -3,8 +3,6 @@ package com.github.hubvd.odootools.odoo.actions
 import com.github.ajalt.mordant.terminal.Terminal
 import com.github.hubvd.odootools.odoo.RunConfiguration
 import com.github.hubvd.odootools.odoo.commands.runConfigurationWidget
-import com.github.pgreze.process.process
-import kotlinx.coroutines.runBlocking
 import java.io.File
 import java.io.FileNotFoundException
 import java.nio.file.Path
@@ -62,25 +60,7 @@ class LaunchAction(private val terminal: Terminal) : Action {
             },
         )
 
-        val code = process.waitFor()
-
-        if (configuration.odoo.testEnable) {
-            runBlocking {
-                process(
-                    "notify-send",
-                    "-h",
-                    *(
-                        if (code == 0) {
-                            arrayOf("string:frcolor:#00FF00", "Tests passed")
-                        } else {
-                            arrayOf("string:frcolor:#FF0000", "Tests failed")
-                        }
-                        ),
-                )
-            }
-        }
-
-        exitProcess(code)
+        exitProcess(process.waitFor())
     }
 
     private fun unpackPatchedLauncher(): Path {
