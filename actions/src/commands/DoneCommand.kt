@@ -5,8 +5,8 @@ import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.ProgramResult
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
-import com.github.hubvd.odootools.actions.git.currentRepository
-import com.github.hubvd.odootools.actions.git.currentRepositoryPath
+import com.github.hubvd.odootools.actions.utils.currentRepository
+import com.github.hubvd.odootools.actions.utils.currentRepositoryPath
 import com.github.hubvd.odootools.workspace.Workspaces
 import java.nio.file.Path
 import java.util.*

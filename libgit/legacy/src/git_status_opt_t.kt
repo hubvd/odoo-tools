@@ -1,6 +1,6 @@
 @file:Suppress("ClassName", "ktlint:standard:filename")
 
-package com.github.hubvd.odootools.actions.git
+package com.github.hubvd.odootools.libgit.legacy
 
 enum class git_status_opt_t(val value: Int) {
     GIT_STATUS_OPT_INCLUDE_UNTRACKED(1 shl 0),

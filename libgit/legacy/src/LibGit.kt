@@ -1,6 +1,6 @@
 @file:Suppress("FunctionName", "unused", "SpellCheckingInspection")
 
-package com.github.hubvd.odootools.actions.git
+package com.github.hubvd.odootools.libgit.legacy
 
 import java.lang.foreign.MemorySegment
 

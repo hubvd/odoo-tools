@@ -1,4 +1,4 @@
-package com.github.hubvd.odootools.actions.git
+package com.github.hubvd.odootools.libgit.legacy
 
 import java.lang.foreign.*
 import java.lang.foreign.MemoryLayout.PathElement

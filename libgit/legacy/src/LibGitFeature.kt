@@ -1,6 +1,6 @@
-package com.github.hubvd.odootools.actions.git
+package com.github.hubvd.odootools.libgit.legacy
 
-import com.github.hubvd.odootools.actions.git.LibGitInvocationHandler.Companion.descriptor
+import com.github.hubvd.odootools.libgit.legacy.LibGitInvocationHandler.Companion.descriptor
 import org.graalvm.nativeimage.hosted.Feature
 import org.graalvm.nativeimage.hosted.RuntimeForeignAccess
 import java.lang.foreign.FunctionDescriptor

@@ -12,8 +12,8 @@ import com.github.ajalt.mordant.rendering.TextStyles.bold
 import com.github.ajalt.mordant.rendering.Widget
 import com.github.ajalt.mordant.table.horizontalLayout
 import com.github.ajalt.mordant.table.verticalLayout
-import com.github.hubvd.odootools.actions.git.Repository
-import com.github.hubvd.odootools.actions.git.git_branch_t
+import com.github.hubvd.odootools.libgit.legacy.Repository
+import com.github.hubvd.odootools.libgit.legacy.git_branch_t
 import com.github.hubvd.odootools.workspace.Workspace
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async

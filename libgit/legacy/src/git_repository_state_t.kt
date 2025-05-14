@@ -1,6 +1,6 @@
 @file:Suppress("ClassName", "ktlint:standard:filename")
 
-package com.github.hubvd.odootools.actions.git
+package com.github.hubvd.odootools.libgit.legacy
 
 enum class git_repository_state_t {
     GIT_REPOSITORY_STATE_NONE,

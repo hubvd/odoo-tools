@@ -1,14 +1,12 @@
-package com.github.hubvd.odootools.actions.git
+package com.github.hubvd.odootools.libgit.legacy
 
-import com.github.hubvd.odootools.workspace.Workspace
 import java.lang.foreign.Arena
 import java.lang.foreign.MemoryLayout.PathElement.groupElement
 import java.lang.foreign.MemorySegment
-import java.lang.foreign.ValueLayout.*
+import java.lang.foreign.ValueLayout.ADDRESS
+import java.lang.foreign.ValueLayout.JAVA_LONG
 import java.nio.file.Path
 import kotlin.io.path.Path
-import kotlin.io.path.div
-import kotlin.io.path.exists
 
 class Repository(
     val path: Path,
@@ -23,6 +21,15 @@ class Repository(
         }.get(ADDRESS, 0).reinterpret(arena, proxy::reference_free),
         this,
     )
+
+    fun path(): Path? = proxy.repository_path(address)
+        .takeIf { it != MemorySegment.NULL }
+        ?.reinterpret(Long.MAX_VALUE)
+        ?.getString(0)
+        ?.let { Path(it) }
+
+    fun state(): git_repository_state_t =
+        git_repository_state_t.entries.first { it.value == proxy.repository_state(address) }
 
     // TODO: extract peel should accept git_object
     fun shortId(ref: GitReference): String {
@@ -185,14 +192,6 @@ class Repository(
         }
     }
 }
-
-fun Workspace.currentRepositoryPath(): Path? = path.relativize(Path(System.getProperty("user.dir")))
-    .subpath(0, 1)
-    .takeIf { it.toString().isNotEmpty() }
-    ?.let { path / it }
-    ?.takeIf { (it / ".git").exists() }
-
-fun Workspace.currentRepository(): Repository? = currentRepositoryPath()?.let { Repository.open(it) }
 
 class GitStatusList(private val address: MemorySegment, private val repo: Repository) {
     fun count(): Long = repo.proxy.status_list_entrycount(address)

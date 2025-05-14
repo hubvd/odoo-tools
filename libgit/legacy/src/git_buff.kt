@@ -1,6 +1,6 @@
 @file:Suppress("ClassName", "ktlint:standard:filename")
 
-package com.github.hubvd.odootools.actions.git
+package com.github.hubvd.odootools.libgit.legacy
 
 import java.lang.foreign.MemoryLayout
 import java.lang.foreign.ValueLayout.ADDRESS

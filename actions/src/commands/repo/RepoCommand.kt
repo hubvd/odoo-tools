@@ -7,7 +7,7 @@ import com.github.ajalt.clikt.core.registerCloseable
 import com.github.ajalt.clikt.core.subcommands
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
-import com.github.hubvd.odootools.actions.git.Repository
+import com.github.hubvd.odootools.libgit.legacy.Repository
 import com.github.hubvd.odootools.workspace.Workspace
 import com.github.hubvd.odootools.workspace.Workspaces
 import kotlinx.coroutines.*

@@ -1,6 +1,6 @@
 @file:Suppress("ClassName", "ktlint:standard:filename")
 
-package com.github.hubvd.odootools.actions.git
+package com.github.hubvd.odootools.libgit.legacy
 
 enum class git_status_show_t {
     GIT_STATUS_SHOW_INDEX_AND_WORKDIR,

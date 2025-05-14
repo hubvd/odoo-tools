@@ -4,8 +4,8 @@ import com.github.ajalt.clikt.core.Abort
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.CliktError
 import com.github.ajalt.clikt.core.Context
-import com.github.hubvd.odootools.actions.git.currentRepository
 import com.github.hubvd.odootools.actions.utils.BrowserService
+import com.github.hubvd.odootools.actions.utils.currentRepository
 import com.github.hubvd.odootools.workspace.Workspaces
 import kotlin.io.path.name
 

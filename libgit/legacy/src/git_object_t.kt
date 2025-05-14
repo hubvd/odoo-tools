@@ -1,6 +1,6 @@
 @file:Suppress("ClassName", "ktlint:standard:filename")
 
-package com.github.hubvd.odootools.actions.git
+package com.github.hubvd.odootools.libgit.legacy
 
 enum class git_object_t(val value: Int) {
     GIT_OBJECT_ANY(-2),

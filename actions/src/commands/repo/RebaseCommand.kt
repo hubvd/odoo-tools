@@ -4,7 +4,7 @@ import com.github.ajalt.clikt.core.Abort
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.ProgramResult
 import com.github.ajalt.clikt.core.requireObject
-import com.github.hubvd.odootools.actions.git.currentRepositoryPath
+import com.github.hubvd.odootools.actions.utils.currentRepositoryPath
 import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
 import kotlin.io.path.name
