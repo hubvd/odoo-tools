@@ -124,8 +124,8 @@ class LaunchCommandTest {
         )
         assertThat(result.env).containsOnly(
             "ODOO_WORKSPACE" to workspaceRoot.toString(),
-            "QUNIT_WATCH" to "1",
-            "STEP_DELAY" to "150",
+            "ODOO_WATCH_CHROME" to "1",
+            "ODOO_TOUR_STEP_DELAY" to "150",
         )
         assertThat(result.cwd).isEqualTo(workspaceRoot)
     }
