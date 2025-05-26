@@ -80,5 +80,9 @@ fun TestTag.toAddons(workspace: Workspace, addonsPath: String?): List<String> {
     val matches = runBlocking {
         process("rg", *rgArg.toTypedArray(), stdout = Redirect.CAPTURE, stderr = Redirect.SILENT).output
     }
-    return matches.filter { it.isNotBlank() }.map { line -> Path(line).parent.parent.name }
+    return matches.filter { it.isNotBlank() }.map { line ->
+        generateSequence(Path(line)) { it.parent }
+            .takeWhile { it.name != "tests" }
+            .last().parent.parent.name
+    }
 }
