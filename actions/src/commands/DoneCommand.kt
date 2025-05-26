@@ -20,7 +20,7 @@ class DoneCommand(private val workspaces: Workspaces) : CliktCommand() {
         val repoPath = workspace.currentRepositoryPath() ?: throw Abort()
         val repo = workspace.currentRepository() ?: throw Abort()
         val currentBranch = repo.head().takeIf { it.isBranch() }?.branchName()
-        val taskRe = Regex("""(task|opw|sentry)-(\d+)""")
+        val taskRe = Regex("""(task|opw|sentry|runbot)-(\d+)""")
         val stagedFiles = stagedFiles() + previousCommitFiles()
         val modules = stagedFiles.mapNotNull {
             when (repoPath.name) {
