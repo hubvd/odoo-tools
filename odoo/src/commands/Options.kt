@@ -25,7 +25,7 @@ class CustomOptionGroup : StoredOptionGroup("Custom options") {
 
     init {
         arrayOf(
-            option("--mobile", help = "Launch the mobile QUnit suite").flag().checkPatched(),
+            option("--mobile", help = "Launch the mobile QUnit suite").flag(),
             option("--watch", help = "Open a chrome tab for js tests").flag().checkPatched(),
             option(
                 "--step-delay",
@@ -68,10 +68,10 @@ class CustomOptionGroup : StoredOptionGroup("Custom options") {
                 val extraPath = Path("/home/hubert/src/multichrome/$it")
                 require(extraPath.isDirectory()) { "$extraPath does not exist" }
             },
-            option("--debug-chrome", help = "Add debug=True to start_tour+browser_js").flag(),
+            option("--debug-chrome", help = "Add debug=True to start_tour+browser_js").flag().checkPatched(),
             option("--coverage").flag(),
             option("--coverage-data-file"),
-            option("--debug-no-suspend").flag(),
+            option("--debug-no-suspend").flag().checkPatched(),
         ).forEach { registerOption(it) }
     }
 
