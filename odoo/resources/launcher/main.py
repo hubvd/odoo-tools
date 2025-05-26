@@ -10,6 +10,8 @@ from patches import progress
 from patches import webtests
 from patches import minifier
 
+suspend = os.environ.get("ODOO_DEBUG_SUSPEND") != "0"
+
 if os.environ.get("ODOO_DEBUG") == "1":
     import pydevd
 
@@ -18,7 +20,7 @@ if os.environ.get("ODOO_DEBUG") == "1":
         port=10000,
         stdoutToServer=False,
         stderrToServer=False,
-        suspend=True,
+        suspend=suspend,
     )
 
 patches = [

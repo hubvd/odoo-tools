@@ -97,6 +97,7 @@ class Odoo(
     val noPatch by flag()
     val chrome by option()
     val debugChrome by flag()
+    val debugNoSuspend by flag()
 
     val database by option { if (testEnable) "${workspace.name}-test" else workspace.name }
     val logHandler by option { if (testEnable) "werkzeug:ERROR" else null }
@@ -142,6 +143,7 @@ class Odoo(
             null
         }
     }
+    val odooDebugSuspend by env { if (debugNoSuspend) "0" else null }
 
     init {
         effect {
