@@ -1,6 +1,6 @@
 [versions]
 kotlinx-serialization = "1.8.1"
-kotlin = "2.2.0-Beta2"
+kotlin = "2.2.0-RC"
 
 [libraries]
 kotlin-bom = { module = "org.jetbrains.kotlin:kotlin-bom", version.ref = "kotlin" }
@@ -8,7 +8,7 @@ kotlin-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.
 serialization = { module = "org.jetbrains.kotlin:kotlin-serialization", version.ref = "kotlin" }
 serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "kotlinx-serialization" }
 serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
-serialization-toml = "com.akuleshov7:ktoml-core:0.6.0"
+serialization-toml = "com.akuleshov7:ktoml-core:0.7.0"
 coroutines-core = "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2"
 process = "com.github.pgreze:kotlin-process:1.5.1"
 xmlbuilder = "org.redundent:kotlin-xml-builder:1.9.3"
