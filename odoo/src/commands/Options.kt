@@ -69,6 +69,8 @@ class CustomOptionGroup : StoredOptionGroup("Custom options") {
                 require(extraPath.isDirectory()) { "$extraPath does not exist" }
             },
             option("--debug-chrome", help = "Add debug=True to start_tour+browser_js").flag(),
+            option("--coverage").flag(),
+            option("--coverage-data-file"),
             option("--debug-no-suspend").flag(),
         ).forEach { registerOption(it) }
     }

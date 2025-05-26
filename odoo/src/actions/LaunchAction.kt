@@ -43,7 +43,21 @@ class LaunchAction(private val terminal: Terminal) : Action {
 
         val venv = Path(System.getenv("VIRTUAL_ENV") ?: "venv")
         val python = venv / "bin/python"
-        val cmd = listOf(python.toString(), main, *configuration.args.toTypedArray())
+
+        val cmd = buildList {
+            add(python.toString())
+            if (configuration.odoo.coverage || configuration.odoo.coverageDataFile != null) {
+                add("-m")
+                add("coverage")
+                add("run")
+                configuration.odoo.coverageDataFile?.let {
+                    add("--data-file")
+                    add(configuration.odoo.coverageDataFile)
+                }
+            }
+            add(main)
+            addAll(configuration.args)
+        }
 
         val process =
             ProcessBuilder()

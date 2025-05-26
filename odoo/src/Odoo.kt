@@ -97,6 +97,8 @@ class Odoo(
     val noPatch by flag()
     val chrome by option()
     val debugChrome by flag()
+    val coverage by flag()
+    val coverageDataFile by option()
     val debugNoSuspend by flag()
 
     val database by option { if (testEnable) "${workspace.name}-test" else workspace.name }
