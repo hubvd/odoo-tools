@@ -53,7 +53,7 @@ class Odoo(
 
         when {
             testHoot != null && mobile -> "/web:MobileWebSuite.test_unit_mobile[$testHoot]"
-            testHoot != null -> "/web:WebSuite.test_hoot$testHoot"
+            testHoot != null -> "/web:WebSuite.test_hoot[$testHoot]"
             testQunit != null && mobile -> "/web:MobileWebSuite.$qunitMobile[$testQunit]"
             testQunit != null -> "/web:WebSuite.$qunit[$testQunit]"
             else -> null
@@ -100,6 +100,7 @@ class Odoo(
     val coverage by flag()
     val coverageDataFile by option()
     val debugNoSuspend by flag()
+    val chromeBreakOn by option()
 
     val database by option { if (testEnable) "${workspace.name}-test" else workspace.name }
     val logHandler by option { if (testEnable) "werkzeug:ERROR" else null }
@@ -146,6 +147,7 @@ class Odoo(
         }
     }
     val odooDebugSuspend by env { if (debugNoSuspend) "0" else null }
+    val odooChromePauseOnExceptions by env { chromeBreakOn }
 
     init {
         effect {

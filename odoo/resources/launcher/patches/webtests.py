@@ -50,8 +50,17 @@ def browser_js(*args, **kwargs):
     return args, kwargs
 
 
+def navigate_to(res, self, url, wait_stop=False):
+    if state := os.environ.get("ODOO_CHROME_PAUSE_ON_EXCEPTIONS"):
+        self._websocket_request("Debugger.enable", params={})
+        self._websocket_request(
+            "Debugger.setPauseOnExceptions", params={"state": state}
+        )
+
+
 class WebTests:
     def apply(self):
         patch_arguments(ChromeBrowser, "_spawn_chrome", _spawn_chrome)
         patch_arguments(HttpCase, "browser_js", browser_js)
         patch_arguments(HttpCase, "start_tour", start_tour)
+        side_effect(ChromeBrowser, "navigate_to", navigate_to)

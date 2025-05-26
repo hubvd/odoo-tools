@@ -69,6 +69,10 @@ class CustomOptionGroup : StoredOptionGroup("Custom options") {
                 require(extraPath.isDirectory()) { "$extraPath does not exist" }
             },
             option("--debug-chrome", help = "Add debug=True to start_tour+browser_js").flag().checkPatched(),
+            option(
+                "--chrome-break-on",
+                help = "Defines pause on exceptions state.",
+            ).choice("caught", "uncaught", "all"),
             option("--coverage").flag(),
             option("--coverage-data-file"),
             option("--debug-no-suspend").flag().checkPatched(),
