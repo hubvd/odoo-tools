@@ -7,6 +7,7 @@ import com.github.ajalt.clikt.output.Localization
 import com.github.ajalt.clikt.output.ParameterFormatter
 import com.github.ajalt.clikt.parameters.groups.OptionGroup
 import com.github.ajalt.clikt.parameters.options.*
+import com.github.ajalt.clikt.parameters.types.choice
 import com.github.hubvd.odootools.odoo.odooCompletion
 import kotlin.io.path.Path
 import kotlin.io.path.isDirectory
@@ -21,12 +22,10 @@ abstract class StoredOptionGroup(name: String) : OptionGroup(name) {
 }
 
 class CustomOptionGroup : StoredOptionGroup("Custom options") {
-    private val noPatch by option("--no-patch", help = "Disable custom patches").flag()
-
     init {
         arrayOf(
             option("--mobile", help = "Launch the mobile QUnit suite").flag(),
-            option("--watch", help = "Open a chrome tab for js tests").flag().checkPatched(),
+            option("--watch", help = "Open a chrome tab for js tests").flag(),
             option(
                 "--step-delay",
                 help = "Override the step delay for tours",
@@ -40,8 +39,8 @@ class CustomOptionGroup : StoredOptionGroup("Custom options") {
                         "1000",
                     ),
                 ),
-            ).checkPatched(),
-            option("--debug", help = "Suspend the execution immediately by placing a breakpoint").flag().checkPatched(),
+            ),
+            option("--debug", help = "Suspend the execution immediately by placing a breakpoint").flag(),
             option("--dry-run", help = "Print the generated config and exit").flag(),
             option("--drop", help = "Drop the database if it exists").flag(),
             option("--community", help = "Remove the enterprise repo from the addons path").flag(),
@@ -68,24 +67,16 @@ class CustomOptionGroup : StoredOptionGroup("Custom options") {
                 val extraPath = Path("/home/hubert/src/multichrome/$it")
                 require(extraPath.isDirectory()) { "$extraPath does not exist" }
             },
-            option("--debug-chrome", help = "Add debug=True to start_tour+browser_js").flag().checkPatched(),
+            option("--debug-chrome", help = "Add debug=True to start_tour+browser_js").flag(),
             option(
                 "--chrome-break-on",
                 help = "Defines pause on exceptions state.",
             ).choice("caught", "uncaught", "all"),
             option("--coverage").flag(),
             option("--coverage-data-file"),
-            option("--debug-no-suspend").flag().checkPatched(),
+            option("--debug-no-suspend").flag(),
+            option("--patches").choice("none", "all", "rich", "tests", "progress", "minifier").split(","),
         ).forEach { registerOption(it) }
-    }
-
-    @JvmName("checkPatchedFlag")
-    private fun OptionWithValues<Boolean, Boolean, Boolean>.checkPatched() = validate {
-        if (noPatch && it) throw PatchedArgumentError(this.option)
-    }
-
-    private fun RawOption.checkPatched() = validate {
-        if (noPatch) throw PatchedArgumentError(this.option)
     }
 
     class PatchedArgumentError(private val option: Option) : UsageError(null) {

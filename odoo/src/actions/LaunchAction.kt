@@ -31,8 +31,7 @@ class LaunchAction(private val terminal: Terminal) : Action {
 
         terminal.println(runConfigurationWidget(configuration))
 
-        val useCustomLauncher = !configuration.odoo.noPatch &&
-            configuration.odoo.workspace.version > 14
+        val useCustomLauncher = configuration.odoo.patches?.split(",")?.contains("none") != true
 
         val main = if (!useCustomLauncher) {
             "odoo/odoo-bin"

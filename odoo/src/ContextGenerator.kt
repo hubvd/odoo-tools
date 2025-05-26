@@ -1,14 +1,11 @@
 package com.github.hubvd.odootools.odoo
 
 import com.github.ajalt.clikt.parameters.options.Option
-import com.github.ajalt.clikt.parameters.options.OptionWithValues
-import com.github.hubvd.odootools.odoo.commands.*
+import com.github.ajalt.clikt.parameters.options.OptionDelegate
+import com.github.hubvd.odootools.odoo.commands.id
 import com.github.hubvd.odootools.workspace.Workspace
 import com.github.hubvd.odootools.workspace.WorkspaceConfig
 import java.nio.file.Path
-
-private typealias StringOption = OptionWithValues<String?, String, String>
-private typealias Flag = OptionWithValues<Boolean, Boolean, Boolean>
 
 data class RunConfiguration(
     val args: List<String>,
@@ -37,7 +34,7 @@ class ContextGenerator(
             when {
                 option.nvalues == 0..0 -> {
                     @Suppress("UNCHECKED_CAST")
-                    option as Flag
+                    option as OptionDelegate<Boolean>
                     if (option.id != "help" && option.value) {
                         flags += option.id
                     }
@@ -45,8 +42,13 @@ class ContextGenerator(
 
                 else -> {
                     @Suppress("UNCHECKED_CAST")
-                    option as StringOption
-                    option.value?.let { options[option.id] = it }
+                    option as OptionDelegate<*>
+                    option.value?.let {
+                        when (it) {
+                            is String -> options[option.id] = it
+                            is List<*> -> options[option.id] = it.joinToString(",")
+                        }
+                    }
                 }
             }
         }

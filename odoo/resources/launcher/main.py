@@ -23,14 +23,21 @@ if os.environ.get("ODOO_DEBUG") == "1":
         suspend=suspend,
     )
 
-patches = [
-    richlogger.RichLogger(),
-    progress.ModuleInstallProgress(),
-    webtests.WebTests(),
-    minifier.Minifier(),
-]
+enabled_patches = os.environ.get("ODOO_PATCHES", "all").split(",")
 
-for patch in patches:
+patches = {
+    "rich": richlogger.RichLogger(),
+    "progress": progress.ModuleInstallProgress(),
+    "tests": webtests.WebTests(),
+    "minifier": minifier.Minifier(),
+}
+
+if "all" in enabled_patches:
+    active_patches = patches.values()
+else:
+    active_patches = [patches[name] for name in enabled_patches if name in patches]
+
+for patch in active_patches:
     patch.apply()
 
 # set server timezone in UTC before time module imported

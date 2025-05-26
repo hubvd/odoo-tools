@@ -94,13 +94,13 @@ class Odoo(
     val dryRun by flag()
     val restart by flag()
     val save by option()
-    val noPatch by flag()
     val chrome by option()
     val debugChrome by flag()
     val coverage by flag()
     val coverageDataFile by option()
     val debugNoSuspend by flag()
     val chromeBreakOn by option()
+    val patches by option()
 
     val database by option { if (testEnable) "${workspace.name}-test" else workspace.name }
     val logHandler by option { if (testEnable) "werkzeug:ERROR" else null }
@@ -148,6 +148,7 @@ class Odoo(
     }
     val odooDebugSuspend by env { if (debugNoSuspend) "0" else null }
     val odooChromePauseOnExceptions by env { chromeBreakOn }
+    val odooPatches by env { patches }
 
     init {
         effect {
