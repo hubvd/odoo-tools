@@ -5,6 +5,8 @@ function expand_odoo
     set parts (string split '' $argv[1])[2..]
     for part in $parts
         switch $part
+            case T
+                set tags
             case d
                 set -a out --drop
             case s
@@ -31,6 +33,19 @@ function expand_odoo
     end
     if set -q addons[1]
         set -a out -i (string join , $addons)
+    end
+    if set -q tags
+        set -a out --test-tags
+        set clipboard_types (wl-paste -l)
+
+        for type in 'text/plain;charset=utf-8' text/plain UTF8_STRING TEXT STRING
+            contains -- $type $clipboard_types
+            and set clipboard "$(wl-paste -n -t $type 2>/dev/null)"
+            and break
+        end
+
+        and string match -q 'test*' "$clipboard"
+        and set -a out ".$clipboard"
     end
     echo -- $out
 end
