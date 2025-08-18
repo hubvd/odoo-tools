@@ -76,6 +76,7 @@ class CustomOptionGroup : StoredOptionGroup("Custom options") {
             option("--coverage-data-file"),
             option("--debug-no-suspend").flag(),
             option("--patches").choice("none", "all", "rich", "tests", "progress", "minifier").split(","),
+            option("-R", "--retries"),
         ).forEach { registerOption(it) }
     }
 

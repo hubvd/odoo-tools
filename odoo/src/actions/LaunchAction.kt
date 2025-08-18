@@ -1,6 +1,8 @@
 package com.github.hubvd.odootools.odoo.actions
 
+import com.github.ajalt.mordant.rendering.TextColors
 import com.github.ajalt.mordant.terminal.Terminal
+import com.github.ajalt.mordant.widgets.HorizontalRule
 import com.github.hubvd.odootools.odoo.RunConfiguration
 import com.github.hubvd.odootools.odoo.commands.runConfigurationWidget
 import java.io.File
@@ -50,22 +52,37 @@ class LaunchAction(private val terminal: Terminal) : Action {
             addAll(configuration.args)
         }
 
-        val process =
-            ProcessBuilder()
+        val retries = configuration.odoo.retries?.toInt() ?: 1
+        var process: Process? = null
+
+        Runtime.getRuntime().addShutdownHook(
+            thread(start = false) {
+                process?.destroy()
+                terminal.cursor.show()
+                terminal.rawPrint("\u001B]9;4;0\u0007")
+            },
+        )
+
+        repeat(retries) { retry ->
+            if (retries != 1) {
+                val percentage = (retry * 100) / retries
+                terminal.rawPrint("\u001B]9;4;1;$percentage\u0007")
+                terminal.println(HorizontalRule(TextColors.blue("[${retry + 1}/${retries}]")))
+            }
+            process = ProcessBuilder()
                 .command(cmd)
                 .inheritIO()
                 .apply { environment().putAll(configuration.env) }
                 .directory(configuration.odoo.workspace.path.toFile())
                 .start()
 
-        Runtime.getRuntime().addShutdownHook(
-            thread(start = false) {
-                terminal.cursor.show()
-                process.destroy()
-            },
-        )
+            val code = process.waitFor()
 
-        exitProcess(process.waitFor())
+            if (code != 0) {
+                exitProcess(code)
+            }
+        }
+
     }
 
     private fun unpackPatchedLauncher(): Path {

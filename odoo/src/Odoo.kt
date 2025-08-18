@@ -37,6 +37,7 @@ class Odoo(
     val mobile by flag()
 
     val testFile by option()
+    val retries by option()
 
     val testTags by option {
         val hasHoot = workspace.version >= 17.2f
