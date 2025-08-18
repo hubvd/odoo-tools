@@ -77,6 +77,9 @@ class ContextGenerator(
             odoo.registeredEffects
         }
 
+        val skips = odoo.skip?.split(',').orEmpty()
+        val ignores = hashSetOf(*skips.toTypedArray(), *ignores.toTypedArray())
+
         val args = buildList(arguments.size + flags.size + options.size) {
             val args = arguments.toMutableList()
             if (args.remove("shell")) add("shell")

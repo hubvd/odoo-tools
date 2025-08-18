@@ -102,6 +102,7 @@ class Odoo(
     val debugNoSuspend by flag()
     val chromeBreakOn by option()
     val patches by option()
+    val skip by option() // FIXME
 
     val database by option { if (testEnable) "${workspace.name}-test" else workspace.name }
     val logHandler by option { if (testEnable) "werkzeug:ERROR" else null }
