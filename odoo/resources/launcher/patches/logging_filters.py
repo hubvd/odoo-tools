@@ -2,6 +2,8 @@ import logging
 import os
 import re
 import subprocess
+import json
+from typing import Optional
 from dataclasses import dataclass
 from enum import Enum
 from rich.markup import escape
@@ -105,6 +107,24 @@ replacements = [
 ]
 
 
+def parse_json_command(message: str) -> Optional[tuple[str, dict]]:
+    if message.startswith("{"):
+        try:
+            payload = json.loads(message)
+            if not isinstance(payload, dict):
+                return None
+
+            cmd = payload.pop("cmd", None)
+            if not cmd:
+                return None
+
+            return cmd, payload
+
+        except json.JSONDecodeError:
+            return None
+    return None
+
+
 def http_case(record):
     if (
         isinstance(record.msg, str)
@@ -138,10 +158,34 @@ def http_case(record):
     ):
         return
 
+    message = record.args[0] or record.args[1]
+    if cmd := parse_json_command(message):
+        name, arguments = cmd
+
+        match name:
+            case "markup":
+                record.msg = arguments["message"]
+                record.args = ()
+                record.markup = True
+                record.highlighter = None
+                return Result.HANDLED
+
+            case "file":
+                filename = arguments["file"]
+
+                with open(filename, "w") as f:
+                    f.write(arguments["content"])
+
+                record.msg = f"[green]saved {filename}[/]"
+                record.args = ()
+                record.markup = True
+                record.highlighter = None
+                return Result.HANDLED
+
     for replacement in replacements:
         if replacement.level and replacement.level != record.levelno:
             continue
-        if match := replacement.regex.match(record.args[0] or record.args[1]):
+        if match := replacement.regex.match(message):
             if replacement.format is None:
                 return Result.CANCELLED
             record.msg = "%s"
