@@ -17,9 +17,9 @@ class Virtualenvs(dataDir: DataDir) {
         val venvPath = rootPath / workspace.base
         if (venvPath.notExists()) {
             val pythonVersion = when {
-                workspace.version < 16f -> "3.9"
-                workspace.version < 17f -> "3.11"
-                else -> "3.12"
+                workspace.version < 15f -> "3.8"
+                workspace.version <= 18.1f -> parseMaxPythonVersion(workspace.path / "odoo/odoo/__init__.py")
+                else -> parseMaxPythonVersion(workspace.path / "odoo/odoo/release.py")
             }
             cd(rootPath)
             run(
@@ -45,6 +45,12 @@ class Virtualenvs(dataDir: DataDir) {
             target.deleteIfExists()
             target.createSymbolicLinkPointingTo(venvPath)
         }
+    }
+
+    private fun parseMaxPythonVersion(path: Path): String = path.useLines { line ->
+        val re = """^MAX_PY_VERSION = \((\d+), (\d+)\)""".toRegex()
+        val match = line.mapNotNull { re.find(it) }.first()
+        return@useLines match.groupValues.drop(1).joinToString(".")
     }
 
     private fun generateRequirements(requirements: Path, odooVersion: Float): Path {
