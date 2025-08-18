@@ -21,6 +21,10 @@ def _spawn_chrome(self, cmd):
         "--unsafely-disable-devtools-self-xss-warnings",
         "--remote-allow-origins=*",
     ]
+
+    if "--headless" not in cmd and os.environ.get("XDG_SESSION_TYPE") == "wayland":
+        extra_flags.append("--ozone-platform=wayland")
+
     for flag in extra_flags:
         if flag not in cmd:
             cmd.insert(len(cmd) - 1, flag)
