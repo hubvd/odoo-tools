@@ -5,6 +5,8 @@ function expand_odoo
     set parts (string split '' $argv[1])[2..]
     for part in $parts
         switch $part
+            case i
+                set init
             case T
                 set tags
             case d
@@ -31,7 +33,7 @@ function expand_odoo
                 end
         end
     end
-    if set -q addons[1]
+    if set -q addons[1] || set -q init
         set -a out -i (string join , $addons)
     end
     if set -q tags
