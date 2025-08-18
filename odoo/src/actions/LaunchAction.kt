@@ -19,15 +19,7 @@ class LaunchAction(private val terminal: Terminal) : Action {
     override fun run(configuration: RunConfiguration) {
         configuration.effects.forEach { it() }
 
-        if (System.getenv("TERM") == "xterm-kitty") {
-            ProcessBuilder("kitty", "@", "set-window-title", "--temporary", "odoo:" + configuration.odoo.database)
-                .apply {
-                    redirectError(ProcessBuilder.Redirect.DISCARD)
-                    redirectOutput(ProcessBuilder.Redirect.DISCARD)
-                }
-                .start()
-                .waitFor()
-        }
+        terminal.rawPrint("\u001B]0;odoo:${configuration.odoo.database}\u0007")
 
         terminal.println(runConfigurationWidget(configuration))
 
