@@ -28,42 +28,51 @@ class OpenerCommand(private val browserService: BrowserService) : CliktCommand()
 
     override fun run() {
         if (all) {
-            return when (type) {
-                Type.PullRequest -> browserService.open("https://github.com/pulls")
-                Type.RunbotError -> browserService.open("https://runbot.odoo.com/odoo/error")
-                Type.Task, null -> browserService.open("https://www.odoo.com/odoo/49/tasks")
-            }
+            return browserService.open((type ?: Type.Task).allUrl)
         }
 
-        if (type == Type.PullRequest || type == null) {
-            pullRequestRe.find(input)?.let {
-                val (repo, id) = it.groupValues.drop(1)
-                return browserService.open("https://github.com/odoo/$repo/pull/$id")
-            }
+        type?.run {
+            resolveUrl(input)?.let { return browserService.open(it) }
+            throw Abort()
         }
 
-        if (type == Type.RunbotError || type == null) {
-            runbotErrorRe.find(input)?.groups?.get("id")?.value?.let {
-                return browserService.open("https://runbot.odoo.com/odoo/runbot.build.error/$it")
-            }
-        }
-
-        if (type == Type.Task || type == null) {
-            val ticketId = taskRe.find(input)?.groups?.get("id")?.value ?: input.takeIf { taskIdRe.matches(input) }
-            ticketId?.let {
-                return browserService.open("https://www.odoo.com/odoo/49/tasks/$it")
-            }
+        for (t in Type.entries) {
+            t.resolveUrl(input)?.let { return browserService.open(it) }
         }
 
         throw Abort()
     }
 
-    private enum class Type { PullRequest, Task, RunbotError }
+    private enum class Type(
+        val allUrl: String,
+        private val regexes: List<Regex>,
+        private val extractor: (MatchResult) -> String?,
+    ) {
+        PullRequest(
+            allUrl = "https://github.com/pulls",
+            regexes = listOf(Regex("""odoo/(?<repo>.*)[#:](?<id>\d+)""")),
+            extractor = { m ->
+                val (repo, id) = m.destructured
+                "https://github.com/odoo/$repo/pull/$id"
+            },
+        ),
+        Task(
+            allUrl = "https://www.odoo.com/odoo/49/tasks",
+            regexes = listOf(Regex("""(?i)(opw|task)[\W\-]*(?:id)?[\W-]*(?<id>\d+)"""), NUMERICAL_ID_RE),
+            extractor = { m -> m.groups["id"]?.value?.let { "https://www.odoo.com/odoo/49/tasks/$it" } },
+        ),
+        RunbotError(
+            allUrl = "https://runbot.odoo.com/odoo/error",
+            regexes = listOf(Regex("""(?i)runbot[\W\-]*(?:id)?[\W-]*(?<id>\d+)"""), NUMERICAL_ID_RE),
+            extractor = { m -> m.groups["id"]?.value?.let { "https://runbot.odoo.com/odoo/runbot.build.error/$it" } },
+        ),
+        ;
+
+        fun resolveUrl(input: String): String? =
+            regexes.firstNotNullOfOrNull { regex -> regex.find(input)?.let(extractor) }
+    }
 
     companion object {
-        private val pullRequestRe = Regex("""odoo/(?<repo>.*)[#:](?<id>\d+)""")
-        private val taskRe = Regex("""(?i)(opw|task)[\W\-]*(?:id)?[\W-]*(?<id>\d+)""")
-        private val runbotErrorRe = Regex("""(?i)runbot[\W\-]*(?:id)?[\W-]*(?<id>\d+)""")
-        private val taskIdRe = Regex("""^\d+$""")
+        private val NUMERICAL_ID_RE = Regex("""^(?<id>\d+)$""")
     }
 }
