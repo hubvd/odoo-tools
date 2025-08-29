@@ -50,12 +50,12 @@ private class UtcToSystemDefaultZonedDateTimeSerializer : KSerializer<ZonedDateT
         .withZoneSameInstant(ZoneId.systemDefault())
 }
 
-private val trigramRe = Regex("""^(.*) \(([a-zA-Z]{2,4})\)$""")
+private val trigramRe = Regex("""^(.*?) ?\(([a-zA-Z]{2,5})\)$""")
 
 class IsOffCommand(private val odooClient: OdooClient) : CliktCommand() {
     private val usernames by argument().multiple().validate {
         it.forEach {
-            require(it.length in 3..4) {
+            require(it.length in 2..5) {
                 "`$it` is not a valid trigram"
             }
         }

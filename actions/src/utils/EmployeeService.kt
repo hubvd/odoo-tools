@@ -6,7 +6,7 @@ import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.serializer
 
-private val trigramRe = Regex("""^(.*) \(([a-zA-Z]{2,4})\)$""")
+private val trigramRe = Regex("""^(.*?) ?\(([a-zA-Z]{2,5})\)$""")
 
 interface Employee {
     val id: Long
