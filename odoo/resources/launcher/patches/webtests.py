@@ -1,19 +1,16 @@
 import os
-import time
 import logging
+from .patch_tools import patch_arguments, side_effect
 
-from odoo.release import version_info
 
 test_logger = logging.getLogger("odoo.tests.common")
 initial_level = test_logger.getEffectiveLevel()
 test_logger.setLevel(logging.CRITICAL)
 
-from odoo.tests import HttpCase
-from odoo.tests.common import ChromeBrowser
+from odoo.tests import HttpCase  # noqa:E402
+from odoo.tests.common import ChromeBrowser  # noqa:E402
 
 test_logger.setLevel(initial_level)
-
-from .patch_tools import patch_arguments, side_effect
 
 
 def _spawn_chrome(self, cmd):
