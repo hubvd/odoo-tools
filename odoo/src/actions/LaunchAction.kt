@@ -67,7 +67,7 @@ class LaunchAction(private val terminal: Terminal) : Action {
             if (retries != 1) {
                 val percentage = (retry * 100) / retries
                 terminal.rawPrint("\u001B]9;4;1;$percentage\u0007")
-                terminal.println(HorizontalRule(TextColors.blue("[${retry + 1}/${retries}]")))
+                terminal.println(HorizontalRule(TextColors.blue("[${retry + 1}/$retries]")))
             }
             process = ProcessBuilder()
                 .command(cmd)
@@ -82,7 +82,6 @@ class LaunchAction(private val terminal: Terminal) : Action {
                 exitProcess(code)
             }
         }
-
     }
 
     private fun unpackPatchedLauncher(): Path {
