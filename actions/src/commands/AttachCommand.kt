@@ -24,8 +24,10 @@ class AttachCommand(
         val request = Request(Method.GET, choice.baseUrl + "/debug/attach")
         val response = httpHandler(request)
 
-        if (!response.status.successful) {
-            throw CliktError("Couldn't attach debugger " + response.bodyString())
+        when (response.status.code) {
+            200 -> return
+            404 -> throw CliktError("Failed to attach debugger: debug module not installed")
+            else -> throw CliktError("Failed to attach debugger: ${response.bodyString()}")
         }
     }
 }
