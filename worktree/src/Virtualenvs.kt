@@ -66,6 +66,7 @@ class Virtualenvs(dataDir: DataDir) {
                 "rich",
                 "ptpython",
                 "dbfread",
+                "coverage",
             ).forEach { writer.appendLine(it) }
             if (14f < odooVersion && odooVersion < 16.4f) {
                 writer.appendLine("rjsmin")
