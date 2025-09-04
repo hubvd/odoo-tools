@@ -13,11 +13,16 @@ from rich.logging import RichHandler
 from rich.text import Span
 
 import odoo.netsvc
-from odoo.netsvc import DBFormatter, PerfFilter
+from odoo.netsvc import PerfFilter
 from odoo.service import server
 
 from .logging_filters import Result, filters
 from .console import console
+
+try:
+    from odoo.netsvc import DBFormatter
+except ImportError:
+    DBFormatter = logging.Formatter
 
 
 class OdooRichHandler(RichHandler):
